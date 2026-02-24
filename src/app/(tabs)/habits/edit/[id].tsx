@@ -2,8 +2,8 @@ import { useTheme } from '@/contexts/ThemeContext';
 import { supabase } from '@/lib/supabase';
 import { createAddHabitStyles } from '@/styles/addHabit.styling';
 import { Ionicons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
-import { useState } from 'react';
+import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useEffect, useState } from 'react';
 import { ScrollView, Switch, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
 const DAYS = [
@@ -16,19 +16,15 @@ const DAYS = [
     { key: 'sun', label: 'S' },
 ];
 
-const formatToday = () => {
-    const d = new Date();
-    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-};
-
-export default function AddHabitScreen() {
+export default function EditHabitScreen() {
+    const { id } = useLocalSearchParams<{ id: string }>();
     const { colors } = useTheme();
     const styles = createAddHabitStyles(colors);
     const router = useRouter();
 
     const [name, setName] = useState('');
     const [description, setDescription] = useState('');
-    const [startDate, setStartDate] = useState(formatToday());
+    const [startDate, setStartDate] = useState('');
     const [endDate, setEndDate] = useState('');
     const [hasEndDate, setHasEndDate] = useState(false);
     const [selectedDays, setSelectedDays] = useState<string[]>([]);
@@ -36,13 +32,37 @@ export default function AddHabitScreen() {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
 
+    useEffect(() => {
+        const fetchHabit = async () => {
+            const { data } = await supabase
+                .from('habits')
+                .select('*')
+                .eq('id', id)
+                .single();
+
+            if (data) {
+                setName(data.name);
+                setDescription(data.description || '');
+                setStartDate(data.start_date);
+                setSelectedDays(data.days || []);
+                setIsPrivate(data.is_private);
+                if (data.end_date) {
+                    setHasEndDate(true);
+                    setEndDate(data.end_date);
+                }
+            }
+        };
+
+        fetchHabit();
+    }, [id]);
+
     const toggleDay = (day: string) => {
         setSelectedDays((prev) =>
             prev.includes(day) ? prev.filter((d) => d !== day) : [...prev, day]
         );
     };
 
-    const handleCreate = async () => {
+    const handleSave = async () => {
         if (!name.trim()) {
             setError('Please enter a habit name');
             return;
@@ -51,31 +71,26 @@ export default function AddHabitScreen() {
             setError('Please select at least one day');
             return;
         }
-        if (!startDate) {
-            setError('Please enter a start date');
-            return;
-        }
 
         setLoading(true);
         setError('');
 
-        const { data: { user } } = await supabase.auth.getUser();
-        if (!user) return;
-
-        const { error: insertError } = await supabase.from('habits').insert({
-            user_id: user.id,
-            name: name.trim(),
-            description: description.trim() || null,
-            start_date: startDate,
-            end_date: hasEndDate && endDate ? endDate : null,
-            days: selectedDays,
-            is_private: isPrivate,
-        });
+        const { error: updateError } = await supabase
+            .from('habits')
+            .update({
+                name: name.trim(),
+                description: description.trim() || null,
+                start_date: startDate,
+                end_date: hasEndDate && endDate ? endDate : null,
+                days: selectedDays,
+                is_private: isPrivate,
+            })
+            .eq('id', id);
 
         setLoading(false);
 
-        if (insertError) {
-            setError(insertError.message);
+        if (updateError) {
+            setError(updateError.message);
         } else {
             router.back();
         }
@@ -87,11 +102,10 @@ export default function AddHabitScreen() {
                 <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
                     <Ionicons name="arrow-back" size={24} color={colors.text} />
                 </TouchableOpacity>
-                <Text style={styles.headerTitle}>New Habit</Text>
+                <Text style={styles.headerTitle}>Edit Habit</Text>
             </View>
 
             <ScrollView contentContainerStyle={styles.scrollContent}>
-                {/* Name */}
                 <Text style={styles.label}>Habit name</Text>
                 <TextInput
                     style={styles.input}
@@ -101,7 +115,6 @@ export default function AddHabitScreen() {
                     onChangeText={setName}
                 />
 
-                {/* Description */}
                 <Text style={styles.label}>Habit description</Text>
                 <TextInput
                     style={[styles.input, styles.textArea]}
@@ -112,7 +125,6 @@ export default function AddHabitScreen() {
                     multiline
                 />
 
-                {/* Start Date */}
                 <Text style={styles.label}>Start day</Text>
                 <TextInput
                     style={styles.input}
@@ -122,7 +134,6 @@ export default function AddHabitScreen() {
                     onChangeText={setStartDate}
                 />
 
-                {/* End Date */}
                 <View style={styles.dateRow}>
                     <Text style={styles.label}>End date</Text>
                     <Switch
@@ -142,7 +153,6 @@ export default function AddHabitScreen() {
                     />
                 )}
 
-                {/* Days */}
                 <Text style={styles.label}>Days</Text>
                 <View style={styles.daysRow}>
                     {DAYS.map((day) => (
@@ -158,21 +168,18 @@ export default function AddHabitScreen() {
                     ))}
                 </View>
 
-                {/* Error */}
                 {error ? <Text style={styles.errorText}>{error}</Text> : null}
 
-                {/* Submit */}
                 <TouchableOpacity
                     style={[styles.submitButton, loading && styles.submitButtonDisabled]}
-                    onPress={handleCreate}
+                    onPress={handleSave}
                     disabled={loading}
                 >
                     <Text style={styles.submitButtonText}>
-                        {loading ? 'Creating...' : 'Create habit'}
+                        {loading ? 'Saving...' : 'Save changes'}
                     </Text>
                 </TouchableOpacity>
             </ScrollView>
         </View>
     );
 }
-

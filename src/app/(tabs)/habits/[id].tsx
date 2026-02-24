@@ -2,8 +2,9 @@ import { useTheme } from '@/contexts/ThemeContext';
 import { supabase } from '@/lib/supabase';
 import { createHabitDetailStyles } from '@/styles/habitDetail.styling';
 import { Ionicons } from '@expo/vector-icons';
+import { useFocusEffect } from '@react-navigation/native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
 import { Alert, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 
 const DAYS_MAP = [
@@ -139,14 +140,18 @@ export default function HabitDetailScreen() {
         }
     };
 
-    useEffect(() => {
-        fetchHabit();
-        fetchLogs();
-    }, [id]);
+    useFocusEffect(
+        useCallback(() => {
+            fetchHabit();
+            fetchLogs();
+        }, [id])
+    );
 
-    useEffect(() => {
-        fetchChartData();
-    }, [id, chartPeriod]);
+    useFocusEffect(
+        useCallback(() => {
+            fetchChartData();
+        }, [id, chartPeriod])
+    );
 
     const handleMarkDone = async () => {
         const { data: { user } } = await supabase.auth.getUser();
@@ -198,6 +203,9 @@ export default function HabitDetailScreen() {
                     <Text style={styles.headerTitle}>{habit.name}</Text>
                 </View>
                 <View style={styles.headerActions}>
+                    <TouchableOpacity style={[styles.actionButton, styles.editButton]} onPress={() => router.push(`/(tabs)/habits/edit/${id}`)}>
+                        <Ionicons name="pencil" size={18} color="#FFFFFF" />
+                    </TouchableOpacity>
                     <TouchableOpacity style={[styles.actionButton, styles.deleteButton]} onPress={handleDelete}>
                         <Ionicons name="trash-outline" size={18} color="#FFFFFF" />
                     </TouchableOpacity>

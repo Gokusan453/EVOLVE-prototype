@@ -1,7 +1,8 @@
 import { useTheme } from '@/contexts/ThemeContext';
 import { supabase } from '@/lib/supabase';
 import { createHomeStyles } from '@/styles/home.styling';
-import { useEffect, useState } from 'react';
+import { useFocusEffect } from '@react-navigation/native';
+import { useCallback, useState } from 'react';
 import { Image, Text, View } from 'react-native';
 
 export default function HomeScreen() {
@@ -13,22 +14,24 @@ export default function HomeScreen() {
     avatar_url: string | null;
   } | null>(null);
 
-  useEffect(() => {
-    const fetchProfile = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        const { data } = await supabase
-          .from('profiles')
-          .select('first_name, last_name, avatar_url')
-          .eq('id', user.id)
-          .single();
+  useFocusEffect(
+    useCallback(() => {
+      const fetchProfile = async () => {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          const { data } = await supabase
+            .from('profiles')
+            .select('first_name, last_name, avatar_url')
+            .eq('id', user.id)
+            .single();
 
-        if (data) setProfile(data);
-      }
-    };
+          if (data) setProfile(data);
+        }
+      };
 
-    fetchProfile();
-  }, []);
+      fetchProfile();
+    }, [])
+  );
 
   const getInitials = () => {
     if (!profile) return '?';
