@@ -75,7 +75,7 @@ export const createAddChallengeStyles = (colors: any) =>
             color: colors.textSecondary,
         },
         dayTextActive: {
-            color: '#FFFFFF',
+            color: colors.onPrimary,
         },
         visibilityRow: {
             flexDirection: 'row',
@@ -100,7 +100,7 @@ export const createAddChallengeStyles = (colors: any) =>
             color: colors.textSecondary,
         },
         visibilityTextActive: {
-            color: '#FFFFFF',
+            color: colors.onPrimary,
         },
         submitButton: {
             backgroundColor: colors.primary,
@@ -113,12 +113,12 @@ export const createAddChallengeStyles = (colors: any) =>
             opacity: 0.6,
         },
         submitButtonText: {
-            color: '#FFFFFF',
+            color: colors.onPrimary,
             fontSize: 16,
             fontWeight: '600',
         },
         errorText: {
-            color: '#EF4444',
+            color: colors.error,
             fontSize: 14,
             marginTop: 8,
         },

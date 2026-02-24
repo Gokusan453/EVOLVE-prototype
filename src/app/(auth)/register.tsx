@@ -1,3 +1,4 @@
+import { Colors } from '@/constants/theme';
 import { supabase } from '@/lib/supabase';
 import { registerStyles as styles } from '@/styles/register.styling';
 import { Ionicons } from '@expo/vector-icons';
@@ -59,7 +60,7 @@ export default function RegisterScreen() {
     return (
         <View style={styles.container}>
             <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
-                <Ionicons name="arrow-back" size={24} color="#F8FAFC" />
+                <Ionicons name="arrow-back" size={24} color={Colors.text} />
             </TouchableOpacity>
 
             <ScrollView contentContainerStyle={{ justifyContent: 'center', flexGrow: 1 }}>
@@ -70,7 +71,7 @@ export default function RegisterScreen() {
                 <TextInput
                     style={styles.input}
                     placeholder="Email"
-                    placeholderTextColor="#64748B"
+                    placeholderTextColor={Colors.textSecondary}
                     value={email}
                     onChangeText={setEmail}
                     keyboardType="email-address"
@@ -80,7 +81,7 @@ export default function RegisterScreen() {
                 <TextInput
                     style={styles.input}
                     placeholder="Username"
-                    placeholderTextColor="#64748B"
+                    placeholderTextColor={Colors.textSecondary}
                     value={username}
                     onChangeText={setUsername}
                     autoCapitalize="none"
@@ -89,7 +90,7 @@ export default function RegisterScreen() {
                 <TextInput
                     style={styles.input}
                     placeholder="First name"
-                    placeholderTextColor="#64748B"
+                    placeholderTextColor={Colors.textSecondary}
                     value={firstName}
                     onChangeText={setFirstName}
                 />
@@ -97,7 +98,7 @@ export default function RegisterScreen() {
                 <TextInput
                     style={styles.input}
                     placeholder="Last name"
-                    placeholderTextColor="#64748B"
+                    placeholderTextColor={Colors.textSecondary}
                     value={lastName}
                     onChangeText={setLastName}
                 />
@@ -105,7 +106,7 @@ export default function RegisterScreen() {
                 <TextInput
                     style={styles.input}
                     placeholder="Password"
-                    placeholderTextColor="#64748B"
+                    placeholderTextColor={Colors.textSecondary}
                     value={password}
                     onChangeText={setPassword}
                     secureTextEntry
@@ -115,7 +116,7 @@ export default function RegisterScreen() {
                 <TextInput
                     style={styles.input}
                     placeholder="Confirm password"
-                    placeholderTextColor="#64748B"
+                    placeholderTextColor={Colors.textSecondary}
                     value={confirmPassword}
                     onChangeText={setConfirmPassword}
                     secureTextEntry

@@ -148,7 +148,7 @@ export default function HabitsListScreen() {
                 style={styles.fab}
                 onPress={() => router.push('/(tabs)/habits/add')}
             >
-                <Ionicons name="add" size={28} color="#FFFFFF" />
+                <Ionicons name="add" size={28} color={colors.onPrimary} />
             </TouchableOpacity>
         </View>
     );

@@ -40,7 +40,7 @@ export const createFriendsStyles = (colors: any) =>
             fontWeight: '500',
         },
         filterTextActive: {
-            color: '#FFFFFF',
+            color: colors.onPrimary,
         },
 
         // Search bar
@@ -90,7 +90,7 @@ export const createFriendsStyles = (colors: any) =>
             marginRight: 12,
         },
         avatarText: {
-            color: '#FFFFFF',
+            color: colors.onPrimary,
             fontSize: 16,
             fontWeight: 'bold',
         },
@@ -122,7 +122,7 @@ export const createFriendsStyles = (colors: any) =>
             backgroundColor: colors.primary,
         },
         rejectButton: {
-            backgroundColor: '#EF4444',
+            backgroundColor: colors.error,
         },
         removeButton: {
             backgroundColor: colors.border,
@@ -131,7 +131,7 @@ export const createFriendsStyles = (colors: any) =>
             backgroundColor: colors.border,
         },
         actionButtonText: {
-            color: '#FFFFFF',
+            color: colors.onPrimary,
             fontSize: 12,
             fontWeight: '600',
         },

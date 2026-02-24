@@ -46,7 +46,7 @@ export const createEditProfileStyles = (colors: any) =>
             borderRadius: 50,
         },
         avatarText: {
-            color: '#FFFFFF',
+            color: colors.onPrimary,
             fontSize: 36,
             fontWeight: 'bold',
         },
@@ -58,7 +58,7 @@ export const createEditProfileStyles = (colors: any) =>
             backgroundColor: colors.primary,
         },
         changePhotoText: {
-            color: '#FFFFFF',
+            color: colors.onPrimary,
             fontSize: 14,
             fontWeight: '600',
         },
@@ -97,18 +97,18 @@ export const createEditProfileStyles = (colors: any) =>
             opacity: 0.6,
         },
         saveButtonText: {
-            color: '#FFFFFF',
+            color: colors.onPrimary,
             fontSize: 16,
             fontWeight: '600',
         },
         errorText: {
-            color: '#EF4444',
+            color: colors.error,
             fontSize: 14,
             marginTop: 8,
             alignSelf: 'flex-start',
         },
         successText: {
-            color: '#10B981',
+            color: colors.success,
             fontSize: 14,
             marginTop: 8,
             alignSelf: 'flex-start',

@@ -139,8 +139,8 @@ export default function EditHabitScreen() {
                     <Switch
                         value={hasEndDate}
                         onValueChange={setHasEndDate}
-                        trackColor={{ false: '#E2E8F0', true: colors.primary }}
-                        thumbColor="#FFFFFF"
+                        trackColor={{ false: colors.border, true: colors.primary }}
+                        thumbColor={colors.switchThumb}
                     />
                 </View>
                 {hasEndDate && (

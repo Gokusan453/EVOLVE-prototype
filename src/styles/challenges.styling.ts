@@ -40,7 +40,7 @@ export const createChallengesStyles = (colors: any) =>
             fontWeight: '500',
         },
         filterTextActive: {
-            color: '#FFFFFF',
+            color: colors.onPrimary,
         },
 
         // Challenge cards
@@ -107,7 +107,7 @@ export const createChallengesStyles = (colors: any) =>
             borderRadius: 8,
         },
         joinButtonText: {
-            color: '#FFFFFF',
+            color: colors.onPrimary,
             fontSize: 13,
             fontWeight: '600',
         },
@@ -126,7 +126,7 @@ export const createChallengesStyles = (colors: any) =>
             backgroundColor: colors.primary,
             alignItems: 'center',
             justifyContent: 'center',
-            shadowColor: '#000',
+            shadowColor: colors.shadow,
             shadowOffset: { width: 0, height: 2 },
             shadowOpacity: 0.25,
             shadowRadius: 4,

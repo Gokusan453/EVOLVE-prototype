@@ -129,7 +129,7 @@ export const createChallengeDetailStyles = (colors: any) =>
             color: colors.textSecondary,
         },
         dayLabelActive: {
-            color: '#FFFFFF',
+            color: colors.onPrimary,
         },
 
         // Leaderboard
@@ -169,10 +169,10 @@ export const createChallengeDetailStyles = (colors: any) =>
             backgroundColor: colors.warning,
         },
         rankSilver: {
-            backgroundColor: '#9CA3AF',
+            backgroundColor: colors.rankSilver,
         },
         rankBronze: {
-            backgroundColor: '#D97706',
+            backgroundColor: colors.rankBronze,
         },
         rankDefault: {
             backgroundColor: colors.border,
@@ -180,7 +180,7 @@ export const createChallengeDetailStyles = (colors: any) =>
         rankText: {
             fontSize: 13,
             fontWeight: 'bold',
-            color: '#FFFFFF',
+            color: colors.onPrimary,
         },
         leaderboardName: {
             flex: 1,
@@ -206,7 +206,7 @@ export const createChallengeDetailStyles = (colors: any) =>
             backgroundColor: colors.border,
         },
         doneButtonText: {
-            color: '#FFFFFF',
+            color: colors.onPrimary,
             fontSize: 16,
             fontWeight: '600',
         },

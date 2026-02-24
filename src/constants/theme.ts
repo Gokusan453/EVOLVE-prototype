@@ -24,6 +24,18 @@ export const LightColors = {
     success: '#10B981',
     warning: '#F59E0B',
     error: '#EF4444',
+
+    onPrimary: '#FFFFFF',
+    onError: '#FFFFFF',
+    switchThumb: '#FFFFFF',
+    shadow: '#000000',
+
+    successSoft: '#86EFAc',
+    successSoftBorder: '#4ADE80',
+    successSoftText: '#166534',
+
+    rankSilver: '#9CA3AF',
+    rankBronze: '#D97706',
 } as const;
 
 export const DarkColors = {
@@ -48,6 +60,18 @@ export const DarkColors = {
     success: '#10B981',
     warning: '#F59E0B',
     error: '#EF4444',
+
+    onPrimary: '#FFFFFF',
+    onError: '#FFFFFF',
+    switchThumb: '#FFFFFF',
+    shadow: '#000000',
+
+    successSoft: '#86EFAc',
+    successSoftBorder: '#4ADE80',
+    successSoftText: '#166534',
+
+    rankSilver: '#9CA3AF',
+    rankBronze: '#D97706',
 } as const;
 
 // Default export for backwards compatibility

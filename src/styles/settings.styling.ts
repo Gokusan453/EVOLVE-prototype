@@ -46,7 +46,7 @@ export const createSettingsStyles = (colors: any) =>
             marginRight: 14,
         },
         avatarText: {
-            color: '#FFFFFF',
+            color: colors.onPrimary,
             fontSize: 20,
             fontWeight: 'bold',
         },
@@ -133,7 +133,7 @@ export const createSettingsStyles = (colors: any) =>
             marginTop: 8,
         },
         logoutText: {
-            color: '#FFFFFF',
+            color: colors.onError,
             fontSize: 16,
             fontWeight: '600',
         },

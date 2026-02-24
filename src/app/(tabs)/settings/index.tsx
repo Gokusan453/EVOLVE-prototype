@@ -110,7 +110,7 @@ export default function SettingsScreen() {
                     </View>
 
                     <TouchableOpacity style={styles.editButton} onPress={() => router.push('/(tabs)/settings/edit-profile')}>
-                        <Ionicons name="pencil" size={18} color="#FFFFFF" />
+                        <Ionicons name="pencil" size={18} color={colors.onPrimary} />
                     </TouchableOpacity>
                 </View>
 
@@ -141,7 +141,7 @@ export default function SettingsScreen() {
                             value={mode === 'dark'}
                             onValueChange={toggleTheme}
                             trackColor={{ false: colors.border, true: colors.primary }}
-                            thumbColor="#FFFFFF"
+                            thumbColor={colors.switchThumb}
                         />
                     </View>
                     <View style={[styles.settingsRow, styles.settingsBorder]}>
@@ -150,7 +150,7 @@ export default function SettingsScreen() {
                             value={notifications}
                             onValueChange={setNotifications}
                             trackColor={{ false: colors.border, true: colors.primary }}
-                            thumbColor="#FFFFFF"
+                            thumbColor={colors.switchThumb}
                         />
                     </View>
                     <View style={[styles.settingsRow, styles.settingsBorder]}>
@@ -159,7 +159,7 @@ export default function SettingsScreen() {
                             value={sound}
                             onValueChange={setSound}
                             trackColor={{ false: colors.border, true: colors.primary }}
-                            thumbColor="#FFFFFF"
+                            thumbColor={colors.switchThumb}
                         />
                     </View>
                     <View style={[styles.settingsRow, styles.settingsBorder]}>
@@ -168,7 +168,7 @@ export default function SettingsScreen() {
                             value={vibrations}
                             onValueChange={setVibrations}
                             trackColor={{ false: colors.border, true: colors.primary }}
-                            thumbColor="#FFFFFF"
+                            thumbColor={colors.switchThumb}
                         />
                     </View>
                     <View style={styles.settingsRow}>
@@ -177,7 +177,7 @@ export default function SettingsScreen() {
                             value={privateAccount}
                             onValueChange={setPrivateAccount}
                             trackColor={{ false: colors.border, true: colors.primary }}
-                            thumbColor="#FFFFFF"
+                            thumbColor={colors.switchThumb}
                         />
                     </View>
                 </View>

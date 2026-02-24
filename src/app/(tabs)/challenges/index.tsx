@@ -236,7 +236,7 @@ export default function ChallengesListScreen() {
                 style={styles.fab}
                 onPress={() => router.push('/(tabs)/challenges/add')}
             >
-                <Ionicons name="add" size={28} color="#FFFFFF" />
+                <Ionicons name="add" size={28} color={colors.onPrimary} />
             </TouchableOpacity>
         </View>
     );

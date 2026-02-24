@@ -1,3 +1,4 @@
+import { Colors } from '@/constants/theme';
 import { supabase } from '@/lib/supabase';
 import { loginStyles as styles } from '@/styles/login.styling';
 import { Ionicons } from '@expo/vector-icons';
@@ -38,7 +39,7 @@ export default function LoginScreen() {
     return (
         <View style={styles.container}>
             <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
-                <Ionicons name="arrow-back" size={24} color="#F8FAFC" />
+                <Ionicons name="arrow-back" size={24} color={Colors.text} />
             </TouchableOpacity>
 
             <Text style={styles.title}>Login</Text>
@@ -48,7 +49,7 @@ export default function LoginScreen() {
             <TextInput
                 style={styles.input}
                 placeholder="Email"
-                placeholderTextColor="#64748B"
+                placeholderTextColor={Colors.textSecondary}
                 value={email}
                 onChangeText={setEmail}
                 keyboardType="email-address"
@@ -58,7 +59,7 @@ export default function LoginScreen() {
             <TextInput
                 style={styles.input}
                 placeholder="Password"
-                placeholderTextColor="#64748B"
+                placeholderTextColor={Colors.textSecondary}
                 value={password}
                 onChangeText={setPassword}
                 secureTextEntry

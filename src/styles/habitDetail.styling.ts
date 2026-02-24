@@ -41,7 +41,7 @@ export const createHabitDetailStyles = (colors: any) =>
             backgroundColor: colors.primary,
         },
         deleteButton: {
-            backgroundColor: '#EF4444',
+            backgroundColor: colors.error,
         },
         scrollContent: {
             paddingHorizontal: 20,
@@ -56,7 +56,7 @@ export const createHabitDetailStyles = (colors: any) =>
             marginBottom: 16,
         },
         progressText: {
-            color: '#FFFFFF',
+            color: colors.onPrimary,
             fontSize: 14,
             fontWeight: '600',
             marginBottom: 8,
@@ -68,7 +68,7 @@ export const createHabitDetailStyles = (colors: any) =>
         },
         progressBarFill: {
             height: 8,
-            backgroundColor: '#FFFFFF',
+            backgroundColor: colors.onPrimary,
             borderRadius: 4,
         },
 
@@ -140,7 +140,7 @@ export const createHabitDetailStyles = (colors: any) =>
             color: colors.textSecondary,
         },
         dayLabelActive: {
-            color: '#FFFFFF',
+            color: colors.onPrimary,
         },
 
         // Weekly chart
@@ -175,7 +175,7 @@ export const createHabitDetailStyles = (colors: any) =>
             color: colors.textSecondary,
         },
         chartFilterTextActive: {
-            color: '#FFFFFF',
+            color: colors.onPrimary,
         },
         chartRow: {
             flexDirection: 'row',
@@ -214,7 +214,7 @@ export const createHabitDetailStyles = (colors: any) =>
             backgroundColor: colors.border,
         },
         doneButtonText: {
-            color: '#FFFFFF',
+            color: colors.onPrimary,
             fontSize: 16,
             fontWeight: '600',
         },

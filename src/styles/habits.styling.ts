@@ -40,7 +40,7 @@ export const createHabitsStyles = (colors: any) =>
             fontWeight: '500',
         },
         filterTextActive: {
-            color: '#FFFFFF',
+            color: colors.onPrimary,
         },
 
         // Habit cards
@@ -83,7 +83,7 @@ export const createHabitsStyles = (colors: any) =>
             backgroundColor: colors.border,
         },
         doneButtonText: {
-            color: '#FFFFFF',
+            color: colors.onPrimary,
             fontSize: 13,
             fontWeight: '600',
         },
@@ -99,7 +99,7 @@ export const createHabitsStyles = (colors: any) =>
             backgroundColor: colors.primary,
             alignItems: 'center',
             justifyContent: 'center',
-            shadowColor: '#000',
+            shadowColor: colors.shadow,
             shadowOffset: { width: 0, height: 2 },
             shadowOpacity: 0.25,
             shadowRadius: 4,

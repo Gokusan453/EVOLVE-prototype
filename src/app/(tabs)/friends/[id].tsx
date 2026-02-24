@@ -208,7 +208,7 @@ const createStyles = (colors: any) =>
             marginBottom: 12,
         },
         avatarText: {
-            color: '#FFFFFF',
+            color: colors.onPrimary,
             fontSize: 28,
             fontWeight: 'bold',
         },
@@ -252,14 +252,14 @@ const createStyles = (colors: any) =>
             marginTop: 2,
         },
         removeButton: {
-            backgroundColor: '#EF4444',
+            backgroundColor: colors.error,
             paddingVertical: 16,
             borderRadius: 12,
             alignItems: 'center',
             marginTop: 16,
         },
         removeText: {
-            color: '#FFFFFF',
+            color: colors.onError,
             fontSize: 16,
             fontWeight: '600',
         },

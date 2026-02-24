@@ -29,7 +29,7 @@ export const startStyles = StyleSheet.create({
         marginBottom: 12,
     },
     loginButtonText: {
-        color: '#FFFFFF',
+        color: Colors.onPrimary,
         fontSize: 18,
         fontWeight: '700',
     },

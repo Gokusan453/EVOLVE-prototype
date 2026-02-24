@@ -39,7 +39,7 @@ export const createHomeStyles = (colors: any) =>
         },
         avatarText: {
             fontSize: 18,
-            color: '#FFFFFF',
+            color: colors.onPrimary,
             fontWeight: 'bold',
         },
         scrollContent: {
@@ -94,7 +94,7 @@ export const createHomeStyles = (colors: any) =>
         },
         progressBarFill: {
             height: '100%',
-            backgroundColor: '#86efac',
+            backgroundColor: colors.successSoft,
             borderRadius: 4,
         },
 
@@ -129,15 +129,15 @@ export const createHomeStyles = (colors: any) =>
             marginTop: 2,
         },
         markDoneBtn: {
-            backgroundColor: '#86efac',
+            backgroundColor: colors.successSoft,
             borderWidth: 1,
-            borderColor: '#4ade80',
+            borderColor: colors.successSoftBorder,
             paddingHorizontal: 16,
             paddingVertical: 10,
             borderRadius: 8,
         },
         markDoneText: {
-            color: '#166534',
+            color: colors.successSoftText,
             fontWeight: '600',
             fontSize: 14,
         },

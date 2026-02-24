@@ -41,7 +41,7 @@ export const loginStyles = StyleSheet.create({
         opacity: 0.6,
     },
     buttonText: {
-        color: '#FFFFFF',
+        color: Colors.onPrimary,
         fontSize: 16,
         fontWeight: '600',
     },

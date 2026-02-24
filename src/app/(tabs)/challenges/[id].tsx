@@ -205,10 +205,10 @@ export default function ChallengeDetailScreen() {
                             style={[styles.actionButton, styles.editButton]}
                             onPress={() => router.push(`/(tabs)/challenges/edit/${id}`)}
                         >
-                            <Ionicons name="pencil" size={18} color="#FFFFFF" />
+                            <Ionicons name="pencil" size={18} color={colors.onPrimary} />
                         </TouchableOpacity>
                         <TouchableOpacity style={[styles.actionButton, styles.deleteButton]} onPress={handleDelete}>
-                            <Ionicons name="trash-outline" size={18} color="#FFFFFF" />
+                            <Ionicons name="trash-outline" size={18} color={colors.onPrimary} />
                         </TouchableOpacity>
                     </View>
                 )}
@@ -238,7 +238,7 @@ export default function ChallengeDetailScreen() {
                             );
                         }}
                     >
-                        <Ionicons name="exit-outline" size={18} color="#FFFFFF" />
+                        <Ionicons name="exit-outline" size={18} color={colors.onPrimary} />
                     </TouchableOpacity>
                 )}
             </View>
