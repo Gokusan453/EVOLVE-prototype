@@ -23,6 +23,7 @@ export default function SettingsScreen() {
     const [vibrations, setVibrations] = useState(true);
     const [privateAccount, setPrivateAccount] = useState(true);
     const [habitsCount, setHabitsCount] = useState(0);
+    const [challengesCount, setChallengesCount] = useState(0);
 
     useFocusEffect(
         useCallback(() => {
@@ -37,12 +38,19 @@ export default function SettingsScreen() {
 
                     if (data) setProfile(data);
 
-                    const { count } = await supabase
+                    const { count: hCount } = await supabase
                         .from('habits')
                         .select('*', { count: 'exact', head: true })
                         .eq('user_id', user.id);
 
-                    setHabitsCount(count || 0);
+                    setHabitsCount(hCount || 0);
+
+                    const { count: cCount } = await supabase
+                        .from('challenge_participants')
+                        .select('*', { count: 'exact', head: true })
+                        .eq('user_id', user.id);
+
+                    setChallengesCount(cCount || 0);
                 }
             };
 
@@ -103,7 +111,7 @@ export default function SettingsScreen() {
                     <View style={styles.statItem}>
                         <Ionicons name="flag" size={28} color={colors.primary} style={styles.statIcon} />
                         <Text style={styles.statLabel}>Challenges</Text>
-                        <Text style={styles.statValue}>0</Text>
+                        <Text style={styles.statValue}>{challengesCount}</Text>
                     </View>
                     <View style={styles.statItem}>
                         <Ionicons name="flame" size={28} color={colors.primary} style={styles.statIcon} />
