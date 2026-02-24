@@ -4,6 +4,7 @@ import { StatusBar } from 'expo-status-bar';
 import { useEffect, useState } from 'react';
 import 'react-native-reanimated';
 
+import { SettingsProvider } from '@/contexts/SettingsContext';
 import { ThemeProvider, useTheme } from '@/contexts/ThemeContext';
 import { supabase } from '@/lib/supabase';
 
@@ -55,7 +56,10 @@ function RootNavigator() {
 export default function RootLayout() {
   return (
     <ThemeProvider>
-      <RootNavigator />
+      <SettingsProvider>
+        <RootNavigator />
+      </SettingsProvider>
     </ThemeProvider>
   );
 }
+
