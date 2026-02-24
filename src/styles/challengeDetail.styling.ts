@@ -43,7 +43,7 @@ export const createChallengeDetailStyles = (colors: any) =>
             backgroundColor: colors.primary,
         },
         deleteButton: {
-            backgroundColor: '#EF4444',
+            backgroundColor: colors.error,
         },
         scrollContent: {
             paddingHorizontal: 20,
@@ -166,7 +166,7 @@ export const createChallengeDetailStyles = (colors: any) =>
             marginRight: 12,
         },
         rankGold: {
-            backgroundColor: '#F59E0B',
+            backgroundColor: colors.warning,
         },
         rankSilver: {
             backgroundColor: '#9CA3AF',

@@ -140,7 +140,7 @@ export default function SettingsScreen() {
                         <Switch
                             value={mode === 'dark'}
                             onValueChange={toggleTheme}
-                            trackColor={{ false: '#E2E8F0', true: '#10B981' }}
+                            trackColor={{ false: colors.border, true: colors.primary }}
                             thumbColor="#FFFFFF"
                         />
                     </View>
@@ -149,7 +149,7 @@ export default function SettingsScreen() {
                         <Switch
                             value={notifications}
                             onValueChange={setNotifications}
-                            trackColor={{ false: '#E2E8F0', true: '#10B981' }}
+                            trackColor={{ false: colors.border, true: colors.primary }}
                             thumbColor="#FFFFFF"
                         />
                     </View>
@@ -158,7 +158,7 @@ export default function SettingsScreen() {
                         <Switch
                             value={sound}
                             onValueChange={setSound}
-                            trackColor={{ false: '#E2E8F0', true: '#10B981' }}
+                            trackColor={{ false: colors.border, true: colors.primary }}
                             thumbColor="#FFFFFF"
                         />
                     </View>
@@ -167,7 +167,7 @@ export default function SettingsScreen() {
                         <Switch
                             value={vibrations}
                             onValueChange={setVibrations}
-                            trackColor={{ false: '#E2E8F0', true: '#10B981' }}
+                            trackColor={{ false: colors.border, true: colors.primary }}
                             thumbColor="#FFFFFF"
                         />
                     </View>
@@ -176,7 +176,7 @@ export default function SettingsScreen() {
                         <Switch
                             value={privateAccount}
                             onValueChange={setPrivateAccount}
-                            trackColor={{ false: '#E2E8F0', true: '#10B981' }}
+                            trackColor={{ false: colors.border, true: colors.primary }}
                             thumbColor="#FFFFFF"
                         />
                     </View>

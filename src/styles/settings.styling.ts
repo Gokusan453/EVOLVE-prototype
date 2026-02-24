@@ -126,7 +126,7 @@ export const createSettingsStyles = (colors: any) =>
 
         // Logout
         logoutButton: {
-            backgroundColor: '#EF4444',
+            backgroundColor: colors.error,
             borderRadius: 12,
             paddingVertical: 16,
             alignItems: 'center',
