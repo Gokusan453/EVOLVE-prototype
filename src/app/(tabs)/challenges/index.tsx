@@ -5,7 +5,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
 import { useRouter } from 'expo-router';
 import { useCallback, useState } from 'react';
-import { FlatList, Text, TouchableOpacity, View } from 'react-native';
+import { FlatList, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
 type Challenge = {
     id: string;
@@ -32,6 +32,7 @@ export default function ChallengesListScreen() {
     const [challenges, setChallenges] = useState<Challenge[]>([]);
     const [filter, setFilter] = useState<Filter>('public');
     const [userId, setUserId] = useState<string | null>(null);
+    const [searchQuery, setSearchQuery] = useState('');
 
     const fetchChallenges = async () => {
         const { data: { user } } = await supabase.auth.getUser();
@@ -172,9 +173,33 @@ export default function ChallengesListScreen() {
         { key: 'mine', label: 'My Challenges' },
     ];
 
+    const filteredChallenges = challenges.filter((c) =>
+        c.name.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+
     return (
         <View style={styles.container}>
             <Text style={styles.header}>Challenges</Text>
+
+            {/* Search bar */}
+            <View style={{ paddingHorizontal: 20, marginBottom: 16 }}>
+                <TextInput
+                    style={{
+                        backgroundColor: colors.surface,
+                        borderRadius: 12,
+                        paddingHorizontal: 16,
+                        paddingVertical: 12,
+                        color: colors.text,
+                        borderWidth: 1,
+                        borderColor: colors.border,
+                        fontSize: 16,
+                    }}
+                    placeholder="Search challenges..."
+                    placeholderTextColor={colors.textMuted}
+                    value={searchQuery}
+                    onChangeText={setSearchQuery}
+                />
+            </View>
 
             {/* Filter tabs */}
             <View style={styles.filterRow}>
@@ -192,16 +217,16 @@ export default function ChallengesListScreen() {
             </View>
 
             {/* Challenge list */}
-            {challenges.length > 0 ? (
+            {filteredChallenges.length > 0 ? (
                 <FlatList
-                    data={challenges}
+                    data={filteredChallenges}
                     renderItem={renderChallenge}
                     keyExtractor={(item) => item.id}
                     contentContainerStyle={styles.listContent}
                 />
             ) : (
                 <View style={styles.emptyContainer}>
-                    <Ionicons name="trophy-outline" size={48} color={colors.textMuted} />
+                    <Ionicons name="search-outline" size={48} color={colors.textMuted} />
                     <Text style={styles.emptyText}>No challenges found</Text>
                 </View>
             )}

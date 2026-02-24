@@ -1,3 +1,4 @@
+import { useSettings } from '@/contexts/SettingsContext';
 import { useTheme } from '@/contexts/ThemeContext';
 import { supabase } from '@/lib/supabase';
 import { createAddChallengeStyles } from '@/styles/addChallenge.styling';
@@ -23,6 +24,7 @@ const formatToday = () => {
 
 export default function AddChallengeScreen() {
     const { colors } = useTheme();
+    const { triggerFeedback } = useSettings();
     const styles = createAddChallengeStyles(colors);
     const router = useRouter();
 
@@ -87,6 +89,7 @@ export default function AddChallengeScreen() {
         }
 
         setLoading(false);
+        triggerFeedback();
         router.back();
     };
 

@@ -1,3 +1,4 @@
+import { useSettings } from '@/contexts/SettingsContext';
 import { useTheme } from '@/contexts/ThemeContext';
 import { supabase } from '@/lib/supabase';
 import { createChallengeDetailStyles } from '@/styles/challengeDetail.styling';
@@ -86,11 +87,19 @@ export default function ChallengeDetailScreen() {
         const entries: LeaderboardEntry[] = [];
 
         for (const p of participants) {
-            const { count } = await supabase
+            // Get total habit logs for the user
+            const { count: habitLogsCount } = await supabase
+                .from('habit_logs')
+                .select('*', { count: 'exact', head: true })
+                .eq('user_id', p.user_id);
+
+            // Get total challenge logs for the user (across ALL challenges)
+            const { count: challengeLogsCount } = await supabase
                 .from('challenge_logs')
                 .select('*', { count: 'exact', head: true })
-                .eq('challenge_id', id)
                 .eq('user_id', p.user_id);
+
+            const totalPoints = (habitLogsCount || 0) + (challengeLogsCount || 0);
 
             const { data: profile } = await supabase
                 .from('profiles')
@@ -105,7 +114,7 @@ export default function ChallengeDetailScreen() {
             entries.push({
                 user_id: p.user_id,
                 username: displayName,
-                score: count || 0,
+                score: totalPoints,
             });
         }
 
@@ -119,6 +128,8 @@ export default function ChallengeDetailScreen() {
         }, [id])
     );
 
+    const { triggerFeedback } = useSettings();
+
     const handleMarkDone = async () => {
         if (!userId) return;
 
@@ -129,6 +140,7 @@ export default function ChallengeDetailScreen() {
 
         setIsDoneToday(true);
         fetchData();
+        triggerFeedback();
     };
 
     const handleDelete = () => {
@@ -139,6 +151,7 @@ export default function ChallengeDetailScreen() {
                 style: 'destructive',
                 onPress: async () => {
                     await supabase.from('challenges').delete().eq('id', id);
+                    triggerFeedback();
                     router.back();
                 },
             },
