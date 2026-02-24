@@ -1,3 +1,4 @@
+import { useSettings } from '@/contexts/SettingsContext';
 import { useTheme } from '@/contexts/ThemeContext';
 import { supabase } from '@/lib/supabase';
 import { createAddHabitStyles } from '@/styles/addHabit.styling';
@@ -23,6 +24,7 @@ const formatToday = () => {
 
 export default function AddHabitScreen() {
     const { colors } = useTheme();
+    const { triggerFeedback } = useSettings();
     const styles = createAddHabitStyles(colors);
     const router = useRouter();
 
@@ -77,6 +79,7 @@ export default function AddHabitScreen() {
         if (insertError) {
             setError(insertError.message);
         } else {
+            triggerFeedback();
             router.back();
         }
     };

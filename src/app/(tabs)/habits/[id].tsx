@@ -1,3 +1,4 @@
+import { useSettings } from '@/contexts/SettingsContext';
 import { useTheme } from '@/contexts/ThemeContext';
 import { supabase } from '@/lib/supabase';
 import { createHabitDetailStyles } from '@/styles/habitDetail.styling';
@@ -153,6 +154,8 @@ export default function HabitDetailScreen() {
         }, [id, chartPeriod])
     );
 
+    const { triggerFeedback } = useSettings();
+
     const handleMarkDone = async () => {
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) return;
@@ -164,6 +167,7 @@ export default function HabitDetailScreen() {
 
         setIsDoneToday(true);
         fetchChartData();
+        triggerFeedback();
     };
 
     const handleDelete = () => {
@@ -174,6 +178,7 @@ export default function HabitDetailScreen() {
                 style: 'destructive',
                 onPress: async () => {
                     await supabase.from('habits').delete().eq('id', id);
+                    triggerFeedback();
                     router.back();
                 },
             },
