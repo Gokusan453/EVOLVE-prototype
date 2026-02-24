@@ -1,3 +1,4 @@
+import { useSettings } from '@/contexts/SettingsContext';
 import { useTheme } from '@/contexts/ThemeContext';
 import { supabase } from '@/lib/supabase';
 import { createSettingsStyles } from '@/styles/settings.styling';
@@ -19,11 +20,10 @@ export default function SettingsScreen() {
         created_at: string;
     } | null>(null);
 
-    const [notifications, setNotifications] = useState(true);
-    const [vibrations, setVibrations] = useState(true);
-    const [privateAccount, setPrivateAccount] = useState(true);
+    const { notifications, sound, vibrations, privateAccount, setNotifications, setSound, setVibrations, setPrivateAccount } = useSettings();
     const [habitsCount, setHabitsCount] = useState(0);
     const [challengesCount, setChallengesCount] = useState(0);
+    const [points, setPoints] = useState(0);
 
     useFocusEffect(
         useCallback(() => {
@@ -51,6 +51,19 @@ export default function SettingsScreen() {
                         .eq('user_id', user.id);
 
                     setChallengesCount(cCount || 0);
+
+                    // Get points (habit logs + challenge logs)
+                    const { count: habitLogs } = await supabase
+                        .from('habit_logs')
+                        .select('*', { count: 'exact', head: true })
+                        .eq('user_id', user.id);
+
+                    const { count: challengeLogs } = await supabase
+                        .from('challenge_logs')
+                        .select('*', { count: 'exact', head: true })
+                        .eq('user_id', user.id);
+
+                    setPoints((habitLogs || 0) + (challengeLogs || 0));
                 }
             };
 
@@ -116,7 +129,7 @@ export default function SettingsScreen() {
                     <View style={styles.statItem}>
                         <Ionicons name="flame" size={28} color={colors.primary} style={styles.statIcon} />
                         <Text style={styles.statLabel}>Points</Text>
-                        <Text style={styles.statValue}>0</Text>
+                        <Text style={styles.statValue}>{points}</Text>
                     </View>
                 </View>
 
@@ -136,6 +149,15 @@ export default function SettingsScreen() {
                         <Switch
                             value={notifications}
                             onValueChange={setNotifications}
+                            trackColor={{ false: '#E2E8F0', true: '#10B981' }}
+                            thumbColor="#FFFFFF"
+                        />
+                    </View>
+                    <View style={[styles.settingsRow, styles.settingsBorder]}>
+                        <Text style={styles.settingsLabel}>Sound</Text>
+                        <Switch
+                            value={sound}
+                            onValueChange={setSound}
                             trackColor={{ false: '#E2E8F0', true: '#10B981' }}
                             thumbColor="#FFFFFF"
                         />
