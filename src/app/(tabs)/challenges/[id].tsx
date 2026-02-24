@@ -45,6 +45,7 @@ export default function ChallengeDetailScreen() {
     const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
     const [isDoneToday, setIsDoneToday] = useState(false);
     const [isCreator, setIsCreator] = useState(false);
+    const [isJoined, setIsJoined] = useState(false);
     const [userId, setUserId] = useState<string | null>(null);
 
     const fetchData = async () => {
@@ -63,6 +64,14 @@ export default function ChallengeDetailScreen() {
             setChallenge(challengeData);
             setIsCreator(challengeData.creator_id === user.id);
         }
+
+        // Check if joined
+        const { data: myParticipation } = await supabase
+            .from('challenge_participants')
+            .select('id')
+            .eq('challenge_id', id)
+            .eq('user_id', user.id);
+        setIsJoined((myParticipation?.length || 0) > 0);
 
         // Check if done today
         const today = new Date().toISOString().split('T')[0];
@@ -203,6 +212,35 @@ export default function ChallengeDetailScreen() {
                         </TouchableOpacity>
                     </View>
                 )}
+                {isJoined && !isCreator && (
+                    <TouchableOpacity
+                        style={[styles.actionButton, styles.deleteButton]}
+                        onPress={() => {
+                            Alert.alert(
+                                'Leave Challenge',
+                                'Are you sure you want to leave this challenge?',
+                                [
+                                    { text: 'Cancel', style: 'cancel' },
+                                    {
+                                        text: 'Leave',
+                                        style: 'destructive',
+                                        onPress: async () => {
+                                            if (!userId) return;
+                                            await supabase
+                                                .from('challenge_participants')
+                                                .delete()
+                                                .eq('challenge_id', id)
+                                                .eq('user_id', userId);
+                                            router.back();
+                                        },
+                                    },
+                                ]
+                            );
+                        }}
+                    >
+                        <Ionicons name="exit-outline" size={18} color="#FFFFFF" />
+                    </TouchableOpacity>
+                )}
             </View>
 
             <ScrollView contentContainerStyle={styles.scrollContent}>
@@ -263,16 +301,33 @@ export default function ChallengeDetailScreen() {
                     )}
                 </View>
 
-                {/* Mark as Done */}
-                <TouchableOpacity
-                    style={[styles.doneButton, isDoneToday && styles.doneButtonCompleted]}
-                    onPress={handleMarkDone}
-                    disabled={isDoneToday}
-                >
-                    <Text style={styles.doneButtonText}>
-                        {isDoneToday ? 'Done for today ✓' : 'Mark as done'}
-                    </Text>
-                </TouchableOpacity>
+                {/* Mark as Done / Join */}
+                {isJoined ? (
+                    <TouchableOpacity
+                        style={[styles.doneButton, isDoneToday && styles.doneButtonCompleted]}
+                        onPress={handleMarkDone}
+                        disabled={isDoneToday}
+                    >
+                        <Text style={styles.doneButtonText}>
+                            {isDoneToday ? 'Done for today ✓' : 'Mark as done'}
+                        </Text>
+                    </TouchableOpacity>
+                ) : (
+                    <TouchableOpacity
+                        style={styles.doneButton}
+                        onPress={async () => {
+                            if (!userId) return;
+                            await supabase.from('challenge_participants').insert({
+                                challenge_id: id,
+                                user_id: userId,
+                            });
+                            setIsJoined(true);
+                            fetchData();
+                        }}
+                    >
+                        <Text style={styles.doneButtonText}>Join challenge</Text>
+                    </TouchableOpacity>
+                )}
             </ScrollView>
         </View>
     );
