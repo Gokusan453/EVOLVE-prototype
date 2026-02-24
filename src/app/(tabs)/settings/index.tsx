@@ -2,8 +2,9 @@ import { useTheme } from '@/contexts/ThemeContext';
 import { supabase } from '@/lib/supabase';
 import { createSettingsStyles } from '@/styles/settings.styling';
 import { Ionicons } from '@expo/vector-icons';
+import { useFocusEffect } from '@react-navigation/native';
 import { useRouter } from 'expo-router';
-import { useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
 import { Image, ScrollView, Switch, Text, TouchableOpacity, View } from 'react-native';
 
 export default function SettingsScreen() {
@@ -21,23 +22,33 @@ export default function SettingsScreen() {
     const [notifications, setNotifications] = useState(true);
     const [vibrations, setVibrations] = useState(true);
     const [privateAccount, setPrivateAccount] = useState(true);
+    const [habitsCount, setHabitsCount] = useState(0);
 
-    useEffect(() => {
-        const fetchProfile = async () => {
-            const { data: { user } } = await supabase.auth.getUser();
-            if (user) {
-                const { data } = await supabase
-                    .from('profiles')
-                    .select('first_name, last_name, avatar_url, created_at')
-                    .eq('id', user.id)
-                    .single();
+    useFocusEffect(
+        useCallback(() => {
+            const fetchProfile = async () => {
+                const { data: { user } } = await supabase.auth.getUser();
+                if (user) {
+                    const { data } = await supabase
+                        .from('profiles')
+                        .select('first_name, last_name, avatar_url, created_at')
+                        .eq('id', user.id)
+                        .single();
 
-                if (data) setProfile(data);
-            }
-        };
+                    if (data) setProfile(data);
 
-        fetchProfile();
-    }, []);
+                    const { count } = await supabase
+                        .from('habits')
+                        .select('*', { count: 'exact', head: true })
+                        .eq('user_id', user.id);
+
+                    setHabitsCount(count || 0);
+                }
+            };
+
+            fetchProfile();
+        }, [])
+    );
 
     const handleLogout = async () => {
         await supabase.auth.signOut();
@@ -77,7 +88,7 @@ export default function SettingsScreen() {
                         <Text style={styles.profileSince}>{getMemberSince()}</Text>
                     </View>
 
-                    <TouchableOpacity style={styles.editButton}>
+                    <TouchableOpacity style={styles.editButton} onPress={() => router.push('/(tabs)/settings/edit-profile')}>
                         <Ionicons name="pencil" size={18} color="#FFFFFF" />
                     </TouchableOpacity>
                 </View>
@@ -87,7 +98,7 @@ export default function SettingsScreen() {
                     <View style={styles.statItem}>
                         <Ionicons name="checkmark-circle" size={28} color={colors.primary} style={styles.statIcon} />
                         <Text style={styles.statLabel}>Habits</Text>
-                        <Text style={styles.statValue}>0</Text>
+                        <Text style={styles.statValue}>{habitsCount}</Text>
                     </View>
                     <View style={styles.statItem}>
                         <Ionicons name="flag" size={28} color={colors.primary} style={styles.statIcon} />
