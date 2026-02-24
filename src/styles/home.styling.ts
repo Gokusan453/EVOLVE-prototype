@@ -6,23 +6,23 @@ export const createHomeStyles = (colors: any) =>
             flex: 1,
             backgroundColor: colors.background,
             paddingTop: 60,
-            paddingHorizontal: 20,
         },
         header: {
             flexDirection: 'row',
-            alignItems: 'center',
             justifyContent: 'space-between',
-            marginBottom: 32,
+            alignItems: 'center',
+            paddingHorizontal: 20,
+            marginBottom: 20,
         },
         greeting: {
             fontSize: 16,
             color: colors.textSecondary,
+            marginBottom: 4,
         },
         userName: {
             fontSize: 24,
             fontWeight: 'bold',
             color: colors.text,
-            marginTop: 2,
         },
         avatar: {
             width: 48,
@@ -38,17 +38,121 @@ export const createHomeStyles = (colors: any) =>
             borderRadius: 24,
         },
         avatarText: {
-            color: '#FFFFFF',
             fontSize: 18,
+            color: '#FFFFFF',
             fontWeight: 'bold',
         },
-        content: {
-            flex: 1,
+        scrollContent: {
+            paddingHorizontal: 20,
+            paddingBottom: 40,
+        },
+        sectionTitle: {
+            fontSize: 18,
+            color: colors.text,
+            fontWeight: '600',
+            marginBottom: 12,
+        },
+
+        // ── Summary cards (top) ──
+        summaryCard: {
+            backgroundColor: colors.surface,
+            borderWidth: 1,
+            borderColor: colors.border,
+            borderRadius: 12,
+            padding: 16,
+            marginBottom: 12,
+        },
+        summaryHeader: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            marginBottom: 12,
+        },
+        summaryName: {
+            fontSize: 16,
+            fontWeight: '600',
+            color: colors.text,
+        },
+        summaryInfo: {
+            fontSize: 14,
+            color: colors.textSecondary,
+            marginTop: 2,
+            marginBottom: 8,
+        },
+        progressText: {
+            fontSize: 13,
+            color: colors.text,
+            fontWeight: '500',
+        },
+        progressBarBg: {
+            height: 8,
+            backgroundColor: colors.background,
+            borderRadius: 4,
+            width: '100%',
+            overflow: 'hidden',
+            borderWidth: 1,
+            borderColor: colors.border,
+        },
+        progressBarFill: {
+            height: '100%',
+            backgroundColor: '#86efac',
+            borderRadius: 4,
+        },
+
+        // ── Separator ──
+        dottedSeparator: {
+            height: 1,
+            borderWidth: 1,
+            borderColor: colors.border,
+            borderStyle: 'dashed',
+            marginVertical: 24,
+        },
+
+        // ── To-do cards (bottom) ──
+        todoCard: {
+            backgroundColor: colors.surface,
+            borderWidth: 1,
+            borderColor: colors.border,
+            borderRadius: 12,
+            padding: 16,
+            marginBottom: 12,
+            flexDirection: 'row',
+            alignItems: 'center',
+        },
+        todoName: {
+            fontSize: 16,
+            fontWeight: '600',
+            color: colors.text,
+        },
+        todoDescription: {
+            fontSize: 14,
+            color: colors.textSecondary,
+            marginTop: 2,
+        },
+        markDoneBtn: {
+            backgroundColor: '#86efac',
+            borderWidth: 1,
+            borderColor: '#4ade80',
+            paddingHorizontal: 16,
+            paddingVertical: 10,
+            borderRadius: 8,
+        },
+        markDoneText: {
+            color: '#166534',
+            fontWeight: '600',
+            fontSize: 14,
+        },
+        emptyBox: {
+            backgroundColor: colors.surface,
+            padding: 24,
+            borderRadius: 12,
             alignItems: 'center',
             justifyContent: 'center',
+            borderWidth: 1,
+            borderColor: colors.border,
+            borderStyle: 'dashed',
         },
-        placeholderText: {
-            fontSize: 16,
-            color: colors.textMuted,
+        emptyText: {
+            color: colors.textSecondary,
+            fontSize: 15,
         },
     });
