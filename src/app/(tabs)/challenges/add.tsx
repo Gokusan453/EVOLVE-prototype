@@ -3,9 +3,10 @@ import { useTheme } from '@/contexts/ThemeContext';
 import { supabase } from '@/lib/supabase';
 import { createAddChallengeStyles } from '@/styles/addChallenge.styling';
 import { Ionicons } from '@expo/vector-icons';
+import DateTimePicker from '@react-native-community/datetimepicker';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
-import { ScrollView, Switch, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Platform, ScrollView, Switch, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
 const DAYS = [
     { key: 'mon', label: 'M' },
@@ -22,8 +23,17 @@ const formatToday = () => {
     return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 };
 
+const toDate = (value: string) => {
+    const parsed = new Date(value);
+    return Number.isNaN(parsed.getTime()) ? new Date() : parsed;
+};
+
+const formatDate = (d: Date) => {
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+};
+
 export default function AddChallengeScreen() {
-    const { colors } = useTheme();
+    const { colors, mode } = useTheme();
     const { triggerFeedback } = useSettings();
     const styles = createAddChallengeStyles(colors);
     const router = useRouter();
@@ -33,6 +43,8 @@ export default function AddChallengeScreen() {
     const [startDate, setStartDate] = useState(formatToday());
     const [endDate, setEndDate] = useState('');
     const [hasEndDate, setHasEndDate] = useState(false);
+    const [showStartPicker, setShowStartPicker] = useState(false);
+    const [showEndPicker, setShowEndPicker] = useState(false);
     const [selectedDays, setSelectedDays] = useState<string[]>([]);
     const [isPublic, setIsPublic] = useState(true);
     const [loading, setLoading] = useState(false);
@@ -123,31 +135,64 @@ export default function AddChallengeScreen() {
                 />
 
                 <Text style={styles.label}>Start day</Text>
-                <TextInput
-                    style={styles.input}
-                    placeholder="YYYY-MM-DD"
-                    placeholderTextColor={colors.textMuted}
-                    value={startDate}
-                    onChangeText={setStartDate}
-                />
+                <TouchableOpacity style={styles.input} onPress={() => setShowStartPicker((prev) => !prev)}>
+                    <Text style={{ color: colors.text, fontSize: 16 }}>{startDate}</Text>
+                </TouchableOpacity>
+                {showStartPicker && (
+                    <DateTimePicker
+                        value={toDate(startDate)}
+                        mode="date"
+                        display="spinner"
+                        textColor={colors.text}
+                        themeVariant={mode}
+                        onChange={(_, selectedDate) => {
+                            if (Platform.OS === 'android') {
+                                setShowStartPicker(false);
+                            }
+                            if (selectedDate) {
+                                setStartDate(formatDate(selectedDate));
+                            }
+                        }}
+                    />
+                )}
 
                 <View style={styles.dateRow}>
                     <Text style={styles.label}>End date</Text>
                     <Switch
                         value={hasEndDate}
-                        onValueChange={setHasEndDate}
+                        onValueChange={(value) => {
+                            setHasEndDate(value);
+                            if (value && !endDate) {
+                                setEndDate(startDate);
+                            }
+                        }}
                         trackColor={{ false: colors.border, true: colors.primary }}
                         thumbColor={colors.switchThumb}
                     />
                 </View>
                 {hasEndDate && (
-                    <TextInput
-                        style={styles.input}
-                        placeholder="YYYY-MM-DD"
-                        placeholderTextColor={colors.textMuted}
-                        value={endDate}
-                        onChangeText={setEndDate}
-                    />
+                    <>
+                        <TouchableOpacity style={styles.input} onPress={() => setShowEndPicker((prev) => !prev)}>
+                            <Text style={{ color: colors.text, fontSize: 16 }}>{endDate || startDate}</Text>
+                        </TouchableOpacity>
+                        {showEndPicker && (
+                            <DateTimePicker
+                                value={toDate(endDate || startDate)}
+                                mode="date"
+                                display="spinner"
+                                textColor={colors.text}
+                                themeVariant={mode}
+                                onChange={(_, selectedDate) => {
+                                    if (Platform.OS === 'android') {
+                                        setShowEndPicker(false);
+                                    }
+                                    if (selectedDate) {
+                                        setEndDate(formatDate(selectedDate));
+                                    }
+                                }}
+                            />
+                        )}
+                    </>
                 )}
 
                 <Text style={styles.label}>Days</Text>
