@@ -17,7 +17,10 @@ export const loginStyles = StyleSheet.create({
         fontSize: 28,
         fontWeight: 'bold',
         color: Colors.text,
+        marginTop: -8,
         marginBottom: 32,
+        alignSelf: 'center',
+        textAlign: 'center',
     },
     input: {
         backgroundColor: Colors.surface,
