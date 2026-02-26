@@ -4,7 +4,7 @@ import { registerStyles as styles } from '@/styles/register.styling';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
-import { ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { KeyboardAvoidingView, Platform, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
 export default function RegisterScreen() {
     const router = useRouter();
@@ -58,13 +58,21 @@ export default function RegisterScreen() {
     };
 
     return (
-        <View style={styles.container}>
-            <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
-                <Ionicons name="arrow-back" size={24} color={Colors.text} />
-            </TouchableOpacity>
+        <KeyboardAvoidingView
+            style={{ flex: 1 }}
+            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        >
+            <View style={styles.container}>
+                <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
+                    <Ionicons name="arrow-back" size={24} color={Colors.text} />
+                </TouchableOpacity>
 
-            <ScrollView contentContainerStyle={{ justifyContent: 'center', flexGrow: 1 }}>
-                <Text style={styles.title}>Create an account</Text>
+                <ScrollView
+                    contentContainerStyle={{ justifyContent: 'center', flexGrow: 1 }}
+                    keyboardShouldPersistTaps="handled"
+                    showsVerticalScrollIndicator={false}
+                >
+                    <Text style={styles.title}>Create an account</Text>
 
                 {error ? <Text style={styles.errorText}>{error}</Text> : null}
 
@@ -139,7 +147,8 @@ export default function RegisterScreen() {
                         <Text style={styles.footerLink}>Login</Text>
                     </TouchableOpacity>
                 </View>
-            </ScrollView>
-        </View>
+                </ScrollView>
+            </View>
+        </KeyboardAvoidingView>
     );
 }

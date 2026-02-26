@@ -4,7 +4,7 @@ import { createAddHabitStyles } from '@/styles/addHabit.styling';
 import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { ScrollView, Switch, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { KeyboardAvoidingView, Platform, ScrollView, Switch, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
 const DAYS = [
     { key: 'mon', label: 'M' },
@@ -98,14 +98,22 @@ export default function EditHabitScreen() {
 
     return (
         <View style={styles.container}>
-            <View style={styles.headerRow}>
-                <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
-                    <Ionicons name="arrow-back" size={24} color={colors.text} />
-                </TouchableOpacity>
-                <Text style={styles.headerTitle}>Edit Habit</Text>
-            </View>
+            <KeyboardAvoidingView
+                style={{ flex: 1 }}
+                behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+            >
+                <View style={styles.headerRow}>
+                    <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
+                        <Ionicons name="arrow-back" size={24} color={colors.text} />
+                    </TouchableOpacity>
+                    <Text style={styles.headerTitle}>Edit Habit</Text>
+                </View>
 
-            <ScrollView contentContainerStyle={styles.scrollContent}>
+                <ScrollView
+                    contentContainerStyle={styles.scrollContent}
+                    keyboardShouldPersistTaps="handled"
+                    showsVerticalScrollIndicator={false}
+                >
                 <Text style={styles.label}>Habit name</Text>
                 <TextInput
                     style={styles.input}
@@ -179,7 +187,8 @@ export default function EditHabitScreen() {
                         {loading ? 'Saving...' : 'Save changes'}
                     </Text>
                 </TouchableOpacity>
-            </ScrollView>
+                </ScrollView>
+            </KeyboardAvoidingView>
         </View>
     );
 }
