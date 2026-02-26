@@ -1,3 +1,4 @@
+import { startupSplashStyles as styles } from '../styles/startupSplash.styling';
 import { ImageBackground, View } from 'react-native';
 
 type StartupSplashProps = {
@@ -11,29 +12,11 @@ export default function StartupSplash({ progress }: StartupSplashProps) {
     <ImageBackground
       source={require('../../assets/images/Splash.png')}
       resizeMode="cover"
-      style={{
-        flex: 1,
-      }}
+      style={styles.background}
     >
-      <View
-        style={{
-          position: 'absolute',
-          left: 20,
-          right: 20,
-          bottom: 44,
-          height: 6,
-          backgroundColor: 'rgba(255,255,255,0.35)',
-          borderRadius: 999,
-          overflow: 'hidden',
-        }}
-      >
+      <View style={styles.progressTrack}>
         <View
-          style={{
-            width: `${clampedProgress * 100}%`,
-            height: '100%',
-            backgroundColor: '#FFFFFF',
-            borderRadius: 999,
-          }}
+          style={[styles.progressFill, { width: `${clampedProgress * 100}%` }]}
         />
       </View>
     </ImageBackground>
