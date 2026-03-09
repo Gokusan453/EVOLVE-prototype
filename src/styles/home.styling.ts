@@ -155,4 +155,45 @@ export const createHomeStyles = (colors: any) =>
             color: colors.textSecondary,
             fontSize: 15,
         },
+
+        // ── AI Chat FAB ──
+        fabContainer: {
+            position: 'absolute',
+            bottom: 24,
+            right: 20,
+            flexDirection: 'row',
+            alignItems: 'center',
+            shadowColor: '#000',
+            shadowOffset: { width: 0, height: 4 },
+            shadowOpacity: 0.15,
+            shadowRadius: 8,
+            elevation: 5,
+        },
+        fabBubble: {
+            backgroundColor: colors.surface,
+            paddingHorizontal: 16,
+            paddingVertical: 12,
+            borderRadius: 24,
+            borderWidth: 2,
+            borderColor: colors.border,
+            marginRight: -16, // pull under the button
+            zIndex: 1,
+        },
+        fabBubbleText: {
+            color: colors.text,
+            fontSize: 15,
+            fontWeight: '600',
+            paddingRight: 12, // Give space for the overlap
+        },
+        fabButton: {
+            width: 64,
+            height: 64,
+            borderRadius: 32,
+            backgroundColor: '#bbf7d0', // Light green
+            alignItems: 'center',
+            justifyContent: 'center',
+            borderWidth: 2,
+            borderColor: colors.border,
+            zIndex: 2,
+        },
     });

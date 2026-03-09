@@ -254,6 +254,20 @@ export default function HomeScreen() {
           ))
         )}
       </ScrollView>
+
+      {/* ── AI Chat Floating Button ── */}
+      <TouchableOpacity
+        style={styles.fabContainer}
+        onPress={() => alert('Evolve AI Chat coming soon!')}
+        activeOpacity={0.8}
+      >
+        <View style={styles.fabBubble}>
+          <Text style={styles.fabBubbleText}>Evolve AI</Text>
+        </View>
+        <View style={styles.fabButton}>
+          <Ionicons name="sparkles" size={32} color="#4ade80" />
+        </View>
+      </TouchableOpacity>
     </View>
   );
 }

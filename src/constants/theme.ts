@@ -43,19 +43,19 @@ export const DarkColors = {
     primaryLight: '#34D399',
     primaryDark: '#059669',
 
-    background: '#1A1A2E',
-    surface: '#16213E',
-    surfaceLight: '#1E2D4A',
+    background: '#0D0D0D',
+    surface: '#1A1A1A',
+    surfaceLight: '#252525',
 
     text: '#F8FAFC',
     textSecondary: '#94A3B8',
     textMuted: '#64748B',
 
-    tabBar: '#0F0F1E',
+    tabBar: '#111111',
     tabIconDefault: '#64748B',
     tabIconSelected: '#10B981',
 
-    border: '#2A2A4A',
+    border: '#2E2E2E',
 
     success: '#10B981',
     warning: '#F59E0B',
