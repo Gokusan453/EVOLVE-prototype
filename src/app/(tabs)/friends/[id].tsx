@@ -1,11 +1,12 @@
 import { useSettings } from '@/contexts/SettingsContext';
 import { useTheme } from '@/contexts/ThemeContext';
+import { BADGES, BadgeProgress, calculateStreak, calculateXP, getLevelFromXP } from '@/lib/gamification';
 import { supabase } from '@/lib/supabase';
 import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useCallback, useState } from 'react';
-import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Image, Pressable, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 type Profile = {
     id: string;
@@ -14,6 +15,7 @@ type Profile = {
     username: string | null;
     avatar_url: string | null;
     created_at: string;
+    bio: string | null;
 };
 
 export default function FriendDetailScreen() {
@@ -26,7 +28,10 @@ export default function FriendDetailScreen() {
     const [friendshipId, setFriendshipId] = useState<string | null>(null);
     const [habitsCount, setHabitsCount] = useState(0);
     const [challengesCount, setChallengesCount] = useState(0);
-    const [points, setPoints] = useState(0);
+    const [xp, setXp] = useState(0);
+    const [streak, setStreak] = useState(0);
+    const [badgeProgress, setBadgeProgress] = useState<BadgeProgress[]>([]);
+    const [selectedBadge, setSelectedBadge] = useState<string | null>(null);
 
     useFocusEffect(
         useCallback(() => {
@@ -37,7 +42,7 @@ export default function FriendDetailScreen() {
                 // Get profile
                 const { data: profileData } = await supabase
                     .from('profiles')
-                    .select('id, first_name, last_name, username, avatar_url, created_at')
+                    .select('id, first_name, last_name, username, avatar_url, created_at, bio')
                     .eq('id', id)
                     .single();
 
@@ -67,7 +72,7 @@ export default function FriendDetailScreen() {
                     .eq('user_id', id);
                 setChallengesCount(cCount || 0);
 
-                // Get points (habit logs + challenge logs)
+                // Get XP
                 const { count: habitLogs } = await supabase
                     .from('habit_logs')
                     .select('*', { count: 'exact', head: true })
@@ -78,7 +83,42 @@ export default function FriendDetailScreen() {
                     .select('*', { count: 'exact', head: true })
                     .eq('user_id', id);
 
-                setPoints((habitLogs || 0) + (challengeLogs || 0));
+                setXp(calculateXP(habitLogs || 0, challengeLogs || 0));
+
+                // Get streak
+                const s = await calculateStreak(id as string);
+                setStreak(s);
+
+                // Get friendships count for badges
+                const { count: friendCount } = await supabase
+                    .from('friendships')
+                    .select('*', { count: 'exact', head: true })
+                    .or(`sender_id.eq.${id},receiver_id.eq.${id}`)
+                    .eq('status', 'accepted');
+
+                // Compute badge progress inline
+                const totalLogs = (habitLogs || 0) + (challengeLogs || 0);
+                const friendXp = calculateXP(habitLogs || 0, challengeLogs || 0);
+                const friendLevel = getLevelFromXP(friendXp);
+
+                const make = (badgeId: string, current: number, target: number): BadgeProgress => ({
+                    id: badgeId,
+                    unlocked: current >= target,
+                    current: Math.min(current, target),
+                    target,
+                    progress: Math.min(current / target, 1),
+                });
+
+                setBadgeProgress([
+                    make('first_step', habitLogs || 0, 1),
+                    make('challenger', cCount || 0, 1),
+                    make('on_fire', s, 7),
+                    make('half_century', totalLogs, 50),
+                    make('century', totalLogs, 100),
+                    make('social', friendCount || 0, 5),
+                    make('unstoppable', s, 30),
+                    make('legend', friendLevel.level, 6),
+                ]);
             };
 
             fetch();
@@ -127,8 +167,37 @@ export default function FriendDetailScreen() {
                     {profile.username && (
                         <Text style={styles.username}>@{profile.username}</Text>
                     )}
+                    {profile.bio ? (
+                        <Text style={{ color: colors.textSecondary, fontSize: 13, marginTop: 4, textAlign: 'center' }}>{profile.bio}</Text>
+                    ) : null}
                     <Text style={styles.memberSince}>Member since {getMemberSince()}</Text>
                 </View>
+
+                {/* Level */}
+                {(() => {
+                    const level = getLevelFromXP(xp);
+                    return (
+                        <View style={[styles.statsCard, { flexDirection: 'column', alignItems: 'center', borderTopWidth: 3, borderTopColor: level.color, paddingVertical: 20 }]}>
+                            <Text style={[styles.statValue, { fontSize: 18, marginBottom: 2 }]}>{level.title}</Text>
+                            <Text style={[styles.statLabel, { marginBottom: 14 }]}>{xp} XP</Text>
+
+                            {level.nextLevel && (
+                                <View style={{ width: '100%' }}>
+                                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 4 }}>
+                                        <Text style={{ color: colors.textSecondary, fontSize: 11 }}>Level {level.level}</Text>
+                                        <Text style={{ color: colors.textSecondary, fontSize: 11 }}>Level {level.nextLevel.level}</Text>
+                                    </View>
+                                    <View style={{ height: 8, backgroundColor: colors.background, borderRadius: 4, overflow: 'hidden', borderWidth: 1, borderColor: colors.border }}>
+                                        <View style={{ height: '100%', width: `${level.progress * 100}%`, backgroundColor: level.color, borderRadius: 4 }} />
+                                    </View>
+                                    <Text style={{ color: colors.textSecondary, fontSize: 11, textAlign: 'center', marginTop: 4 }}>
+                                        {level.nextLevel.xpRequired - xp} XP to Level {level.nextLevel.level}
+                                    </Text>
+                                </View>
+                            )}
+                        </View>
+                    );
+                })()}
 
                 {/* Stats */}
                 <View style={styles.statsCard}>
@@ -143,11 +212,59 @@ export default function FriendDetailScreen() {
                         <Text style={styles.statValue}>{challengesCount}</Text>
                     </View>
                     <View style={styles.statItem}>
-                        <Ionicons name="flame" size={28} color={colors.primary} />
-                        <Text style={styles.statLabel}>Points</Text>
-                        <Text style={styles.statValue}>{points}</Text>
+                        <Ionicons name="flame" size={28} color={'#F59E0B'} />
+                        <Text style={styles.statLabel}>Streak</Text>
+                        <Text style={styles.statValue}>{streak} 🔥</Text>
                     </View>
                 </View>
+
+                {/* Badges — only show unlocked */}
+                <Pressable onPress={() => setSelectedBadge(null)}>
+                    <View style={[styles.statsCard, { flexDirection: 'column', alignItems: 'flex-start' }]}>
+                        <Text style={[styles.statValue, { marginBottom: 12 }]}>Badges</Text>
+
+                        {/* Tooltip */}
+                        {selectedBadge && (() => {
+                            const badge = BADGES.find(b => b.id === selectedBadge);
+                            if (!badge) return null;
+                            return (
+                                <View style={{ backgroundColor: colors.background, borderRadius: 10, padding: 12, marginBottom: 12, borderWidth: 1, borderColor: colors.border, width: '100%' }}>
+                                    <Text style={{ color: colors.text, fontWeight: '700', fontSize: 14, marginBottom: 4 }}>
+                                        {badge.emoji} {badge.label}
+                                    </Text>
+                                    <Text style={{ color: colors.textSecondary, fontSize: 12 }}>
+                                        {badge.description}
+                                    </Text>
+                                </View>
+                            );
+                        })()}
+
+                        {badgeProgress.filter(b => b.unlocked).length === 0 ? (
+                            <Text style={{ color: colors.textSecondary, fontSize: 13 }}>No badges yet</Text>
+                        ) : (
+                            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 12 }}>
+                                {BADGES.filter(badge => badgeProgress.find(b => b.id === badge.id)?.unlocked).map((badge) => (
+                                    <TouchableOpacity
+                                        key={badge.id}
+                                        style={{ alignItems: 'center', width: 64 }}
+                                        onPress={() => setSelectedBadge(selectedBadge === badge.id ? null : badge.id)}
+                                    >
+                                        <View style={{
+                                            width: 48, height: 48, borderRadius: 24,
+                                            backgroundColor: badge.color,
+                                            alignItems: 'center', justifyContent: 'center',
+                                        }}>
+                                            <Text style={{ fontSize: 22 }}>{badge.emoji}</Text>
+                                        </View>
+                                        <Text style={{ fontSize: 10, color: colors.textSecondary, marginTop: 4, textAlign: 'center' }}>
+                                            {badge.label}
+                                        </Text>
+                                    </TouchableOpacity>
+                                ))}
+                            </View>
+                        )}
+                    </View>
+                </Pressable>
 
                 {/* Remove button */}
                 <TouchableOpacity style={styles.removeButton} onPress={handleRemove}>

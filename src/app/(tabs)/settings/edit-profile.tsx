@@ -15,6 +15,7 @@ export default function EditProfileScreen() {
     const [firstName, setFirstName] = useState('');
     const [lastName, setLastName] = useState('');
     const [username, setUsername] = useState('');
+    const [bio, setBio] = useState('');
     const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
@@ -27,7 +28,7 @@ export default function EditProfileScreen() {
 
             const { data } = await supabase
                 .from('profiles')
-                .select('first_name, last_name, username, avatar_url')
+                .select('first_name, last_name, username, avatar_url, bio')
                 .eq('id', user.id)
                 .single();
 
@@ -36,6 +37,7 @@ export default function EditProfileScreen() {
                 setLastName(data.last_name || '');
                 setUsername(data.username || '');
                 setAvatarUrl(data.avatar_url);
+                setBio(data.bio || '');
             }
         };
 
@@ -124,6 +126,7 @@ export default function EditProfileScreen() {
                 first_name: firstName.trim(),
                 last_name: lastName.trim(),
                 username: username.trim(),
+                bio: bio.trim(),
             })
             .eq('id', user.id);
 
@@ -196,6 +199,19 @@ export default function EditProfileScreen() {
                     autoCapitalize="none"
                     placeholderTextColor={colors.textMuted}
                 />
+
+                {/* Bio */}
+                <Text style={styles.label}>Bio</Text>
+                <TextInput
+                    style={[styles.input, { height: 80, textAlignVertical: 'top', paddingTop: 12 }]}
+                    value={bio}
+                    onChangeText={(text) => setBio(text.slice(0, 150))}
+                    placeholder="Tell something about yourself..."
+                    placeholderTextColor={colors.textMuted}
+                    multiline
+                    maxLength={150}
+                />
+                <Text style={{ color: colors.textMuted, fontSize: 11, textAlign: 'right', marginTop: 2, marginBottom: 8 }}>{bio.length}/150</Text>
 
                 {/* Messages */}
                 {error ? <Text style={styles.errorText}>{error}</Text> : null}
