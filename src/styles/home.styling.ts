@@ -157,43 +157,25 @@ export const createHomeStyles = (colors: any) =>
         },
 
         // ── AI Chat FAB ──
-        fabContainer: {
+        fabPill: {
             position: 'absolute',
             bottom: 24,
             right: 20,
-            flexDirection: 'row',
-            alignItems: 'center',
+            backgroundColor: '#bbf7d0',
+            paddingHorizontal: 18,
+            paddingVertical: 10,
+            borderRadius: 20,
+            borderWidth: 1.5,
+            borderColor: '#4ade80',
             shadowColor: '#000',
-            shadowOffset: { width: 0, height: 4 },
+            shadowOffset: { width: 0, height: 3 },
             shadowOpacity: 0.15,
-            shadowRadius: 8,
+            shadowRadius: 6,
             elevation: 5,
         },
-        fabBubble: {
-            backgroundColor: colors.surface,
-            paddingHorizontal: 16,
-            paddingVertical: 12,
-            borderRadius: 24,
-            borderWidth: 2,
-            borderColor: colors.border,
-            marginRight: -16, // pull under the button
-            zIndex: 1,
-        },
-        fabBubbleText: {
-            color: colors.text,
+        fabPillText: {
+            color: '#166534',
             fontSize: 15,
-            fontWeight: '600',
-            paddingRight: 12, // Give space for the overlap
-        },
-        fabButton: {
-            width: 64,
-            height: 64,
-            borderRadius: 32,
-            backgroundColor: '#bbf7d0', // Light green
-            alignItems: 'center',
-            justifyContent: 'center',
-            borderWidth: 2,
-            borderColor: colors.border,
-            zIndex: 2,
+            fontWeight: '700',
         },
     });
