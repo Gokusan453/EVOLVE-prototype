@@ -1,5 +1,6 @@
 import { useSettings } from '@/contexts/SettingsContext';
 import { useTheme } from '@/contexts/ThemeContext';
+import { calculateStreak, calculateXP, getLevelFromXP } from '@/lib/gamification';
 import { supabase } from '@/lib/supabase';
 import { createHomeStyles } from '@/styles/home.styling';
 import { Ionicons } from '@expo/vector-icons';
@@ -37,6 +38,8 @@ export default function HomeScreen() {
 
   // To-do items (not done today)
   const [todos, setTodos] = useState<TodoItem[]>([]);
+  const [streak, setStreak] = useState(0);
+  const [xp, setXp] = useState(0);
 
   const fetchData = async () => {
     const { data: { user } } = await supabase.auth.getUser();
@@ -50,6 +53,21 @@ export default function HomeScreen() {
       .eq('id', user.id)
       .single();
     if (profileData) setProfile(profileData);
+
+    // Streak
+    const s = await calculateStreak(user.id);
+    setStreak(s);
+
+    // XP
+    const { count: hLogs } = await supabase
+      .from('habit_logs')
+      .select('*', { count: 'exact', head: true })
+      .eq('user_id', user.id);
+    const { count: cLogs } = await supabase
+      .from('challenge_logs')
+      .select('*', { count: 'exact', head: true })
+      .eq('user_id', user.id);
+    setXp(calculateXP(hLogs || 0, cLogs || 0));
 
     const todayDate = new Date();
     const dayKeys = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
@@ -172,12 +190,7 @@ export default function HomeScreen() {
     <View style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <View>
-          <Text style={styles.greeting}>Welcome back,</Text>
-          <Text style={styles.userName}>
-            {profile ? `${profile.first_name} ${profile.last_name}` : '...'}
-          </Text>
-        </View>
+        {/* Avatar */}
         {profile?.avatar_url ? (
           <Image source={{ uri: profile.avatar_url }} style={styles.avatarImage} />
         ) : (
@@ -185,6 +198,27 @@ export default function HomeScreen() {
             <Text style={styles.avatarText}>{getInitials()}</Text>
           </View>
         )}
+        <View style={{ flex: 1, marginHorizontal: 10 }}>
+          <Text style={styles.greeting}>Welcome back,</Text>
+          <Text style={styles.userName} numberOfLines={1}>
+            {profile ? `${profile.first_name} ${profile.last_name}` : '...'}
+          </Text>
+        </View>
+        {/* Level bar */}
+        {(() => {
+          const level = getLevelFromXP(xp);
+          return (
+            <View style={{ backgroundColor: colors.surface, borderRadius: 14, paddingHorizontal: 16, paddingVertical: 6, borderWidth: 1, borderColor: colors.border, minWidth: 120 }}>
+              <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 3 }}>
+                <Text style={{ color: level.color, fontWeight: '700', fontSize: 11 }}>{level.title}</Text>
+                <Text style={{ color: colors.textSecondary, fontSize: 10 }}>Lv.{level.level}</Text>
+              </View>
+              <View style={{ height: 5, backgroundColor: colors.border, borderRadius: 3, overflow: 'hidden' }}>
+                <View style={{ height: '100%', width: `${level.progress * 100}%`, backgroundColor: level.color, borderRadius: 3 }} />
+              </View>
+            </View>
+          );
+        })()}
       </View>
 
       <ScrollView contentContainerStyle={styles.scrollContent}>
@@ -231,10 +265,26 @@ export default function HomeScreen() {
 
         {/* ── TO-DO LIST ── */}
         {todos.length === 0 ? (
-          <View style={styles.emptyBox}>
-            <Ionicons name="checkmark-circle" size={40} color={colors.primary} />
-            <Text style={[styles.emptyText, { marginTop: 8 }]}>You're all caught up for today!</Text>
-          </View>
+          habitsTotal === 0 && challengesTotal === 0 ? (
+            /* No habits or challenges created yet */
+            <View style={styles.emptyBox}>
+              <Text style={{ fontSize: 36 }}>🌱</Text>
+              <Text style={[styles.emptyText, { marginTop: 8, fontWeight: '700', fontSize: 17 }]}>Begin je Evolve journey!</Text>
+              <Text style={[styles.emptyText, { marginTop: 4, fontSize: 13 }]}>Maak je eerste habit of challenge aan, of vraag EVO om inspiratie.</Text>
+              <TouchableOpacity
+                style={{ backgroundColor: colors.primary, paddingHorizontal: 20, paddingVertical: 10, borderRadius: 12, marginTop: 14 }}
+                onPress={() => router.push('/(tabs)/habits/add')}
+              >
+                <Text style={{ color: colors.onPrimary, fontWeight: '600', fontSize: 13 }}>+ Habit aanmaken</Text>
+              </TouchableOpacity>
+            </View>
+          ) : (
+            /* All habits/challenges done for today */
+            <View style={styles.emptyBox}>
+              <Ionicons name="checkmark-circle" size={40} color={colors.primary} />
+              <Text style={[styles.emptyText, { marginTop: 8 }]}>You're all caught up for today!</Text>
+            </View>
+          )
         ) : (
           todos.map((item) => (
             <View key={`todo-${item.id}`} style={styles.todoCard}>
@@ -257,16 +307,11 @@ export default function HomeScreen() {
 
       {/* ── AI Chat Floating Button ── */}
       <TouchableOpacity
-        style={styles.fabContainer}
-        onPress={() => alert('Evolve AI Chat coming soon!')}
+        style={styles.fabPill}
+        onPress={() => router.push('/chat')}
         activeOpacity={0.8}
       >
-        <View style={styles.fabBubble}>
-          <Text style={styles.fabBubbleText}>Evolve AI</Text>
-        </View>
-        <View style={styles.fabButton}>
-          <Ionicons name="sparkles" size={32} color="#4ade80" />
-        </View>
+        <Text style={styles.fabPillText}>✦ EVO</Text>
       </TouchableOpacity>
     </View>
   );

@@ -1,12 +1,13 @@
 import { useSettings } from '@/contexts/SettingsContext';
 import { useTheme } from '@/contexts/ThemeContext';
+import { BADGES, BadgeProgress, calculateStreak, calculateXP, getBadgeProgress, getLevelFromXP } from '@/lib/gamification';
 import { supabase } from '@/lib/supabase';
 import { createSettingsStyles } from '@/styles/settings.styling';
 import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
 import { useRouter } from 'expo-router';
 import { useCallback, useState } from 'react';
-import { Image, ScrollView, Switch, Text, TouchableOpacity, View } from 'react-native';
+import { Image, Pressable, ScrollView, Switch, Text, TouchableOpacity, View } from 'react-native';
 
 export default function SettingsScreen() {
     const { colors, mode, toggleTheme } = useTheme();
@@ -18,12 +19,16 @@ export default function SettingsScreen() {
         last_name: string;
         avatar_url: string | null;
         created_at: string;
+        bio: string | null;
     } | null>(null);
 
     const { notifications, sound, vibrations, privateAccount, setNotifications, setSound, setVibrations, setPrivateAccount } = useSettings();
     const [habitsCount, setHabitsCount] = useState(0);
     const [challengesCount, setChallengesCount] = useState(0);
-    const [points, setPoints] = useState(0);
+    const [xp, setXp] = useState(0);
+    const [streak, setStreak] = useState(0);
+    const [badgeProgress, setBadgeProgress] = useState<BadgeProgress[]>([]);
+    const [selectedBadge, setSelectedBadge] = useState<string | null>(null);
 
     useFocusEffect(
         useCallback(() => {
@@ -32,7 +37,7 @@ export default function SettingsScreen() {
                 if (user) {
                     const { data } = await supabase
                         .from('profiles')
-                        .select('first_name, last_name, avatar_url, created_at')
+                        .select('first_name, last_name, avatar_url, created_at, bio')
                         .eq('id', user.id)
                         .single();
 
@@ -52,7 +57,7 @@ export default function SettingsScreen() {
 
                     setChallengesCount(cCount || 0);
 
-                    // Get points (habit logs + challenge logs)
+                    // Get XP
                     const { count: habitLogs } = await supabase
                         .from('habit_logs')
                         .select('*', { count: 'exact', head: true })
@@ -63,7 +68,13 @@ export default function SettingsScreen() {
                         .select('*', { count: 'exact', head: true })
                         .eq('user_id', user.id);
 
-                    setPoints((habitLogs || 0) + (challengeLogs || 0));
+                    setXp(calculateXP(habitLogs || 0, challengeLogs || 0));
+
+                    // Get streak & badges
+                    const s = await calculateStreak(user.id);
+                    setStreak(s);
+                    const badges = await getBadgeProgress(user.id);
+                    setBadgeProgress(badges);
                 }
             };
 
@@ -106,6 +117,9 @@ export default function SettingsScreen() {
                         <Text style={styles.profileName}>
                             {profile ? `${profile.first_name} ${profile.last_name}` : '...'}
                         </Text>
+                        {profile?.bio ? (
+                            <Text style={{ color: colors.textSecondary, fontSize: 13, marginTop: 2 }}>{profile.bio}</Text>
+                        ) : null}
                         <Text style={styles.profileSince}>{getMemberSince()}</Text>
                     </View>
 
@@ -113,6 +127,33 @@ export default function SettingsScreen() {
                         <Ionicons name="pencil" size={18} color={colors.onPrimary} />
                     </TouchableOpacity>
                 </View>
+
+                {/* Level & XP */}
+                {(() => {
+                    const level = getLevelFromXP(xp);
+                    return (
+                        <View style={[styles.statsCard, { flexDirection: 'column', alignItems: 'center', paddingVertical: 20 }]}>
+                            <Text style={[styles.statValue, { fontSize: 20, marginBottom: 2 }]}>{level.title}</Text>
+                            <Text style={[styles.statLabel, { marginBottom: 16 }]}>{xp} XP</Text>
+
+                            {/* XP progress bar */}
+                            {level.nextLevel && (
+                                <View style={{ width: '100%' }}>
+                                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 4 }}>
+                                        <Text style={{ color: colors.textSecondary, fontSize: 11 }}>Level {level.level}</Text>
+                                        <Text style={{ color: colors.textSecondary, fontSize: 11 }}>Level {level.nextLevel.level}</Text>
+                                    </View>
+                                    <View style={{ height: 10, backgroundColor: colors.background, borderRadius: 5, overflow: 'hidden', borderWidth: 1, borderColor: colors.border }}>
+                                        <View style={{ height: '100%', width: `${level.progress * 100}%`, backgroundColor: level.color, borderRadius: 5 }} />
+                                    </View>
+                                    <Text style={{ color: colors.textSecondary, fontSize: 11, textAlign: 'center', marginTop: 4 }}>
+                                        {level.nextLevel.xpRequired - xp} XP to Level {level.nextLevel.level}
+                                    </Text>
+                                </View>
+                            )}
+                        </View>
+                    );
+                })()}
 
                 {/* Stats */}
                 <View style={styles.statsCard}>
@@ -127,11 +168,71 @@ export default function SettingsScreen() {
                         <Text style={styles.statValue}>{challengesCount}</Text>
                     </View>
                     <View style={styles.statItem}>
-                        <Ionicons name="flame" size={28} color={colors.primary} style={styles.statIcon} />
-                        <Text style={styles.statLabel}>Points</Text>
-                        <Text style={styles.statValue}>{points}</Text>
+                        <Ionicons name="flame" size={28} color={'#F59E0B'} style={styles.statIcon} />
+                        <Text style={styles.statLabel}>Streak</Text>
+                        <Text style={styles.statValue}>{streak} 🔥</Text>
                     </View>
                 </View>
+
+                {/* Badges */}
+                <Pressable onPress={() => setSelectedBadge(null)}>
+                    <View style={[styles.statsCard, { flexDirection: 'column', alignItems: 'flex-start' }]}>
+                        <Text style={[styles.statValue, { marginBottom: 12 }]}>Badges</Text>
+
+                        {/* Tooltip */}
+                        {selectedBadge && (() => {
+                            const badge = BADGES.find(b => b.id === selectedBadge);
+                            const bp = badgeProgress.find(b => b.id === selectedBadge);
+                            if (!badge) return null;
+                            return (
+                                <View style={{ backgroundColor: colors.background, borderRadius: 10, padding: 12, marginBottom: 12, borderWidth: 1, borderColor: colors.border, width: '100%' }}>
+                                    <Text style={{ color: colors.text, fontWeight: '700', fontSize: 14, marginBottom: 4 }}>
+                                        {badge.emoji} {badge.label}
+                                    </Text>
+                                    <Text style={{ color: colors.textSecondary, fontSize: 12 }}>
+                                        {badge.description}
+                                    </Text>
+                                    <Text style={{ color: colors.textSecondary, fontSize: 11, marginTop: 4 }}>
+                                        Progress: {bp?.current ?? 0}/{bp?.target ?? '?'}
+                                    </Text>
+                                </View>
+                            );
+                        })()}
+
+                        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 12 }}>
+                            {BADGES.map((badge) => {
+                                const bp = badgeProgress.find(b => b.id === badge.id);
+                                const isUnlocked = bp?.unlocked ?? false;
+                                return (
+                                    <TouchableOpacity
+                                        key={badge.id}
+                                        style={{ alignItems: 'center', width: 64 }}
+                                        onPress={() => setSelectedBadge(selectedBadge === badge.id ? null : badge.id)}
+                                    >
+                                        <View style={{
+                                            width: 48, height: 48, borderRadius: 24,
+                                            backgroundColor: isUnlocked ? badge.color : colors.border,
+                                            alignItems: 'center', justifyContent: 'center',
+                                            opacity: isUnlocked ? 1 : 0.4,
+                                        }}>
+                                            <Text style={{ fontSize: 22 }}>{isUnlocked ? badge.emoji : '🔒'}</Text>
+                                        </View>
+                                        {/* Progress bar */}
+                                        <View style={{ width: 48, height: 4, backgroundColor: colors.border, borderRadius: 2, marginTop: 4, overflow: 'hidden' }}>
+                                            <View style={{ height: '100%', width: `${(bp?.progress ?? 0) * 100}%`, backgroundColor: isUnlocked ? badge.color : colors.textMuted, borderRadius: 2 }} />
+                                        </View>
+                                        <Text style={{ fontSize: 9, color: colors.textSecondary, marginTop: 2, textAlign: 'center' }}>
+                                            {bp ? `${bp.current}/${bp.target}` : ''}
+                                        </Text>
+                                        <Text style={{ fontSize: 10, color: colors.textSecondary, textAlign: 'center' }}>
+                                            {badge.label}
+                                        </Text>
+                                    </TouchableOpacity>
+                                );
+                            })}
+                        </View>
+                    </View>
+                </Pressable>
 
                 {/* Settings Toggles */}
                 <View style={styles.settingsCard}>
