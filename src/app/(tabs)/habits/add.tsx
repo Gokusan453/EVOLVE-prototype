@@ -1,12 +1,13 @@
 import { useSettings } from '@/contexts/SettingsContext';
 import { useTheme } from '@/contexts/ThemeContext';
 import { supabase } from '@/lib/supabase';
+import { setUnsavedChanges } from '@/lib/unsavedChanges';
 import { createAddHabitStyles } from '@/styles/addHabit.styling';
 import { Ionicons } from '@expo/vector-icons';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { useRouter } from 'expo-router';
-import { useState } from 'react';
-import { KeyboardAvoidingView, Platform, ScrollView, Switch, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { useEffect, useState } from 'react';
+import { Alert, KeyboardAvoidingView, Platform, ScrollView, Switch, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
 const DAYS = [
     { key: 'mon', label: 'M' },
@@ -50,6 +51,13 @@ export default function AddHabitScreen() {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
 
+    // Track unsaved changes for tab switch alert
+    useEffect(() => {
+        const hasData = name.trim().length > 0 || selectedDays.length > 0 || description.trim().length > 0;
+        setUnsavedChanges(hasData);
+        return () => setUnsavedChanges(false);
+    }, [name, selectedDays, description]);
+
     const toggleDay = (day: string) => {
         setSelectedDays((prev) =>
             prev.includes(day) ? prev.filter((d) => d !== day) : [...prev, day]
@@ -91,6 +99,7 @@ export default function AddHabitScreen() {
         if (insertError) {
             setError(insertError.message);
         } else {
+            setUnsavedChanges(false);
             triggerFeedback();
             router.back();
         }
@@ -103,7 +112,25 @@ export default function AddHabitScreen() {
                 behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
             >
                 <View style={styles.headerRow}>
-                    <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
+                    <TouchableOpacity style={styles.backButton} onPress={() => {
+                        const hasData = name.trim().length > 0 || selectedDays.length > 0 || description.trim().length > 0;
+                        if (hasData) {
+                            Alert.alert(
+                                'Discard changes?',
+                                'You have unsaved changes. Are you sure you want to leave?',
+                                [
+                                    { text: 'Stay', style: 'cancel' },
+                                    {
+                                        text: 'Discard',
+                                        style: 'destructive',
+                                        onPress: () => router.back(),
+                                    },
+                                ]
+                            );
+                        } else {
+                            router.back();
+                        }
+                    }}>
                         <Ionicons name="arrow-back" size={24} color={colors.text} />
                     </TouchableOpacity>
                     <Text style={styles.headerTitle}>New Habit</Text>
