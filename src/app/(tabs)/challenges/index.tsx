@@ -80,9 +80,9 @@ export default function ChallengesListScreen() {
             });
         }
 
-        // For "friends" filter, show challenges user has joined but didn't create
+        // For "friends" filter, show all challenges user has joined
         if (filter === 'friends') {
-            setChallenges(enriched.filter((c) => c.is_joined && c.creator_id !== user.id));
+            setChallenges(enriched.filter((c) => c.is_joined));
         } else {
             setChallenges(enriched);
         }

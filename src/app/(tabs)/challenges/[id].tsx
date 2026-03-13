@@ -96,19 +96,12 @@ export default function ChallengeDetailScreen() {
         const entries: LeaderboardEntry[] = [];
 
         for (const p of participants) {
-            // Get total habit logs for the user
-            const { count: habitLogsCount } = await supabase
-                .from('habit_logs')
-                .select('*', { count: 'exact', head: true })
-                .eq('user_id', p.user_id);
-
-            // Get total challenge logs for the user (across ALL challenges)
-            const { count: challengeLogsCount } = await supabase
+            // Count only logs for THIS challenge
+            const { count: logCount } = await supabase
                 .from('challenge_logs')
                 .select('*', { count: 'exact', head: true })
+                .eq('challenge_id', id)
                 .eq('user_id', p.user_id);
-
-            const totalPoints = (habitLogsCount || 0) + (challengeLogsCount || 0);
 
             const { data: profile } = await supabase
                 .from('profiles')
@@ -123,7 +116,7 @@ export default function ChallengeDetailScreen() {
             entries.push({
                 user_id: p.user_id,
                 username: displayName,
-                score: totalPoints,
+                score: logCount || 0,
             });
         }
 
