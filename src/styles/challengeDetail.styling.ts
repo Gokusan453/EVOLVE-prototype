@@ -28,19 +28,12 @@ export const createChallengeDetailStyles = (colors: any) =>
             color: colors.text,
             flex: 1,
         },
-        headerActions: {
-            flexDirection: 'row',
-            gap: 8,
-        },
         actionButton: {
             width: 36,
             height: 36,
             borderRadius: 10,
             alignItems: 'center',
             justifyContent: 'center',
-        },
-        editButton: {
-            backgroundColor: colors.primary,
         },
         deleteButton: {
             backgroundColor: colors.error,
@@ -79,19 +72,6 @@ export const createChallengeDetailStyles = (colors: any) =>
             marginBottom: 16,
             borderWidth: 1,
             borderColor: colors.border,
-        },
-        dateRow: {
-            flexDirection: 'row',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            marginBottom: 10,
-        },
-        dateText: {
-            fontSize: 14,
-            color: colors.text,
-        },
-        dateArrow: {
-            color: colors.textMuted,
         },
         progressBarBg: {
             height: 8,

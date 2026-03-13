@@ -199,7 +199,7 @@ export default function SettingsScreen() {
                             );
                         })()}
 
-                        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 12 }}>
+                        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 12, justifyContent: 'center' }}>
                             {BADGES.map((badge) => {
                                 const bp = badgeProgress.find(b => b.id === badge.id);
                                 const isUnlocked = bp?.unlocked ?? false;

@@ -15,39 +15,7 @@ export const createChallengesStyles = (colors: any) =>
             marginBottom: 16,
         },
 
-        // Filter tabs
-        filterRow: {
-            flexDirection: 'row',
-            justifyContent: 'center',
-            marginBottom: 20,
-            paddingHorizontal: 20,
-        },
-        filterButton: {
-            paddingVertical: 8,
-            paddingHorizontal: 18,
-            borderRadius: 20,
-            marginHorizontal: 4,
-            borderWidth: 1,
-            borderColor: colors.border,
-        },
-        filterButtonActive: {
-            backgroundColor: colors.primary,
-            borderColor: colors.primary,
-        },
-        filterText: {
-            fontSize: 13,
-            color: colors.textSecondary,
-            fontWeight: '500',
-        },
-        filterTextActive: {
-            color: colors.onPrimary,
-        },
-
         // Challenge cards
-        listContent: {
-            paddingHorizontal: 20,
-            paddingBottom: 100,
-        },
         challengeCard: {
             backgroundColor: colors.surface,
             borderRadius: 14,
@@ -88,18 +56,6 @@ export const createChallengesStyles = (colors: any) =>
             justifyContent: 'space-between',
             alignItems: 'center',
         },
-        cardMeta: {
-            flex: 1,
-        },
-        creatorText: {
-            fontSize: 12,
-            color: colors.textMuted,
-        },
-        durationText: {
-            fontSize: 12,
-            color: colors.textMuted,
-            marginTop: 2,
-        },
         joinButton: {
             backgroundColor: colors.primary,
             paddingVertical: 8,
@@ -113,24 +69,6 @@ export const createChallengesStyles = (colors: any) =>
         },
         joinedButton: {
             backgroundColor: colors.border,
-        },
-
-        // FAB
-        fab: {
-            position: 'absolute',
-            bottom: 24,
-            alignSelf: 'center',
-            width: 56,
-            height: 56,
-            borderRadius: 28,
-            backgroundColor: colors.primary,
-            alignItems: 'center',
-            justifyContent: 'center',
-            shadowColor: colors.shadow,
-            shadowOffset: { width: 0, height: 2 },
-            shadowOpacity: 0.25,
-            shadowRadius: 4,
-            elevation: 5,
         },
 
         // Empty state

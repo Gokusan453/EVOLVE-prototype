@@ -20,13 +20,11 @@ const DAYS_MAP = [
 
 type Challenge = {
     id: string;
-    creator_id: string;
     name: string;
     description: string | null;
-    start_date: string;
-    end_date: string | null;
+    month: number;
+    year: number;
     days: string[];
-    is_public: boolean;
 };
 
 type LeaderboardEntry = {
@@ -40,11 +38,11 @@ export default function ChallengeDetailScreen() {
     const { colors } = useTheme();
     const styles = createChallengeDetailStyles(colors);
     const router = useRouter();
+    const { triggerFeedback } = useSettings();
 
     const [challenge, setChallenge] = useState<Challenge | null>(null);
     const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
     const [isDoneToday, setIsDoneToday] = useState(false);
-    const [isCreator, setIsCreator] = useState(false);
     const [isJoined, setIsJoined] = useState(false);
     const [userId, setUserId] = useState<string | null>(null);
 
@@ -62,7 +60,6 @@ export default function ChallengeDetailScreen() {
 
         if (challengeData) {
             setChallenge(challengeData);
-            setIsCreator(challengeData.creator_id === user.id);
         }
 
         // Check if joined
@@ -96,7 +93,6 @@ export default function ChallengeDetailScreen() {
         const entries: LeaderboardEntry[] = [];
 
         for (const p of participants) {
-            // Count only logs for THIS challenge
             const { count: logCount } = await supabase
                 .from('challenge_logs')
                 .select('*', { count: 'exact', head: true })
@@ -130,8 +126,6 @@ export default function ChallengeDetailScreen() {
         }, [id])
     );
 
-    const { triggerFeedback } = useSettings();
-
     const handleMarkDone = async () => {
         if (!userId) return;
 
@@ -145,34 +139,18 @@ export default function ChallengeDetailScreen() {
         triggerFeedback();
     };
 
-    const handleDelete = () => {
-        Alert.alert('Delete challenge', 'Are you sure? This will delete the challenge for all participants.', [
-            { text: 'Cancel', style: 'cancel' },
-            {
-                text: 'Delete',
-                style: 'destructive',
-                onPress: async () => {
-                    await supabase.from('challenges').delete().eq('id', id);
-                    triggerFeedback();
-                    router.back();
-                },
-            },
-        ]);
-    };
-
     if (!challenge) return null;
 
-    const formatDate = (date: string) =>
-        new Date(date).toLocaleDateString('en-GB', {
-            day: '2-digit', month: '2-digit', year: '2-digit',
-        });
+    const getMonthProgress = () => {
+        const now = new Date();
+        const daysInMonth = new Date(challenge.year, challenge.month, 0).getDate();
+        const currentDay = now.getDate();
+        return Math.min(100, (currentDay / daysInMonth) * 100);
+    };
 
-    const getProgress = () => {
-        if (!challenge.end_date) return 0;
-        const start = new Date(challenge.start_date).getTime();
-        const end = new Date(challenge.end_date).getTime();
-        const now = Date.now();
-        return Math.min(100, Math.max(0, ((now - start) / (end - start)) * 100));
+    const getMonthLabel = () => {
+        const d = new Date(challenge.year, challenge.month - 1);
+        return d.toLocaleDateString('nl-NL', { month: 'long', year: 'numeric' });
     };
 
     const getRankStyle = (rank: number) => {
@@ -192,20 +170,8 @@ export default function ChallengeDetailScreen() {
                     </TouchableOpacity>
                     <Text style={styles.headerTitle} numberOfLines={1}>{challenge.name}</Text>
                 </View>
-                {isCreator && (
-                    <View style={styles.headerActions}>
-                        <TouchableOpacity
-                            style={[styles.actionButton, styles.editButton]}
-                            onPress={() => router.push(`/(tabs)/challenges/edit/${id}`)}
-                        >
-                            <Ionicons name="pencil" size={18} color={colors.onPrimary} />
-                        </TouchableOpacity>
-                        <TouchableOpacity style={[styles.actionButton, styles.deleteButton]} onPress={handleDelete}>
-                            <Ionicons name="trash-outline" size={18} color={colors.onPrimary} />
-                        </TouchableOpacity>
-                    </View>
-                )}
-                {isJoined && !isCreator && (
+
+                {isJoined && (
                     <TouchableOpacity
                         style={[styles.actionButton, styles.deleteButton]}
                         onPress={() => {
@@ -245,15 +211,13 @@ export default function ChallengeDetailScreen() {
                     </Text>
                 </View>
 
-                {/* Date & Progress */}
+                {/* Month Progress */}
                 <View style={styles.dateCard}>
-                    <View style={styles.dateRow}>
-                        <Text style={styles.dateText}>{formatDate(challenge.start_date)}</Text>
-                        <Text style={styles.dateArrow}>→</Text>
-                        <Text style={styles.dateText}>{challenge.end_date ? formatDate(challenge.end_date) : 'Ongoing'}</Text>
-                    </View>
+                    <Text style={{ color: colors.textSecondary, fontSize: 13, marginBottom: 8 }}>
+                        {getMonthLabel().charAt(0).toUpperCase() + getMonthLabel().slice(1)}
+                    </Text>
                     <View style={styles.progressBarBg}>
-                        <View style={[styles.progressBarFill, { width: `${getProgress()}%` }]} />
+                        <View style={[styles.progressBarFill, { width: `${getMonthProgress()}%` }]} />
                     </View>
                 </View>
 
