@@ -29,7 +29,7 @@ export async function chatWithAI(messages: ChatMessage[]): Promise<string> {
     }
 
     const data = await response.json();
-    const raw = data.choices?.[0]?.message?.content || 'Sorry, ik kon geen antwoord genereren.';
+    const raw = data.choices?.[0]?.message?.content || 'Sorry, I could not generate a response.';
     return stripMarkdown(raw);
 }
 

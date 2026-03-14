@@ -16,7 +16,7 @@ import {
 
 const WELCOME_MESSAGE: ChatMessage = {
     role: 'assistant',
-    content: 'Hey! 👋 Ik ben EVO, jouw persoonlijke coach. Ik help je met het bedenken van habits en challenges. Waar kan ik je mee helpen?',
+    content: 'Hey! I\'m EVO, your personal coach. I help you come up with habits and challenges. How can I help you?',
 };
 
 export default function ChatScreen() {
@@ -54,7 +54,7 @@ export default function ChatScreen() {
         } catch {
             const errorMessage: ChatMessage = {
                 role: 'assistant',
-                content: 'Oeps, er ging iets mis. Probeer het opnieuw! 🔄',
+                content: 'Oops, something went wrong. Please try again!',
             };
             setMessages(prev => [...prev, errorMessage]);
         } finally {
@@ -85,7 +85,7 @@ export default function ChatScreen() {
                 </TouchableOpacity>
                 <View>
                     <Text style={styles.headerTitle}>EVO</Text>
-                    <Text style={styles.headerSubtitle}>Jouw habit & challenge coach</Text>
+                    <Text style={styles.headerSubtitle}>Your habit & challenge coach</Text>
                 </View>
             </View>
 
@@ -101,7 +101,7 @@ export default function ChatScreen() {
                 ListFooterComponent={
                     isLoading ? (
                         <View style={styles.typingContainer}>
-                            <Text style={styles.typingText}>EVO is aan het typen...</Text>
+                            <Text style={styles.typingText}>•••</Text>
                         </View>
                     ) : null
                 }
@@ -111,7 +111,7 @@ export default function ChatScreen() {
             <View style={styles.inputContainer}>
                 <TextInput
                     style={styles.textInput}
-                    placeholder="Typ je bericht..."
+                    placeholder="Type your message..."
                     placeholderTextColor={colors.textMuted}
                     value={input}
                     onChangeText={setInput}

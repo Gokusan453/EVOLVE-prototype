@@ -2,11 +2,12 @@ import { useSettings } from '@/contexts/SettingsContext';
 import { useTheme } from '@/contexts/ThemeContext';
 import { BADGES, BadgeProgress, calculateStreak, calculateXP, getLevelFromXP } from '@/lib/gamification';
 import { supabase } from '@/lib/supabase';
+import { createFriendDetailStyles } from '@/styles/friendDetail.styling';
 import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useCallback, useState } from 'react';
-import { Image, Pressable, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Image, Pressable, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 
 type Profile = {
     id: string;
@@ -23,6 +24,7 @@ export default function FriendDetailScreen() {
     const { colors } = useTheme();
     const { triggerFeedback } = useSettings();
     const router = useRouter();
+    const styles = createFriendDetailStyles(colors);
 
     const [profile, setProfile] = useState<Profile | null>(null);
     const [friendshipId, setFriendshipId] = useState<string | null>(null);
@@ -39,7 +41,6 @@ export default function FriendDetailScreen() {
                 const { data: { user } } = await supabase.auth.getUser();
                 if (!user) return;
 
-                // Get profile
                 const { data: profileData } = await supabase
                     .from('profiles')
                     .select('id, first_name, last_name, username, avatar_url, created_at, bio')
@@ -48,7 +49,6 @@ export default function FriendDetailScreen() {
 
                 if (profileData) setProfile(profileData);
 
-                // Get friendship id
                 const { data: friendship } = await supabase
                     .from('friendships')
                     .select('id')
@@ -58,21 +58,18 @@ export default function FriendDetailScreen() {
 
                 if (friendship) setFriendshipId(friendship.id);
 
-                // Get habits count
                 const { count: hCount } = await supabase
                     .from('habits')
                     .select('*', { count: 'exact', head: true })
                     .eq('user_id', id);
                 setHabitsCount(hCount || 0);
 
-                // Get challenges count
                 const { count: cCount } = await supabase
                     .from('challenge_participants')
                     .select('*', { count: 'exact', head: true })
                     .eq('user_id', id);
                 setChallengesCount(cCount || 0);
 
-                // Get XP
                 const { count: habitLogs } = await supabase
                     .from('habit_logs')
                     .select('*', { count: 'exact', head: true })
@@ -85,18 +82,15 @@ export default function FriendDetailScreen() {
 
                 setXp(calculateXP(habitLogs || 0, challengeLogs || 0));
 
-                // Get streak
                 const s = await calculateStreak(id as string);
                 setStreak(s);
 
-                // Get friendships count for badges
                 const { count: friendCount } = await supabase
                     .from('friendships')
                     .select('*', { count: 'exact', head: true })
                     .or(`sender_id.eq.${id},receiver_id.eq.${id}`)
                     .eq('status', 'accepted');
 
-                // Compute badge progress inline
                 const totalLogs = (habitLogs || 0) + (challengeLogs || 0);
                 const friendXp = calculateXP(habitLogs || 0, challengeLogs || 0);
                 const friendLevel = getLevelFromXP(friendXp);
@@ -142,8 +136,6 @@ export default function FriendDetailScreen() {
         return d.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
     };
 
-    const styles = createStyles(colors);
-
     return (
         <View style={styles.container}>
             <View style={styles.headerRow}>
@@ -168,7 +160,7 @@ export default function FriendDetailScreen() {
                         <Text style={styles.username}>@{profile.username}</Text>
                     )}
                     {profile.bio ? (
-                        <Text style={{ color: colors.textSecondary, fontSize: 13, marginTop: 4, textAlign: 'center' }}>{profile.bio}</Text>
+                        <Text style={styles.bioText}>{profile.bio}</Text>
                     ) : null}
                     <Text style={styles.memberSince}>Member since {getMemberSince()}</Text>
                 </View>
@@ -177,20 +169,20 @@ export default function FriendDetailScreen() {
                 {(() => {
                     const level = getLevelFromXP(xp);
                     return (
-                        <View style={[styles.statsCard, { flexDirection: 'column', alignItems: 'center', borderTopWidth: 3, borderTopColor: level.color, paddingVertical: 20 }]}>
-                            <Text style={[styles.statValue, { fontSize: 18, marginBottom: 2 }]}>{level.title}</Text>
-                            <Text style={[styles.statLabel, { marginBottom: 14 }]}>{xp} XP</Text>
+                        <View style={[styles.levelCard, { borderTopWidth: 3, borderTopColor: level.color }]}>
+                            <Text style={styles.levelTitle}>{level.title}</Text>
+                            <Text style={styles.levelXp}>{xp} XP</Text>
 
                             {level.nextLevel && (
-                                <View style={{ width: '100%' }}>
-                                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 4 }}>
-                                        <Text style={{ color: colors.textSecondary, fontSize: 11 }}>Level {level.level}</Text>
-                                        <Text style={{ color: colors.textSecondary, fontSize: 11 }}>Level {level.nextLevel.level}</Text>
+                                <View style={styles.levelProgressContainer}>
+                                    <View style={styles.levelProgressLabels}>
+                                        <Text style={styles.levelProgressLabel}>Level {level.level}</Text>
+                                        <Text style={styles.levelProgressLabel}>Level {level.nextLevel.level}</Text>
                                     </View>
-                                    <View style={{ height: 8, backgroundColor: colors.background, borderRadius: 4, overflow: 'hidden', borderWidth: 1, borderColor: colors.border }}>
+                                    <View style={styles.levelProgressBg}>
                                         <View style={{ height: '100%', width: `${level.progress * 100}%`, backgroundColor: level.color, borderRadius: 4 }} />
                                     </View>
-                                    <Text style={{ color: colors.textSecondary, fontSize: 11, textAlign: 'center', marginTop: 4 }}>
+                                    <Text style={styles.levelProgressRemaining}>
                                         {level.nextLevel.xpRequired - xp} XP to Level {level.nextLevel.level}
                                     </Text>
                                 </View>
@@ -214,25 +206,24 @@ export default function FriendDetailScreen() {
                     <View style={styles.statItem}>
                         <Ionicons name="flame" size={28} color={'#F59E0B'} />
                         <Text style={styles.statLabel}>Streak</Text>
-                        <Text style={styles.statValue}>{streak} 🔥</Text>
+                        <Text style={styles.statValue}>{streak}</Text>
                     </View>
                 </View>
 
                 {/* Badges — only show unlocked */}
                 <Pressable onPress={() => setSelectedBadge(null)}>
-                    <View style={[styles.statsCard, { flexDirection: 'column', alignItems: 'flex-start' }]}>
-                        <Text style={[styles.statValue, { marginBottom: 12 }]}>Badges</Text>
+                    <View style={styles.badgesCard}>
+                        <Text style={styles.badgesTitle}>Badges</Text>
 
-                        {/* Tooltip */}
                         {selectedBadge && (() => {
                             const badge = BADGES.find(b => b.id === selectedBadge);
                             if (!badge) return null;
                             return (
-                                <View style={{ backgroundColor: colors.background, borderRadius: 10, padding: 12, marginBottom: 12, borderWidth: 1, borderColor: colors.border, width: '100%' }}>
-                                    <Text style={{ color: colors.text, fontWeight: '700', fontSize: 14, marginBottom: 4 }}>
+                                <View style={styles.badgeTooltip}>
+                                    <Text style={styles.badgeTooltipLabel}>
                                         {badge.emoji} {badge.label}
                                     </Text>
-                                    <Text style={{ color: colors.textSecondary, fontSize: 12 }}>
+                                    <Text style={styles.badgeTooltipDesc}>
                                         {badge.description}
                                     </Text>
                                 </View>
@@ -240,23 +231,19 @@ export default function FriendDetailScreen() {
                         })()}
 
                         {badgeProgress.filter(b => b.unlocked).length === 0 ? (
-                            <Text style={{ color: colors.textSecondary, fontSize: 13 }}>No badges yet</Text>
+                            <Text style={styles.noBadgesText}>No badges yet</Text>
                         ) : (
-                            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 12 }}>
+                            <View style={styles.badgeGrid}>
                                 {BADGES.filter(badge => badgeProgress.find(b => b.id === badge.id)?.unlocked).map((badge) => (
                                     <TouchableOpacity
                                         key={badge.id}
-                                        style={{ alignItems: 'center', width: 64 }}
+                                        style={styles.badgeItem}
                                         onPress={() => setSelectedBadge(selectedBadge === badge.id ? null : badge.id)}
                                     >
-                                        <View style={{
-                                            width: 48, height: 48, borderRadius: 24,
-                                            backgroundColor: badge.color,
-                                            alignItems: 'center', justifyContent: 'center',
-                                        }}>
-                                            <Text style={{ fontSize: 22 }}>{badge.emoji}</Text>
+                                        <View style={[styles.badgeCircle, { backgroundColor: badge.color }]}>
+                                            <Text style={styles.badgeEmoji}>{badge.emoji}</Text>
                                         </View>
-                                        <Text style={{ fontSize: 10, color: colors.textSecondary, marginTop: 4, textAlign: 'center' }}>
+                                        <Text style={styles.badgeLabel}>
                                             {badge.label}
                                         </Text>
                                     </TouchableOpacity>
@@ -274,110 +261,3 @@ export default function FriendDetailScreen() {
         </View>
     );
 }
-
-const createStyles = (colors: any) =>
-    StyleSheet.create({
-        container: {
-            flex: 1,
-            backgroundColor: colors.background,
-            paddingTop: 60,
-        },
-        headerRow: {
-            flexDirection: 'row',
-            alignItems: 'center',
-            paddingHorizontal: 20,
-            marginBottom: 24,
-        },
-        backButton: {
-            marginRight: 12,
-        },
-        headerTitle: {
-            fontSize: 24,
-            fontWeight: 'bold',
-            color: colors.text,
-        },
-        scrollContent: {
-            paddingHorizontal: 20,
-            paddingBottom: 40,
-        },
-        profileCard: {
-            backgroundColor: colors.surface,
-            borderRadius: 16,
-            padding: 24,
-            alignItems: 'center',
-            marginBottom: 16,
-            borderWidth: 1,
-            borderColor: colors.border,
-        },
-        avatar: {
-            width: 80,
-            height: 80,
-            borderRadius: 40,
-            marginBottom: 12,
-        },
-        avatarPlaceholder: {
-            width: 80,
-            height: 80,
-            borderRadius: 40,
-            backgroundColor: colors.primary,
-            alignItems: 'center',
-            justifyContent: 'center',
-            marginBottom: 12,
-        },
-        avatarText: {
-            color: colors.onPrimary,
-            fontSize: 28,
-            fontWeight: 'bold',
-        },
-        name: {
-            fontSize: 20,
-            fontWeight: 'bold',
-            color: colors.text,
-            marginBottom: 4,
-        },
-        username: {
-            fontSize: 15,
-            color: colors.textMuted,
-            marginBottom: 4,
-        },
-        memberSince: {
-            fontSize: 13,
-            color: colors.textSecondary,
-        },
-        statsCard: {
-            backgroundColor: colors.surface,
-            borderRadius: 16,
-            padding: 20,
-            flexDirection: 'row',
-            justifyContent: 'space-around',
-            marginBottom: 16,
-            borderWidth: 1,
-            borderColor: colors.border,
-        },
-        statItem: {
-            alignItems: 'center',
-        },
-        statLabel: {
-            fontSize: 13,
-            color: colors.textSecondary,
-            marginTop: 6,
-        },
-        statValue: {
-            fontSize: 20,
-            fontWeight: 'bold',
-            color: colors.text,
-            marginTop: 2,
-        },
-        removeButton: {
-            backgroundColor: colors.error,
-            paddingVertical: 16,
-            borderRadius: 12,
-            alignItems: 'center',
-            marginTop: 16,
-        },
-        removeText: {
-            color: colors.onError,
-            fontSize: 16,
-            fontWeight: '600',
-        },
-    });

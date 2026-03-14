@@ -269,13 +269,13 @@ export default function HomeScreen() {
             /* No habits or challenges created yet */
             <View style={styles.emptyBox}>
               <Text style={{ fontSize: 36 }}>🌱</Text>
-              <Text style={[styles.emptyText, { marginTop: 8, fontWeight: '700', fontSize: 17 }]}>Begin je Evolve journey!</Text>
-              <Text style={[styles.emptyText, { marginTop: 4, fontSize: 13 }]}>Maak je eerste habit of challenge aan, of vraag EVO om inspiratie.</Text>
+              <Text style={[styles.emptyText, { marginTop: 8, fontWeight: '700', fontSize: 17 }]}>Start your Evolve journey!</Text>
+              <Text style={[styles.emptyText, { marginTop: 4, fontSize: 13 }]}>Create your first habit or challenge, or ask EVO for inspiration.</Text>
               <TouchableOpacity
                 style={{ backgroundColor: colors.primary, paddingHorizontal: 20, paddingVertical: 10, borderRadius: 12, marginTop: 14 }}
                 onPress={() => router.push('/(tabs)/habits/add')}
               >
-                <Text style={{ color: colors.onPrimary, fontWeight: '600', fontSize: 13 }}>+ Habit aanmaken</Text>
+                <Text style={{ color: colors.onPrimary, fontWeight: '600', fontSize: 13 }}>+ Create habit</Text>
               </TouchableOpacity>
             </View>
           ) : (
