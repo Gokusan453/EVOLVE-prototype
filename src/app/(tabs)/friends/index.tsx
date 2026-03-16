@@ -6,7 +6,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
 import { useRouter } from 'expo-router';
 import { useCallback, useState } from 'react';
-import { FlatList, Image, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { FlatList, Image, KeyboardAvoidingView, Platform, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
 type UserProfile = {
     id: string;
@@ -309,7 +309,10 @@ export default function FriendsScreen() {
     ];
 
     return (
-        <View style={styles.container}>
+        <KeyboardAvoidingView
+            style={styles.container}
+            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        >
             <Text style={styles.header}>Friends</Text>
 
             {/* Search bar — always visible */}
@@ -407,6 +410,6 @@ export default function FriendsScreen() {
                     )}
                 </>
             )}
-        </View>
+        </KeyboardAvoidingView>
     );
 }
