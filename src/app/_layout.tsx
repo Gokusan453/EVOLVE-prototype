@@ -7,10 +7,12 @@ import 'react-native-reanimated';
 import StartupSplash from '@/components/StartupSplash';
 import { SettingsProvider } from '@/contexts/SettingsContext';
 import { ThemeProvider, useTheme } from '@/contexts/ThemeContext';
+import { hasPendingOnboardingForUser } from '@/lib/onboarding';
 import { supabase } from '@/lib/supabase';
 
 function RootNavigator() {
   const [session, setSession] = useState<Session | null>(null);
+  const [hasPendingOnboarding, setHasPendingOnboarding] = useState<boolean | null>(null);
   const [isReady, setIsReady] = useState(false);
   const [showStartupSplash, setShowStartupSplash] = useState(true);
   const [startupProgress, setStartupProgress] = useState(0.12);
@@ -54,16 +56,57 @@ function RootNavigator() {
   }, [isReady]);
 
   useEffect(() => {
+    let active = true;
+
+    const syncPendingOnboarding = async () => {
+      if (!session?.user?.id) {
+        if (active) setHasPendingOnboarding(false);
+        return;
+      }
+
+      if (active) setHasPendingOnboarding(null);
+      const pending = await hasPendingOnboardingForUser(session.user.id);
+      if (active) setHasPendingOnboarding(pending);
+    };
+
+    syncPendingOnboarding();
+    return () => {
+      active = false;
+    };
+  }, [session?.user?.id]);
+
+  useEffect(() => {
     if (!isReady) return;
 
     const inAuthGroup = segments[0] === '(auth)';
+    const onOnboardingScreen = segments[1] === 'onboarding';
 
     if (!session && !inAuthGroup) {
       router.replace('/(auth)/start');
-    } else if (session && inAuthGroup) {
+      return;
+    }
+
+    if (session && hasPendingOnboarding === null) {
+      return;
+    }
+
+    if (session && hasPendingOnboarding) {
+      if (!inAuthGroup || !onOnboardingScreen) {
+        // Re-check storage before redirecting to avoid stale state after finishing onboarding.
+        hasPendingOnboardingForUser(session.user.id).then((stillPending) => {
+          setHasPendingOnboarding(stillPending);
+          if (stillPending) {
+            router.replace('/(auth)/onboarding');
+          }
+        });
+      }
+      return;
+    }
+
+    if (session && inAuthGroup) {
       router.replace('/(tabs)');
     }
-  }, [session, isReady, segments]);
+  }, [session, isReady, segments, hasPendingOnboarding]);
 
   if (showStartupSplash) {
     return <StartupSplash progress={startupProgress} />;

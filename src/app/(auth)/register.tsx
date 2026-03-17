@@ -1,4 +1,5 @@
 import { Colors } from '@/constants/theme';
+import { setPendingOnboardingUserId } from '@/lib/onboarding';
 import { supabase } from '@/lib/supabase';
 import { registerStyles as styles } from '@/styles/register.styling';
 import { Ionicons } from '@expo/vector-icons';
@@ -36,7 +37,7 @@ export default function RegisterScreen() {
         setLoading(true);
         setError('');
 
-        const { error: authError } = await supabase.auth.signUp({
+        const { data, error: authError } = await supabase.auth.signUp({
             email,
             password,
             options: {
@@ -53,7 +54,13 @@ export default function RegisterScreen() {
         if (authError) {
             setError(authError.message);
         } else {
-            router.replace('/(tabs)');
+            if (data.user?.id) {
+                await setPendingOnboardingUserId(data.user.id);
+                router.replace('/(auth)/onboarding');
+                return;
+            }
+
+            router.replace('/(auth)/login');
         }
     };
 
