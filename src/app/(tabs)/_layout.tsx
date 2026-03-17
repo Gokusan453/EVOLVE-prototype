@@ -96,6 +96,24 @@ export default function TabLayout() {
         }}
         listeners={handleTabPress('/(tabs)/profile')}
       />
+      <Tabs.Screen
+        name="profile/settings"
+        options={{
+          href: null,
+        }}
+      />
+      <Tabs.Screen
+        name="profile/edit-profile"
+        options={{
+          href: null,
+        }}
+      />
+      <Tabs.Screen
+        name="settings"
+        options={{
+          href: null,
+        }}
+      />
     </Tabs>
   );
 }
