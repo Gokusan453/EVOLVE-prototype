@@ -1,3 +1,4 @@
+import { ProfilePageSkeleton } from '@/components/Skeletons';
 import { useTheme } from '@/contexts/ThemeContext';
 import { BADGES, BadgeProgress, calculateStreak, calculateXP, getBadgeProgress, getLevelFromXP } from '@/lib/gamification';
 import { supabase } from '@/lib/supabase';
@@ -27,6 +28,7 @@ export default function SettingsScreen() {
     const [streak, setStreak] = useState(0);
     const [badgeProgress, setBadgeProgress] = useState<BadgeProgress[]>([]);
     const [selectedBadge, setSelectedBadge] = useState<string | null>(null);
+    const [isInitialLoading, setIsInitialLoading] = useState(true);
 
     useFocusEffect(
         useCallback(() => {
@@ -74,11 +76,17 @@ export default function SettingsScreen() {
                     const badges = await getBadgeProgress(user.id);
                     setBadgeProgress(badges);
                 }
+
+                setIsInitialLoading(false);
             };
 
             fetchProfile();
         }, [])
     );
+
+    if (isInitialLoading) {
+        return <ProfilePageSkeleton />;
+    }
 
     const getInitials = () => {
         if (!profile) return '?';

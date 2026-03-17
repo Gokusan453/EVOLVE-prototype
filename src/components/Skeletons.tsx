@@ -13,6 +13,52 @@ type DetailPageSkeletonProps = {
     rows?: number;
 };
 
+export function ProfilePageSkeleton() {
+    const { colors } = useTheme();
+
+    return (
+        <View style={{ flex: 1, backgroundColor: colors.background, paddingTop: 60 }}>
+            <View style={{ alignItems: 'center', marginBottom: 20 }}>
+                <SkeletonBox width={140} height={34} radius={10} />
+            </View>
+
+            <View style={{ paddingHorizontal: 12, gap: 12 }}>
+                <View style={{ backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border, borderRadius: 18, padding: 16, flexDirection: 'row', alignItems: 'center' }}>
+                    <SkeletonBox width={64} height={64} radius={32} />
+                    <View style={{ flex: 1, marginLeft: 12 }}>
+                        <SkeletonBox width="62%" height={14} radius={7} />
+                        <View style={{ height: 8 }} />
+                        <SkeletonBox width="42%" height={10} radius={5} />
+                    </View>
+                    <SkeletonBox width={40} height={40} radius={12} />
+                </View>
+
+                <View style={{ backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border, borderRadius: 18, padding: 16 }}>
+                    <View style={{ alignItems: 'center' }}>
+                        <SkeletonBox width={120} height={18} radius={9} />
+                        <View style={{ height: 10 }} />
+                        <SkeletonBox width={70} height={12} radius={6} />
+                    </View>
+                    <View style={{ height: 16 }} />
+                    <SkeletonBox width="100%" height={10} radius={5} />
+                </View>
+
+                <View style={{ backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border, borderRadius: 18, padding: 16, flexDirection: 'row', justifyContent: 'space-around' }}>
+                    {[0, 1, 2].map((idx) => (
+                        <View key={`profile-stat-${idx}`} style={{ alignItems: 'center' }}>
+                            <SkeletonBox width={22} height={22} radius={11} />
+                            <View style={{ height: 8 }} />
+                            <SkeletonBox width={56} height={10} radius={5} />
+                            <View style={{ height: 8 }} />
+                            <SkeletonBox width={20} height={14} radius={7} />
+                        </View>
+                    ))}
+                </View>
+            </View>
+        </View>
+    );
+}
+
 function SkeletonBox({ width, height, radius = 8 }: { width: DimensionValue; height: number; radius?: number }) {
     const { colors } = useTheme();
 
