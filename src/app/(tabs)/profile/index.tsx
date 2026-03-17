@@ -1,4 +1,3 @@
-import { useSettings } from '@/contexts/SettingsContext';
 import { useTheme } from '@/contexts/ThemeContext';
 import { BADGES, BadgeProgress, calculateStreak, calculateXP, getBadgeProgress, getLevelFromXP } from '@/lib/gamification';
 import { supabase } from '@/lib/supabase';
@@ -7,10 +6,10 @@ import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
 import { useRouter } from 'expo-router';
 import { useCallback, useState } from 'react';
-import { Image, Pressable, ScrollView, Switch, Text, TouchableOpacity, View } from 'react-native';
+import { Image, Pressable, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 
 export default function SettingsScreen() {
-    const { colors, mode, toggleTheme } = useTheme();
+    const { colors } = useTheme();
     const styles = createSettingsStyles(colors);
     const router = useRouter();
 
@@ -22,7 +21,6 @@ export default function SettingsScreen() {
         bio: string | null;
     } | null>(null);
 
-    const { notifications, sound, vibrations, privateAccount, setNotifications, setSound, setVibrations, setPrivateAccount } = useSettings();
     const [habitsCount, setHabitsCount] = useState(0);
     const [challengesCount, setChallengesCount] = useState(0);
     const [xp, setXp] = useState(0);
@@ -82,11 +80,6 @@ export default function SettingsScreen() {
         }, [])
     );
 
-    const handleLogout = async () => {
-        await supabase.auth.signOut();
-        router.replace('/(auth)/start');
-    };
-
     const getInitials = () => {
         if (!profile) return '?';
         return `${profile.first_name[0]}${profile.last_name[0]}`.toUpperCase();
@@ -100,7 +93,15 @@ export default function SettingsScreen() {
 
     return (
         <View style={styles.container}>
-            <Text style={styles.header}>Settings</Text>
+            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', marginBottom: 24, position: 'relative' }}>
+                <Text style={styles.header}>Profile</Text>
+                <TouchableOpacity
+                    style={{ position: 'absolute', right: 20, top: 0, width: 36, height: 36, borderRadius: 10, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border }}
+                    onPress={() => router.push('/(tabs)/profile/settings')}
+                >
+                    <Ionicons name="settings-outline" size={18} color={colors.text} />
+                </TouchableOpacity>
+            </View>
 
             <ScrollView contentContainerStyle={styles.scrollContent}>
                 {/* Profile Card */}
@@ -123,7 +124,7 @@ export default function SettingsScreen() {
                         <Text style={styles.profileSince}>{getMemberSince()}</Text>
                     </View>
 
-                    <TouchableOpacity style={styles.editButton} onPress={() => router.push('/(tabs)/settings/edit-profile')}>
+                    <TouchableOpacity style={styles.editButton} onPress={() => router.push('/(tabs)/profile/edit-profile')}>
                         <Ionicons name="pencil" size={18} color={colors.onPrimary} />
                     </TouchableOpacity>
                 </View>
@@ -233,60 +234,6 @@ export default function SettingsScreen() {
                         </View>
                     </View>
                 </Pressable>
-
-                {/* Settings Toggles */}
-                <View style={styles.settingsCard}>
-                    <View style={[styles.settingsRow, styles.settingsBorder]}>
-                        <Text style={styles.settingsLabel}>Theme</Text>
-                        <Switch
-                            value={mode === 'dark'}
-                            onValueChange={toggleTheme}
-                            trackColor={{ false: colors.border, true: colors.primary }}
-                            thumbColor={colors.switchThumb}
-                        />
-                    </View>
-                    <View style={[styles.settingsRow, styles.settingsBorder]}>
-                        <Text style={styles.settingsLabel}>Notifications</Text>
-                        <Switch
-                            value={notifications}
-                            onValueChange={setNotifications}
-                            trackColor={{ false: colors.border, true: colors.primary }}
-                            thumbColor={colors.switchThumb}
-                        />
-                    </View>
-                    <View style={[styles.settingsRow, styles.settingsBorder]}>
-                        <Text style={styles.settingsLabel}>Sound</Text>
-                        <Switch
-                            value={sound}
-                            onValueChange={setSound}
-                            trackColor={{ false: colors.border, true: colors.primary }}
-                            thumbColor={colors.switchThumb}
-                        />
-                    </View>
-                    <View style={[styles.settingsRow, styles.settingsBorder]}>
-                        <Text style={styles.settingsLabel}>Vibrations</Text>
-                        <Switch
-                            value={vibrations}
-                            onValueChange={setVibrations}
-                            trackColor={{ false: colors.border, true: colors.primary }}
-                            thumbColor={colors.switchThumb}
-                        />
-                    </View>
-                    <View style={styles.settingsRow}>
-                        <Text style={styles.settingsLabel}>Private account</Text>
-                        <Switch
-                            value={privateAccount}
-                            onValueChange={setPrivateAccount}
-                            trackColor={{ false: colors.border, true: colors.primary }}
-                            thumbColor={colors.switchThumb}
-                        />
-                    </View>
-                </View>
-
-                {/* Logout */}
-                <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-                    <Text style={styles.logoutText}>Log out</Text>
-                </TouchableOpacity>
             </ScrollView>
         </View>
     );

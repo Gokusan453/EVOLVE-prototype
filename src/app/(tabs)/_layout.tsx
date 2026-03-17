@@ -87,14 +87,14 @@ export default function TabLayout() {
         listeners={handleTabPress('/(tabs)/friends')}
       />
       <Tabs.Screen
-        name="settings"
+        name="profile"
         options={{
-          title: 'Settings',
+          title: 'Profile',
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="settings-outline" size={size} color={color} />
+            <Ionicons name="person-outline" size={size} color={color} />
           ),
         }}
-        listeners={handleTabPress('/(tabs)/settings')}
+        listeners={handleTabPress('/(tabs)/profile')}
       />
     </Tabs>
   );
