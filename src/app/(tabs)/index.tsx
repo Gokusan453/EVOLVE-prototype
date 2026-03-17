@@ -1,3 +1,4 @@
+import { ListPageSkeleton } from '@/components/Skeletons';
 import { useSettings } from '@/contexts/SettingsContext';
 import { useTheme } from '@/contexts/ThemeContext';
 import { calculateStreak, calculateXP, getLevelFromXP } from '@/lib/gamification';
@@ -6,7 +7,7 @@ import { createHomeStyles } from '@/styles/home.styling';
 import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
 import { useRouter } from 'expo-router';
-import { useCallback, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import { Image, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 
 type Profile = {
@@ -40,124 +41,135 @@ export default function HomeScreen() {
   const [todos, setTodos] = useState<TodoItem[]>([]);
   const [streak, setStreak] = useState(0);
   const [xp, setXp] = useState(0);
+  const [isInitialLoading, setIsInitialLoading] = useState(true);
+  const hasLoadedOnceRef = useRef(false);
 
-  const fetchData = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
-    setUserId(user.id);
+  const fetchData = async (opts?: { initial?: boolean }) => {
+    const isInitial = opts?.initial ?? false;
+    if (isInitial) setIsInitialLoading(true);
 
-    // Profile
-    const { data: profileData } = await supabase
-      .from('profiles')
-      .select('first_name, last_name, avatar_url')
-      .eq('id', user.id)
-      .single();
-    if (profileData) setProfile(profileData);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      setUserId(user.id);
 
-    // Streak
-    const s = await calculateStreak(user.id);
-    setStreak(s);
+      // Profile
+      const { data: profileData } = await supabase
+        .from('profiles')
+        .select('first_name, last_name, avatar_url')
+        .eq('id', user.id)
+        .single();
+      if (profileData) setProfile(profileData);
 
-    // XP
-    const { count: hLogs } = await supabase
-      .from('habit_logs')
-      .select('*', { count: 'exact', head: true })
-      .eq('user_id', user.id);
-    const { count: cLogs } = await supabase
-      .from('challenge_logs')
-      .select('*', { count: 'exact', head: true })
-      .eq('user_id', user.id);
-    setXp(calculateXP(hLogs || 0, cLogs || 0));
+      // Streak
+      const s = await calculateStreak(user.id);
+      setStreak(s);
 
-    const todayDate = new Date();
-    const dayKeys = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
-    const todayName = dayKeys[todayDate.getDay()];
-    const todayStart = new Date(todayDate);
-    todayStart.setHours(0, 0, 0, 0);
+      // XP
+      const { count: hLogs } = await supabase
+        .from('habit_logs')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', user.id);
+      const { count: cLogs } = await supabase
+        .from('challenge_logs')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', user.id);
+      setXp(calculateXP(hLogs || 0, cLogs || 0));
 
-    // ── HABITS ──
-    const { data: habitsData } = await supabase
-      .from('habits')
-      .select('*')
-      .eq('user_id', user.id);
+      const todayDate = new Date();
+      const dayKeys = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
+      const todayName = dayKeys[todayDate.getDay()];
+      const todayStart = new Date(todayDate);
+      todayStart.setHours(0, 0, 0, 0);
 
-    const activeHabits = (habitsData || []).filter(h => {
-      if (!h.days.includes(todayName)) return false;
-      if (h.start_date && new Date(h.start_date) > todayDate) return false;
-      if (h.end_date && new Date(h.end_date) < todayStart) return false;
-      return true;
-    });
-
-    // Today's habit logs
-    const today = new Date().toISOString().split('T')[0];
-    const { data: habitLogsToday } = await supabase
-      .from('habit_logs')
-      .select('habit_id')
-      .eq('user_id', user.id)
-      .gte('completed_at', `${today}T00:00:00`)
-      .lte('completed_at', `${today}T23:59:59`);
-    const doneHabitIds = habitLogsToday?.map(l => l.habit_id) || [];
-
-    const hDone = activeHabits.filter(h => doneHabitIds.includes(h.id)).length;
-    setHabitsTotal(activeHabits.length);
-    setHabitsDone(hDone);
-
-    // ── CHALLENGES ──
-    const { data: participants } = await supabase
-      .from('challenge_participants')
-      .select('challenge_id')
-      .eq('user_id', user.id);
-
-    const challengeIds = participants?.map(p => p.challenge_id) || [];
-    let challengesData: any[] = [];
-    if (challengeIds.length > 0) {
-      const { data } = await supabase
-        .from('challenges')
+      // ── HABITS ──
+      const { data: habitsData } = await supabase
+        .from('habits')
         .select('*')
-        .in('id', challengeIds);
-      challengesData = data || [];
-    }
+        .eq('user_id', user.id);
 
-    const activeChallenges = challengesData.filter(c => {
-      if (!c.days.includes(todayName)) return false;
-      if (c.start_date && new Date(c.start_date) > todayDate) return false;
-      if (c.end_date && new Date(c.end_date) < todayStart) return false;
-      return true;
-    });
+      const activeHabits = (habitsData || []).filter(h => {
+        if (!h.days.includes(todayName)) return false;
+        if (h.start_date && new Date(h.start_date) > todayDate) return false;
+        if (h.end_date && new Date(h.end_date) < todayStart) return false;
+        return true;
+      });
 
-    // Today's challenge logs
-    const { data: challengeLogsToday } = await supabase
-      .from('challenge_logs')
-      .select('challenge_id')
-      .eq('user_id', user.id)
-      .gte('completed_at', `${today}T00:00:00`)
-      .lte('completed_at', `${today}T23:59:59`);
-    const doneChallengeIds = challengeLogsToday?.map(l => l.challenge_id) || [];
+      // Today's habit logs
+      const today = new Date().toISOString().split('T')[0];
+      const { data: habitLogsToday } = await supabase
+        .from('habit_logs')
+        .select('habit_id')
+        .eq('user_id', user.id)
+        .gte('completed_at', `${today}T00:00:00`)
+        .lte('completed_at', `${today}T23:59:59`);
+      const doneHabitIds = habitLogsToday?.map(l => l.habit_id) || [];
 
-    const cDone = activeChallenges.filter(c => doneChallengeIds.includes(c.id)).length;
-    setChallengesTotal(activeChallenges.length);
-    setChallengesDone(cDone);
+      const hDone = activeHabits.filter(h => doneHabitIds.includes(h.id)).length;
+      setHabitsTotal(activeHabits.length);
+      setHabitsDone(hDone);
 
-    // ── TO-DO LIST ──
-    const todoList: TodoItem[] = [];
+      // ── CHALLENGES ──
+      const { data: participants } = await supabase
+        .from('challenge_participants')
+        .select('challenge_id')
+        .eq('user_id', user.id);
 
-    for (const h of activeHabits) {
-      if (!doneHabitIds.includes(h.id)) {
-        todoList.push({ id: h.id, type: 'habit', name: h.name, description: h.description });
+      const challengeIds = participants?.map(p => p.challenge_id) || [];
+      let challengesData: any[] = [];
+      if (challengeIds.length > 0) {
+        const { data } = await supabase
+          .from('challenges')
+          .select('*')
+          .in('id', challengeIds);
+        challengesData = data || [];
       }
-    }
-    for (const c of activeChallenges) {
-      if (!doneChallengeIds.includes(c.id)) {
-        todoList.push({ id: c.id, type: 'challenge', name: c.name, description: c.description });
-      }
-    }
 
-    setTodos(todoList);
+      const activeChallenges = challengesData.filter(c => {
+        if (!c.days.includes(todayName)) return false;
+        if (c.start_date && new Date(c.start_date) > todayDate) return false;
+        if (c.end_date && new Date(c.end_date) < todayStart) return false;
+        return true;
+      });
+
+      // Today's challenge logs
+      const { data: challengeLogsToday } = await supabase
+        .from('challenge_logs')
+        .select('challenge_id')
+        .eq('user_id', user.id)
+        .gte('completed_at', `${today}T00:00:00`)
+        .lte('completed_at', `${today}T23:59:59`);
+      const doneChallengeIds = challengeLogsToday?.map(l => l.challenge_id) || [];
+
+      const cDone = activeChallenges.filter(c => doneChallengeIds.includes(c.id)).length;
+      setChallengesTotal(activeChallenges.length);
+      setChallengesDone(cDone);
+
+      // ── TO-DO LIST ──
+      const todoList: TodoItem[] = [];
+
+      for (const h of activeHabits) {
+        if (!doneHabitIds.includes(h.id)) {
+          todoList.push({ id: h.id, type: 'habit', name: h.name, description: h.description });
+        }
+      }
+      for (const c of activeChallenges) {
+        if (!doneChallengeIds.includes(c.id)) {
+          todoList.push({ id: c.id, type: 'challenge', name: c.name, description: c.description });
+        }
+      }
+
+      setTodos(todoList);
+    } finally {
+      if (isInitial) setIsInitialLoading(false);
+    }
   };
 
   useFocusEffect(
     useCallback(() => {
-      fetchData();
+      const isInitial = !hasLoadedOnceRef.current;
+      fetchData({ initial: isInitial });
+      if (isInitial) hasLoadedOnceRef.current = true;
     }, [])
   );
 
@@ -185,6 +197,10 @@ export default function HomeScreen() {
 
   const habitPct = habitsTotal > 0 ? habitsDone / habitsTotal : 0;
   const challengePct = challengesTotal > 0 ? challengesDone / challengesTotal : 0;
+
+  if (isInitialLoading && !profile) {
+    return <ListPageSkeleton title="Home" rows={3} />;
+  }
 
   return (
     <View style={styles.container}>

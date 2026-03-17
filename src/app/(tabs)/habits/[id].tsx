@@ -1,3 +1,4 @@
+import { DetailPageSkeleton } from '@/components/Skeletons';
 import { useSettings } from '@/contexts/SettingsContext';
 import { useTheme } from '@/contexts/ThemeContext';
 import { supabase } from '@/lib/supabase';
@@ -37,18 +38,24 @@ export default function HabitDetailScreen() {
     const router = useRouter();
 
     const [habit, setHabit] = useState<Habit | null>(null);
+    const [isLoading, setIsLoading] = useState(true);
     const [isDoneToday, setIsDoneToday] = useState(false);
     const [chartData, setChartData] = useState<{ label: string; count: number }[]>([]);
     const [chartPeriod, setChartPeriod] = useState<ChartPeriod>('week');
 
     const fetchHabit = async () => {
-        const { data } = await supabase
-            .from('habits')
-            .select('*')
-            .eq('id', id)
-            .single();
+        setIsLoading(true);
+        try {
+            const { data } = await supabase
+                .from('habits')
+                .select('*')
+                .eq('id', id)
+                .single();
 
-        if (data) setHabit(data);
+            if (data) setHabit(data);
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     const fetchLogs = async () => {
@@ -185,6 +192,7 @@ export default function HabitDetailScreen() {
         ]);
     };
 
+    if (isLoading && !habit) return <DetailPageSkeleton title="Habit" rows={4} />;
     if (!habit) return null;
 
     const formatDate = (date: string) => {

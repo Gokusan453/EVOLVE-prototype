@@ -1,3 +1,4 @@
+import { DetailPageSkeleton } from '@/components/Skeletons';
 import { useSettings } from '@/contexts/SettingsContext';
 import { useTheme } from '@/contexts/ThemeContext';
 import { BADGES, BadgeProgress, calculateStreak, calculateXP, getLevelFromXP } from '@/lib/gamification';
@@ -34,85 +35,91 @@ export default function FriendDetailScreen() {
     const [streak, setStreak] = useState(0);
     const [badgeProgress, setBadgeProgress] = useState<BadgeProgress[]>([]);
     const [selectedBadge, setSelectedBadge] = useState<string | null>(null);
+    const [isLoading, setIsLoading] = useState(true);
 
     useFocusEffect(
         useCallback(() => {
             const fetch = async () => {
-                const { data: { user } } = await supabase.auth.getUser();
-                if (!user) return;
+                setIsLoading(true);
+                try {
+                    const { data: { user } } = await supabase.auth.getUser();
+                    if (!user) return;
 
-                const { data: profileData } = await supabase
-                    .from('profiles')
-                    .select('id, first_name, last_name, username, avatar_url, created_at, bio')
-                    .eq('id', id)
-                    .single();
+                    const { data: profileData } = await supabase
+                        .from('profiles')
+                        .select('id, first_name, last_name, username, avatar_url, created_at, bio')
+                        .eq('id', id)
+                        .single();
 
-                if (profileData) setProfile(profileData);
+                    if (profileData) setProfile(profileData);
 
-                const { data: friendship } = await supabase
-                    .from('friendships')
-                    .select('id')
-                    .or(`and(sender_id.eq.${user.id},receiver_id.eq.${id}),and(sender_id.eq.${id},receiver_id.eq.${user.id})`)
-                    .eq('status', 'accepted')
-                    .single();
+                    const { data: friendship } = await supabase
+                        .from('friendships')
+                        .select('id')
+                        .or(`and(sender_id.eq.${user.id},receiver_id.eq.${id}),and(sender_id.eq.${id},receiver_id.eq.${user.id})`)
+                        .eq('status', 'accepted')
+                        .single();
 
-                if (friendship) setFriendshipId(friendship.id);
+                    if (friendship) setFriendshipId(friendship.id);
 
-                const { count: hCount } = await supabase
-                    .from('habits')
-                    .select('*', { count: 'exact', head: true })
-                    .eq('user_id', id);
-                setHabitsCount(hCount || 0);
+                    const { count: hCount } = await supabase
+                        .from('habits')
+                        .select('*', { count: 'exact', head: true })
+                        .eq('user_id', id);
+                    setHabitsCount(hCount || 0);
 
-                const { count: cCount } = await supabase
-                    .from('challenge_participants')
-                    .select('*', { count: 'exact', head: true })
-                    .eq('user_id', id);
-                setChallengesCount(cCount || 0);
+                    const { count: cCount } = await supabase
+                        .from('challenge_participants')
+                        .select('*', { count: 'exact', head: true })
+                        .eq('user_id', id);
+                    setChallengesCount(cCount || 0);
 
-                const { count: habitLogs } = await supabase
-                    .from('habit_logs')
-                    .select('*', { count: 'exact', head: true })
-                    .eq('user_id', id);
+                    const { count: habitLogs } = await supabase
+                        .from('habit_logs')
+                        .select('*', { count: 'exact', head: true })
+                        .eq('user_id', id);
 
-                const { count: challengeLogs } = await supabase
-                    .from('challenge_logs')
-                    .select('*', { count: 'exact', head: true })
-                    .eq('user_id', id);
+                    const { count: challengeLogs } = await supabase
+                        .from('challenge_logs')
+                        .select('*', { count: 'exact', head: true })
+                        .eq('user_id', id);
 
-                setXp(calculateXP(habitLogs || 0, challengeLogs || 0));
+                    setXp(calculateXP(habitLogs || 0, challengeLogs || 0));
 
-                const s = await calculateStreak(id as string);
-                setStreak(s);
+                    const s = await calculateStreak(id as string);
+                    setStreak(s);
 
-                const { count: friendCount } = await supabase
-                    .from('friendships')
-                    .select('*', { count: 'exact', head: true })
-                    .or(`sender_id.eq.${id},receiver_id.eq.${id}`)
-                    .eq('status', 'accepted');
+                    const { count: friendCount } = await supabase
+                        .from('friendships')
+                        .select('*', { count: 'exact', head: true })
+                        .or(`sender_id.eq.${id},receiver_id.eq.${id}`)
+                        .eq('status', 'accepted');
 
-                const totalLogs = (habitLogs || 0) + (challengeLogs || 0);
-                const friendXp = calculateXP(habitLogs || 0, challengeLogs || 0);
-                const friendLevel = getLevelFromXP(friendXp);
+                    const totalLogs = (habitLogs || 0) + (challengeLogs || 0);
+                    const friendXp = calculateXP(habitLogs || 0, challengeLogs || 0);
+                    const friendLevel = getLevelFromXP(friendXp);
 
-                const make = (badgeId: string, current: number, target: number): BadgeProgress => ({
-                    id: badgeId,
-                    unlocked: current >= target,
-                    current: Math.min(current, target),
-                    target,
-                    progress: Math.min(current / target, 1),
-                });
+                    const make = (badgeId: string, current: number, target: number): BadgeProgress => ({
+                        id: badgeId,
+                        unlocked: current >= target,
+                        current: Math.min(current, target),
+                        target,
+                        progress: Math.min(current / target, 1),
+                    });
 
-                setBadgeProgress([
-                    make('first_step', habitLogs || 0, 1),
-                    make('challenger', cCount || 0, 1),
-                    make('on_fire', s, 7),
-                    make('half_century', totalLogs, 50),
-                    make('century', totalLogs, 100),
-                    make('social', friendCount || 0, 5),
-                    make('unstoppable', s, 30),
-                    make('legend', friendLevel.level, 6),
-                ]);
+                    setBadgeProgress([
+                        make('first_step', habitLogs || 0, 1),
+                        make('challenger', cCount || 0, 1),
+                        make('on_fire', s, 7),
+                        make('half_century', totalLogs, 50),
+                        make('century', totalLogs, 100),
+                        make('social', friendCount || 0, 5),
+                        make('unstoppable', s, 30),
+                        make('legend', friendLevel.level, 6),
+                    ]);
+                } finally {
+                    setIsLoading(false);
+                }
             };
 
             fetch();
@@ -126,6 +133,7 @@ export default function FriendDetailScreen() {
         router.back();
     };
 
+    if (isLoading && !profile) return <DetailPageSkeleton title="Friend" rows={4} />;
     if (!profile) return null;
 
     const getInitials = () =>

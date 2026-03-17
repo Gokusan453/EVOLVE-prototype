@@ -1,3 +1,4 @@
+import { DetailPageSkeleton } from '@/components/Skeletons';
 import { useSettings } from '@/contexts/SettingsContext';
 import { useTheme } from '@/contexts/ThemeContext';
 import { supabase } from '@/lib/supabase';
@@ -45,79 +46,85 @@ export default function ChallengeDetailScreen() {
     const [isDoneToday, setIsDoneToday] = useState(false);
     const [isJoined, setIsJoined] = useState(false);
     const [userId, setUserId] = useState<string | null>(null);
+    const [isLoading, setIsLoading] = useState(true);
 
     const fetchData = async () => {
-        const { data: { user } } = await supabase.auth.getUser();
-        if (!user) return;
-        setUserId(user.id);
+        setIsLoading(true);
+        try {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) return;
+            setUserId(user.id);
 
-        // Fetch challenge
-        const { data: challengeData } = await supabase
-            .from('challenges')
-            .select('*')
-            .eq('id', id)
-            .single();
-
-        if (challengeData) {
-            setChallenge(challengeData);
-        }
-
-        // Check if joined
-        const { data: myParticipation } = await supabase
-            .from('challenge_participants')
-            .select('id')
-            .eq('challenge_id', id)
-            .eq('user_id', user.id);
-        setIsJoined((myParticipation?.length || 0) > 0);
-
-        // Check if done today
-        const today = new Date().toISOString().split('T')[0];
-        const { data: todayLogs } = await supabase
-            .from('challenge_logs')
-            .select('id')
-            .eq('challenge_id', id)
-            .eq('user_id', user.id)
-            .gte('completed_at', `${today}T00:00:00`)
-            .lte('completed_at', `${today}T23:59:59`);
-
-        setIsDoneToday((todayLogs?.length || 0) > 0);
-
-        // Fetch leaderboard
-        const { data: participants } = await supabase
-            .from('challenge_participants')
-            .select('user_id')
-            .eq('challenge_id', id);
-
-        if (!participants) return;
-
-        const entries: LeaderboardEntry[] = [];
-
-        for (const p of participants) {
-            const { count: logCount } = await supabase
-                .from('challenge_logs')
-                .select('*', { count: 'exact', head: true })
-                .eq('challenge_id', id)
-                .eq('user_id', p.user_id);
-
-            const { data: profile } = await supabase
-                .from('profiles')
-                .select('username, first_name, last_name')
-                .eq('id', p.user_id)
+            // Fetch challenge
+            const { data: challengeData } = await supabase
+                .from('challenges')
+                .select('*')
+                .eq('id', id)
                 .single();
 
-            const displayName = profile?.first_name && profile?.last_name
-                ? `${profile.first_name} ${profile.last_name}`
-                : profile?.username || 'Unknown';
+            if (challengeData) {
+                setChallenge(challengeData);
+            }
 
-            entries.push({
-                user_id: p.user_id,
-                username: displayName,
-                score: logCount || 0,
-            });
+            // Check if joined
+            const { data: myParticipation } = await supabase
+                .from('challenge_participants')
+                .select('id')
+                .eq('challenge_id', id)
+                .eq('user_id', user.id);
+            setIsJoined((myParticipation?.length || 0) > 0);
+
+            // Check if done today
+            const today = new Date().toISOString().split('T')[0];
+            const { data: todayLogs } = await supabase
+                .from('challenge_logs')
+                .select('id')
+                .eq('challenge_id', id)
+                .eq('user_id', user.id)
+                .gte('completed_at', `${today}T00:00:00`)
+                .lte('completed_at', `${today}T23:59:59`);
+
+            setIsDoneToday((todayLogs?.length || 0) > 0);
+
+            // Fetch leaderboard
+            const { data: participants } = await supabase
+                .from('challenge_participants')
+                .select('user_id')
+                .eq('challenge_id', id);
+
+            if (!participants) return;
+
+            const entries: LeaderboardEntry[] = [];
+
+            for (const p of participants) {
+                const { count: logCount } = await supabase
+                    .from('challenge_logs')
+                    .select('*', { count: 'exact', head: true })
+                    .eq('challenge_id', id)
+                    .eq('user_id', p.user_id);
+
+                const { data: profile } = await supabase
+                    .from('profiles')
+                    .select('username, first_name, last_name')
+                    .eq('id', p.user_id)
+                    .single();
+
+                const displayName = profile?.first_name && profile?.last_name
+                    ? `${profile.first_name} ${profile.last_name}`
+                    : profile?.username || 'Unknown';
+
+                entries.push({
+                    user_id: p.user_id,
+                    username: displayName,
+                    score: logCount || 0,
+                });
+            }
+
+            entries.sort((a, b) => b.score - a.score);
+            setLeaderboard(entries);
+        } finally {
+            setIsLoading(false);
         }
-
-        entries.sort((a, b) => b.score - a.score);
-        setLeaderboard(entries);
     };
 
     useFocusEffect(
@@ -139,6 +146,7 @@ export default function ChallengeDetailScreen() {
         triggerFeedback();
     };
 
+    if (isLoading && !challenge) return <DetailPageSkeleton title="Challenge" rows={4} />;
     if (!challenge) return null;
 
     const getMonthProgress = () => {

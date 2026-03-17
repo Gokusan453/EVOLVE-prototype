@@ -1,3 +1,4 @@
+import { ListPageSkeleton } from '@/components/Skeletons';
 import { useSettings } from '@/contexts/SettingsContext';
 import { useTheme } from '@/contexts/ThemeContext';
 import { supabase } from '@/lib/supabase';
@@ -5,7 +6,7 @@ import { createFriendsStyles } from '@/styles/friends.styling';
 import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
 import { useRouter } from 'expo-router';
-import { useCallback, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import { FlatList, Image, KeyboardAvoidingView, Platform, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
 type UserProfile = {
@@ -40,102 +41,113 @@ export default function FriendsScreen() {
     const [userId, setUserId] = useState<string | null>(null);
     const [sentRequests, setSentRequests] = useState<string[]>([]);
     const [isSearching, setIsSearching] = useState(false);
+    const [isInitialLoading, setIsInitialLoading] = useState(true);
+    const hasLoadedOnceRef = useRef(false);
 
-    const fetchData = async () => {
-        const { data: { user } } = await supabase.auth.getUser();
-        if (!user) return;
-        setUserId(user.id);
+    const fetchData = async (opts?: { initial?: boolean }) => {
+        const isInitial = opts?.initial ?? false;
+        if (isInitial) setIsInitialLoading(true);
 
-        // Fetch accepted friends
-        const { data: friendships } = await supabase
-            .from('friendships')
-            .select('*')
-            .or(`sender_id.eq.${user.id},receiver_id.eq.${user.id}`)
-            .eq('status', 'accepted');
+        try {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) return;
+            setUserId(user.id);
 
-        const friendsList: FriendshipData[] = [];
-        if (friendships) {
-            for (const f of friendships) {
-                const otherId = f.sender_id === user.id ? f.receiver_id : f.sender_id;
-                const { data: profile } = await supabase
-                    .from('profiles')
-                    .select('id, first_name, last_name, username, avatar_url')
-                    .eq('id', otherId)
-                    .single();
+            // Fetch accepted friends
+            const { data: friendships } = await supabase
+                .from('friendships')
+                .select('*')
+                .or(`sender_id.eq.${user.id},receiver_id.eq.${user.id}`)
+                .eq('status', 'accepted');
 
-                if (profile) {
-                    friendsList.push({
-                        profile,
-                        friendshipId: f.id,
-                        status: f.status,
-                        isSender: f.sender_id === user.id,
-                    });
+            const friendsList: FriendshipData[] = [];
+            if (friendships) {
+                for (const f of friendships) {
+                    const otherId = f.sender_id === user.id ? f.receiver_id : f.sender_id;
+                    const { data: profile } = await supabase
+                        .from('profiles')
+                        .select('id, first_name, last_name, username, avatar_url')
+                        .eq('id', otherId)
+                        .single();
+
+                    if (profile) {
+                        friendsList.push({
+                            profile,
+                            friendshipId: f.id,
+                            status: f.status,
+                            isSender: f.sender_id === user.id,
+                        });
+                    }
                 }
             }
-        }
-        setFriends(friendsList);
+            setFriends(friendsList);
 
-        // Fetch pending requests (where I'm the receiver)
-        const { data: pendingRequests } = await supabase
-            .from('friendships')
-            .select('*')
-            .eq('receiver_id', user.id)
-            .eq('status', 'pending');
+            // Fetch pending requests (where I'm the receiver)
+            const { data: pendingRequests } = await supabase
+                .from('friendships')
+                .select('*')
+                .eq('receiver_id', user.id)
+                .eq('status', 'pending');
 
-        const requestsList: FriendshipData[] = [];
-        if (pendingRequests) {
-            for (const r of pendingRequests) {
-                const { data: profile } = await supabase
-                    .from('profiles')
-                    .select('id, first_name, last_name, username, avatar_url')
-                    .eq('id', r.sender_id)
-                    .single();
+            const requestsList: FriendshipData[] = [];
+            if (pendingRequests) {
+                for (const r of pendingRequests) {
+                    const { data: profile } = await supabase
+                        .from('profiles')
+                        .select('id, first_name, last_name, username, avatar_url')
+                        .eq('id', r.sender_id)
+                        .single();
 
-                if (profile) {
-                    requestsList.push({
-                        profile,
-                        friendshipId: r.id,
-                        status: r.status,
-                        isSender: false,
-                    });
+                    if (profile) {
+                        requestsList.push({
+                            profile,
+                            friendshipId: r.id,
+                            status: r.status,
+                            isSender: false,
+                        });
+                    }
                 }
             }
-        }
-        setRequests(requestsList);
+            setRequests(requestsList);
 
-        // Fetch sent pending requests (where I'm the sender)
-        const { data: sentPending } = await supabase
-            .from('friendships')
-            .select('*')
-            .eq('sender_id', user.id)
-            .eq('status', 'pending');
+            // Fetch sent pending requests (where I'm the sender)
+            const { data: sentPending } = await supabase
+                .from('friendships')
+                .select('*')
+                .eq('sender_id', user.id)
+                .eq('status', 'pending');
 
-        const pendingList: FriendshipData[] = [];
-        if (sentPending) {
-            for (const s of sentPending) {
-                const { data: profile } = await supabase
-                    .from('profiles')
-                    .select('id, first_name, last_name, username, avatar_url')
-                    .eq('id', s.receiver_id)
-                    .single();
+            const pendingList: FriendshipData[] = [];
+            if (sentPending) {
+                for (const s of sentPending) {
+                    const { data: profile } = await supabase
+                        .from('profiles')
+                        .select('id, first_name, last_name, username, avatar_url')
+                        .eq('id', s.receiver_id)
+                        .single();
 
-                if (profile) {
-                    pendingList.push({
-                        profile,
-                        friendshipId: s.id,
-                        status: s.status,
-                        isSender: true,
-                    });
+                    if (profile) {
+                        pendingList.push({
+                            profile,
+                            friendshipId: s.id,
+                            status: s.status,
+                            isSender: true,
+                        });
+                    }
                 }
             }
+            setPending(pendingList);
+            setSentRequests(sentPending?.map((s) => s.receiver_id) || []);
+        } finally {
+            if (isInitial) setIsInitialLoading(false);
         }
-        setPending(pendingList);
-        setSentRequests(sentPending?.map((s) => s.receiver_id) || []);
     };
 
     useFocusEffect(
         useCallback(() => {
-            fetchData();
+            const isInitial = !hasLoadedOnceRef.current;
+            fetchData({ initial: isInitial });
+            if (isInitial) hasLoadedOnceRef.current = true;
         }, [])
     );
 
@@ -307,6 +319,10 @@ export default function FriendsScreen() {
         { key: 'requests', label: `Requests (${requests.length})` },
         { key: 'pending', label: `Pending (${pending.length})` },
     ];
+
+    if (isInitialLoading && friends.length === 0 && requests.length === 0 && pending.length === 0) {
+        return <ListPageSkeleton title="Friends" rows={4} showSearch showTabs />;
+    }
 
     return (
         <KeyboardAvoidingView

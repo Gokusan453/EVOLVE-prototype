@@ -1,10 +1,11 @@
+import { ListPageSkeleton } from '@/components/Skeletons';
 import { useTheme } from '@/contexts/ThemeContext';
 import { supabase } from '@/lib/supabase';
 import { createChallengesStyles } from '@/styles/challenges.styling';
 import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
 import { useRouter } from 'expo-router';
-import { useCallback, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import { ScrollView, Text, TouchableOpacity, View } from 'react-native';
 
 type Challenge = {
@@ -25,52 +26,63 @@ export default function ChallengesListScreen() {
 
     const [challenges, setChallenges] = useState<Challenge[]>([]);
     const [userId, setUserId] = useState<string | null>(null);
+    const [isInitialLoading, setIsInitialLoading] = useState(true);
+    const hasLoadedOnceRef = useRef(false);
 
-    const fetchChallenges = async () => {
-        const { data: { user } } = await supabase.auth.getUser();
-        if (!user) return;
-        setUserId(user.id);
+    const fetchChallenges = async (opts?: { initial?: boolean }) => {
+        const isInitial = opts?.initial ?? false;
+        if (isInitial) setIsInitialLoading(true);
 
-        const now = new Date();
-        const currentMonth = now.getMonth() + 1;
-        const currentYear = now.getFullYear();
+        try {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) return;
+            setUserId(user.id);
 
-        const { data: challengesData } = await supabase
-            .from('challenges')
-            .select('*')
-            .eq('month', currentMonth)
-            .eq('year', currentYear)
-            .order('created_at', { ascending: true });
+            const now = new Date();
+            const currentMonth = now.getMonth() + 1;
+            const currentYear = now.getFullYear();
 
-        if (!challengesData) return;
+            const { data: challengesData } = await supabase
+                .from('challenges')
+                .select('*')
+                .eq('month', currentMonth)
+                .eq('year', currentYear)
+                .order('created_at', { ascending: true });
 
-        const enriched: Challenge[] = [];
+            if (!challengesData) return;
 
-        for (const c of challengesData) {
-            const { count } = await supabase
-                .from('challenge_participants')
-                .select('*', { count: 'exact', head: true })
-                .eq('challenge_id', c.id);
+            const enriched: Challenge[] = [];
 
-            const { data: myParticipation } = await supabase
-                .from('challenge_participants')
-                .select('id')
-                .eq('challenge_id', c.id)
-                .eq('user_id', user.id);
+            for (const c of challengesData) {
+                const { count } = await supabase
+                    .from('challenge_participants')
+                    .select('*', { count: 'exact', head: true })
+                    .eq('challenge_id', c.id);
 
-            enriched.push({
-                ...c,
-                participant_count: count || 0,
-                is_joined: (myParticipation?.length || 0) > 0,
-            });
+                const { data: myParticipation } = await supabase
+                    .from('challenge_participants')
+                    .select('id')
+                    .eq('challenge_id', c.id)
+                    .eq('user_id', user.id);
+
+                enriched.push({
+                    ...c,
+                    participant_count: count || 0,
+                    is_joined: (myParticipation?.length || 0) > 0,
+                });
+            }
+
+            setChallenges(enriched);
+        } finally {
+            if (isInitial) setIsInitialLoading(false);
         }
-
-        setChallenges(enriched);
     };
 
     useFocusEffect(
         useCallback(() => {
-            fetchChallenges();
+            const isInitial = !hasLoadedOnceRef.current;
+            fetchChallenges({ initial: isInitial });
+            if (isInitial) hasLoadedOnceRef.current = true;
         }, [])
     );
 
@@ -95,6 +107,10 @@ export default function ChallengesListScreen() {
 
     const notJoined = challenges.filter((c) => !c.is_joined);
     const joined = challenges.filter((c) => c.is_joined);
+
+    if (isInitialLoading && challenges.length === 0) {
+        return <ListPageSkeleton title="Challenges" rows={3} />;
+    }
 
     return (
         <View style={styles.container}>
