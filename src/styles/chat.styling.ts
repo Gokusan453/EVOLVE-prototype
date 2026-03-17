@@ -99,7 +99,6 @@ export const createChatStyles = (colors: any) =>
             backgroundColor: colors.surface,
             borderTopWidth: 1,
             borderTopColor: colors.border,
-            paddingBottom: 32,
         },
         textInput: {
             flex: 1,
