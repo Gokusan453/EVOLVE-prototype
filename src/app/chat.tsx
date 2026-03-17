@@ -80,7 +80,7 @@ export default function ChatScreen() {
             <KeyboardAvoidingView
                 style={{ flex: 1 }}
                 behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-                keyboardVerticalOffset={Platform.OS === 'ios' ? 10 : 0}
+                keyboardVerticalOffset={Platform.OS === 'ios' ? 6 : 0}
             >
             {/* Header */}
             <View style={styles.header}>
@@ -101,6 +101,8 @@ export default function ChatScreen() {
                 keyExtractor={(_, index) => `msg-${index}`}
                 style={styles.messagesList}
                 contentContainerStyle={styles.messagesContent}
+                keyboardShouldPersistTaps="handled"
+                keyboardDismissMode="on-drag"
                 onContentSizeChange={() => flatListRef.current?.scrollToEnd({ animated: true })}
                 ListFooterComponent={
                     isLoading ? (
@@ -120,6 +122,8 @@ export default function ChatScreen() {
                     value={input}
                     onChangeText={setInput}
                     multiline
+                    textAlignVertical="center"
+                    returnKeyType="send"
                     onSubmitEditing={handleSend}
                     editable={!isLoading}
                 />
