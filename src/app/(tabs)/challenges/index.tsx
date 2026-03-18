@@ -6,7 +6,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
 import { useRouter } from 'expo-router';
 import { useCallback, useRef, useState } from 'react';
-import { ScrollView, Text, TouchableOpacity, View } from 'react-native';
+import { Alert, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 
 type Challenge = {
     id: string;
@@ -88,20 +88,57 @@ export default function ChallengesListScreen() {
 
     const handleJoin = async (challengeId: string) => {
         if (!userId) return;
-        await supabase.from('challenge_participants').insert({
+
+        // Rejoin should always start from zero score for this challenge.
+        const { error: resetError } = await supabase
+            .from('challenge_logs')
+            .delete()
+            .eq('challenge_id', challengeId)
+            .eq('user_id', userId);
+
+        if (resetError) {
+            Alert.alert('Could not reset progress', resetError.message);
+            return;
+        }
+
+        const { error: joinError } = await supabase.from('challenge_participants').insert({
             challenge_id: challengeId,
             user_id: userId,
         });
+
+        if (joinError) {
+            Alert.alert('Could not join challenge', joinError.message);
+            return;
+        }
+
         fetchChallenges();
     };
 
     const handleLeave = async (challengeId: string) => {
         if (!userId) return;
-        await supabase
+
+        const { error: logsDeleteError } = await supabase
+            .from('challenge_logs')
+            .delete()
+            .eq('challenge_id', challengeId)
+            .eq('user_id', userId);
+
+        if (logsDeleteError) {
+            Alert.alert('Could not reset progress', logsDeleteError.message);
+            return;
+        }
+
+        const { error: leaveError } = await supabase
             .from('challenge_participants')
             .delete()
             .eq('challenge_id', challengeId)
             .eq('user_id', userId);
+
+        if (leaveError) {
+            Alert.alert('Could not leave challenge', leaveError.message);
+            return;
+        }
+
         fetchChallenges();
     };
 
