@@ -8,11 +8,9 @@ type SettingsContextType = {
     notifications: boolean;
     sound: boolean;
     vibrations: boolean;
-    privateAccount: boolean;
     setNotifications: (val: boolean) => void;
     setSound: (val: boolean) => void;
     setVibrations: (val: boolean) => void;
-    setPrivateAccount: (val: boolean) => void;
     triggerFeedback: () => void;
 };
 
@@ -20,11 +18,9 @@ const SettingsContext = createContext<SettingsContextType>({
     notifications: true,
     sound: true,
     vibrations: true,
-    privateAccount: false,
     setNotifications: () => { },
     setSound: () => { },
     setVibrations: () => { },
-    setPrivateAccount: () => { },
     triggerFeedback: () => { },
 });
 
@@ -45,7 +41,6 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
     const [notifications, setNotificationsState] = useState(true);
     const [sound, setSoundState] = useState(true);
     const [vibrations, setVibrationsState] = useState(true);
-    const [privateAccount, setPrivateAccountState] = useState(false);
 
     // Load settings on mount
     useEffect(() => {
@@ -56,7 +51,6 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
                 setNotificationsState(parsed.notifications ?? true);
                 setSoundState(parsed.sound ?? true);
                 setVibrationsState(parsed.vibrations ?? true);
-                setPrivateAccountState(parsed.privateAccount ?? false);
             }
         };
         load();
@@ -82,11 +76,6 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
     const setVibrations = (val: boolean) => {
         setVibrationsState(val);
         save('vibrations', val);
-    };
-
-    const setPrivateAccount = (val: boolean) => {
-        setPrivateAccountState(val);
-        save('privateAccount', val);
     };
 
     // Play in-app success sound
@@ -137,11 +126,9 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
                 notifications,
                 sound,
                 vibrations,
-                privateAccount,
                 setNotifications,
                 setSound,
                 setVibrations,
-                setPrivateAccount,
                 triggerFeedback,
             }}
         >

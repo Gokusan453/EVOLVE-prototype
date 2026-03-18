@@ -12,11 +12,9 @@ export default function PreferencesScreen() {
         notifications,
         sound,
         vibrations,
-        privateAccount,
         setNotifications,
         setSound,
         setVibrations,
-        setPrivateAccount,
     } = useSettings();
     const styles = createSettingsStyles(colors);
     const router = useRouter();
@@ -72,15 +70,6 @@ export default function PreferencesScreen() {
                         <Switch
                             value={vibrations}
                             onValueChange={setVibrations}
-                            trackColor={{ false: colors.border, true: colors.primary }}
-                            thumbColor={colors.switchThumb}
-                        />
-                    </View>
-                    <View style={styles.settingsRow}>
-                        <Text style={styles.settingsLabel}>Private account</Text>
-                        <Switch
-                            value={privateAccount}
-                            onValueChange={setPrivateAccount}
                             trackColor={{ false: colors.border, true: colors.primary }}
                             thumbColor={colors.switchThumb}
                         />
