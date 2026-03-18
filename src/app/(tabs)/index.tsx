@@ -286,13 +286,22 @@ export default function HomeScreen() {
             <View style={styles.emptyBox}>
               <Text style={{ fontSize: 36 }}>🌱</Text>
               <Text style={[styles.emptyText, { marginTop: 8, fontWeight: '700', fontSize: 17 }]}>Start your Evolve journey!</Text>
-              <Text style={[styles.emptyText, { marginTop: 4, fontSize: 13 }]}>Create your first habit or challenge, or ask EVO for inspiration.</Text>
-              <TouchableOpacity
-                style={{ backgroundColor: colors.primary, paddingHorizontal: 20, paddingVertical: 10, borderRadius: 12, marginTop: 14 }}
-                onPress={() => router.push('/(tabs)/habits/add')}
-              >
-                <Text style={{ color: colors.onPrimary, fontWeight: '600', fontSize: 13 }}>+ Create habit</Text>
-              </TouchableOpacity>
+              <Text style={[styles.emptyText, { marginTop: 4, fontSize: 13, textAlign: 'center' }]}>Start by creating a habit or explore challenges to join.</Text>
+              <View style={styles.emptyActionsRow}>
+                <TouchableOpacity
+                  style={styles.emptyPrimaryButton}
+                  onPress={() => router.push('/(tabs)/habits/add')}
+                >
+                  <Text style={styles.emptyPrimaryButtonText}>+ Create habit</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={styles.emptySecondaryButton}
+                  onPress={() => router.push('/(tabs)/challenges')}
+                >
+                  <Text style={styles.emptySecondaryButtonText}>View challenges</Text>
+                </TouchableOpacity>
+              </View>
             </View>
           ) : (
             /* All habits/challenges done for today */

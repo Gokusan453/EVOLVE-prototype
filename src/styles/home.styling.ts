@@ -155,6 +155,35 @@ export const createHomeStyles = (colors: any) =>
             color: colors.textSecondary,
             fontSize: 15,
         },
+        emptyActionsRow: {
+            flexDirection: 'row',
+            marginTop: 14,
+            gap: 10,
+        },
+        emptyPrimaryButton: {
+            backgroundColor: colors.primary,
+            paddingHorizontal: 16,
+            paddingVertical: 10,
+            borderRadius: 12,
+        },
+        emptyPrimaryButtonText: {
+            color: colors.onPrimary,
+            fontWeight: '600',
+            fontSize: 13,
+        },
+        emptySecondaryButton: {
+            backgroundColor: colors.surface,
+            borderWidth: 1,
+            borderColor: colors.border,
+            paddingHorizontal: 14,
+            paddingVertical: 10,
+            borderRadius: 12,
+        },
+        emptySecondaryButtonText: {
+            color: colors.text,
+            fontWeight: '600',
+            fontSize: 13,
+        },
 
         // ── AI Chat FAB ──
         fabPill: {
