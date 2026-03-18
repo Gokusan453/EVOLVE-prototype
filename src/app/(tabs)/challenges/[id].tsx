@@ -133,7 +133,29 @@ export default function ChallengeDetailScreen() {
         }, [id])
     );
 
+    const getTodayKey = () => {
+        const keys = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
+        return keys[new Date().getDay()];
+    };
+
+    const isChallengeScheduledToday = (challengeItem: Challenge) => {
+        const now = new Date();
+        const currentMonth = now.getMonth() + 1;
+        const currentYear = now.getFullYear();
+
+        if (challengeItem.month !== currentMonth || challengeItem.year !== currentYear) return false;
+        if (!challengeItem.days.includes(getTodayKey())) return false;
+
+        return true;
+    };
+
     const handleMarkDone = async () => {
+        if (!challenge) return;
+        if (!isChallengeScheduledToday(challenge)) {
+            Alert.alert('Not scheduled today', 'This challenge is not planned for today.');
+            return;
+        }
+        if (isDoneToday) return;
         if (!userId) return;
 
         await supabase.from('challenge_logs').insert({
@@ -148,6 +170,7 @@ export default function ChallengeDetailScreen() {
 
     if (isLoading && !challenge) return <DetailPageSkeleton title="Challenge" rows={4} />;
     if (!challenge) return null;
+    const canMarkToday = isChallengeScheduledToday(challenge);
 
     const getMonthProgress = () => {
         const now = new Date();
@@ -286,12 +309,12 @@ export default function ChallengeDetailScreen() {
                 {/* Mark as Done / Join */}
                 {isJoined ? (
                     <TouchableOpacity
-                        style={[styles.doneButton, isDoneToday && styles.doneButtonCompleted]}
+                        style={[styles.doneButton, (isDoneToday || !canMarkToday) && styles.doneButtonCompleted]}
                         onPress={handleMarkDone}
-                        disabled={isDoneToday}
+                        disabled={isDoneToday || !canMarkToday}
                     >
                         <Text style={styles.doneButtonText}>
-                            {isDoneToday ? 'Done for today ✓' : 'Mark as done'}
+                            {isDoneToday ? 'Done for today ✓' : canMarkToday ? 'Mark as done' : 'Not scheduled today'}
                         </Text>
                     </TouchableOpacity>
                 ) : (
