@@ -1,8 +1,31 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Audio } from 'expo-av';
-import * as Notifications from 'expo-notifications';
+import Constants from 'expo-constants';
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { Vibration } from 'react-native';
+import { Platform, Vibration } from 'react-native';
+
+type NotificationsModule = typeof import('expo-notifications');
+
+let notificationsModulePromise: Promise<NotificationsModule | null> | null = null;
+
+const getNotificationsModule = async (): Promise<NotificationsModule | null> => {
+    if (!notificationsModulePromise) {
+        notificationsModulePromise = (async () => {
+            // Expo Go on Android does not support this module path for our use-case.
+            if (Constants.appOwnership === 'expo' && Platform.OS === 'android') {
+                return null;
+            }
+
+            try {
+                return await import('expo-notifications');
+            } catch {
+                return null;
+            }
+        })();
+    }
+
+    return notificationsModulePromise;
+};
 
 type SettingsContextType = {
     notifications: boolean;
@@ -26,17 +49,6 @@ const SettingsContext = createContext<SettingsContextType>({
 
 export const useSettings = () => useContext(SettingsContext);
 
-// Configure how notifications appear when app is in foreground
-Notifications.setNotificationHandler({
-    handleNotification: async () => ({
-        shouldShowAlert: true,
-        shouldPlaySound: false,
-        shouldSetBadge: false,
-        shouldShowBanner: true,
-        shouldShowList: true,
-    }),
-});
-
 export function SettingsProvider({ children }: { children: React.ReactNode }) {
     const [notifications, setNotificationsState] = useState(true);
     const [sound, setSoundState] = useState(true);
@@ -54,6 +66,25 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
             }
         };
         load();
+    }, []);
+
+    useEffect(() => {
+        const configureNotifications = async () => {
+            const notificationsModule = await getNotificationsModule();
+            if (!notificationsModule) return;
+
+            notificationsModule.setNotificationHandler({
+                handleNotification: async () => ({
+                    shouldShowAlert: true,
+                    shouldPlaySound: false,
+                    shouldSetBadge: false,
+                    shouldShowBanner: true,
+                    shouldShowList: true,
+                }),
+            });
+        };
+
+        configureNotifications();
     }, []);
 
     const save = async (key: string, value: boolean) => {
@@ -110,7 +141,10 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
 
         // Push notification
         if (notifications) {
-            await Notifications.scheduleNotificationAsync({
+            const notificationsModule = await getNotificationsModule();
+            if (!notificationsModule) return;
+
+            await notificationsModule.scheduleNotificationAsync({
                 content: {
                     title: 'Well done! 🎉',
                     body: 'You completed a task today. Keep going!',
