@@ -33,6 +33,26 @@ export const loginStyles = StyleSheet.create({
         color: Colors.text,
         marginBottom: 16,
     },
+    passwordInputWrapper: {
+        backgroundColor: Colors.surface,
+        borderWidth: 1,
+        borderColor: Colors.border,
+        borderRadius: 12,
+        paddingLeft: 16,
+        paddingRight: 10,
+        marginBottom: 16,
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    passwordInput: {
+        flex: 1,
+        paddingVertical: 14,
+        fontSize: 16,
+        color: Colors.text,
+    },
+    eyeButton: {
+        padding: 6,
+    },
     button: {
         backgroundColor: Colors.primary,
         paddingVertical: 16,

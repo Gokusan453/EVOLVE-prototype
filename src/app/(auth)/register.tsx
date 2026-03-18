@@ -15,6 +15,8 @@ export default function RegisterScreen() {
     const [lastName, setLastName] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
 
@@ -118,25 +120,49 @@ export default function RegisterScreen() {
                     onChangeText={setLastName}
                 />
 
-                <TextInput
-                    style={styles.input}
-                    placeholder="Password"
-                    placeholderTextColor={Colors.textSecondary}
-                    value={password}
-                    onChangeText={setPassword}
-                    secureTextEntry
-                    textContentType="oneTimeCode"
-                />
+                <View style={styles.passwordInputWrapper}>
+                    <TextInput
+                        style={styles.passwordInput}
+                        placeholder="Password"
+                        placeholderTextColor={Colors.textSecondary}
+                        value={password}
+                        onChangeText={setPassword}
+                        secureTextEntry={!showPassword}
+                        textContentType="oneTimeCode"
+                    />
+                    <TouchableOpacity
+                        style={styles.eyeButton}
+                        onPress={() => setShowPassword((prev) => !prev)}
+                    >
+                        <Ionicons
+                            name={showPassword ? 'eye-off-outline' : 'eye-outline'}
+                            size={20}
+                            color={Colors.textSecondary}
+                        />
+                    </TouchableOpacity>
+                </View>
 
-                <TextInput
-                    style={styles.input}
-                    placeholder="Confirm password"
-                    placeholderTextColor={Colors.textSecondary}
-                    value={confirmPassword}
-                    onChangeText={setConfirmPassword}
-                    secureTextEntry
-                    textContentType="oneTimeCode"
-                />
+                <View style={styles.passwordInputWrapper}>
+                    <TextInput
+                        style={styles.passwordInput}
+                        placeholder="Confirm password"
+                        placeholderTextColor={Colors.textSecondary}
+                        value={confirmPassword}
+                        onChangeText={setConfirmPassword}
+                        secureTextEntry={!showConfirmPassword}
+                        textContentType="oneTimeCode"
+                    />
+                    <TouchableOpacity
+                        style={styles.eyeButton}
+                        onPress={() => setShowConfirmPassword((prev) => !prev)}
+                    >
+                        <Ionicons
+                            name={showConfirmPassword ? 'eye-off-outline' : 'eye-outline'}
+                            size={20}
+                            color={Colors.textSecondary}
+                        />
+                    </TouchableOpacity>
+                </View>
 
                 <TouchableOpacity
                     style={[styles.button, loading && styles.buttonDisabled]}
