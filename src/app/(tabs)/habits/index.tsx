@@ -6,13 +6,15 @@ import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
 import { useRouter } from 'expo-router';
 import { useCallback, useRef, useState } from 'react';
-import { FlatList, Text, TouchableOpacity, View } from 'react-native';
+import { Alert, FlatList, Text, TouchableOpacity, View } from 'react-native';
 
 type Habit = {
     id: string;
     name: string;
     description: string | null;
     days: string[];
+    start_date?: string;
+    end_date?: string | null;
     is_done_today?: boolean;
 };
 
@@ -68,6 +70,19 @@ export default function HabitsListScreen() {
         }
     };
 
+    const isHabitScheduledToday = (habit: Habit) => {
+        const now = new Date();
+        const todayStart = new Date(now);
+        todayStart.setHours(0, 0, 0, 0);
+        const todayDay = dayMap[now.getDay()];
+
+        if (!habit.days.includes(todayDay)) return false;
+        if (habit.start_date && new Date(habit.start_date) > now) return false;
+        if (habit.end_date && new Date(habit.end_date) < todayStart) return false;
+
+        return true;
+    };
+
     useFocusEffect(
         useCallback(() => {
             const isInitial = !hasLoadedOnceRef.current;
@@ -76,12 +91,17 @@ export default function HabitsListScreen() {
         }, [])
     );
 
-    const handleMarkDone = async (habitId: string) => {
+    const handleMarkDone = async (habit: Habit) => {
+        if (!isHabitScheduledToday(habit)) {
+            Alert.alert('Not scheduled today', 'This habit is not planned for today.');
+            return;
+        }
+
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) return;
 
         await supabase.from('habit_logs').insert({
-            habit_id: habitId,
+            habit_id: habit.id,
             user_id: user.id,
         });
 
@@ -109,16 +129,20 @@ export default function HabitsListScreen() {
                 ) : null}
             </View>
 
-            {!item.is_done_today ? (
+            {item.is_done_today ? (
+                <View style={[styles.doneButton, styles.doneButtonCompleted]}>
+                    <Text style={styles.doneButtonText}>Done ✓</Text>
+                </View>
+            ) : isHabitScheduledToday(item) ? (
                 <TouchableOpacity
                     style={styles.doneButton}
-                    onPress={() => handleMarkDone(item.id)}
+                    onPress={() => handleMarkDone(item)}
                 >
                     <Text style={styles.doneButtonText}>Mark as done</Text>
                 </TouchableOpacity>
             ) : (
                 <View style={[styles.doneButton, styles.doneButtonCompleted]}>
-                    <Text style={styles.doneButtonText}>Done ✓</Text>
+                    <Text style={styles.doneButtonText}>Not today</Text>
                 </View>
             )}
         </TouchableOpacity>

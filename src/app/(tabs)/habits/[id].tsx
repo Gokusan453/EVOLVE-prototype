@@ -163,7 +163,31 @@ export default function HabitDetailScreen() {
 
     const { triggerFeedback } = useSettings();
 
+    const getTodayKey = () => {
+        const keys = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
+        return keys[new Date().getDay()];
+    };
+
+    const isScheduledForToday = (habitItem: Habit) => {
+        const now = new Date();
+        const todayStart = new Date(now);
+        todayStart.setHours(0, 0, 0, 0);
+
+        if (!habitItem.days.includes(getTodayKey())) return false;
+        if (habitItem.start_date && new Date(habitItem.start_date) > now) return false;
+        if (habitItem.end_date && new Date(habitItem.end_date) < todayStart) return false;
+
+        return true;
+    };
+
     const handleMarkDone = async () => {
+        if (!habit) return;
+        if (!isScheduledForToday(habit)) {
+            Alert.alert('Not scheduled today', 'This habit is not planned for today.');
+            return;
+        }
+        if (isDoneToday) return;
+
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) return;
 
@@ -204,6 +228,7 @@ export default function HabitDetailScreen() {
     const maxCount = Math.max(1, ...chartData.map((d) => d.count));
     const totalDone = chartData.reduce((a, b) => a + b.count, 0);
     const totalPossible = chartPeriod === 'week' ? 7 : chartPeriod === 'month' ? 30 : 365;
+    const canMarkToday = isScheduledForToday(habit);
 
     return (
         <View style={styles.container}>
@@ -300,12 +325,12 @@ export default function HabitDetailScreen() {
 
                 {/* Mark as Done */}
                 <TouchableOpacity
-                    style={[styles.doneButton, isDoneToday && styles.doneButtonCompleted]}
+                    style={[styles.doneButton, (isDoneToday || !canMarkToday) && styles.doneButtonCompleted]}
                     onPress={handleMarkDone}
-                    disabled={isDoneToday}
+                    disabled={isDoneToday || !canMarkToday}
                 >
                     <Text style={styles.doneButtonText}>
-                        {isDoneToday ? 'Done for today ✓' : 'Mark as done'}
+                        {isDoneToday ? 'Done for today ✓' : canMarkToday ? 'Mark as done' : 'Not scheduled today'}
                     </Text>
                 </TouchableOpacity>
             </ScrollView>
