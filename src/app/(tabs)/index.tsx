@@ -1,7 +1,7 @@
 import { ListPageSkeleton } from '@/components/Skeletons';
 import { useSettings } from '@/contexts/SettingsContext';
 import { useTheme } from '@/contexts/ThemeContext';
-import { calculateStreak, calculateXP, getLevelFromXP } from '@/lib/gamification';
+import { calculateStreak } from '@/lib/gamification';
 import { supabase } from '@/lib/supabase';
 import { createHomeStyles } from '@/styles/home.styling';
 import { Ionicons } from '@expo/vector-icons';
@@ -40,7 +40,7 @@ export default function HomeScreen() {
   // To-do items (not done today)
   const [todos, setTodos] = useState<TodoItem[]>([]);
   const [streak, setStreak] = useState(0);
-  const [xp, setXp] = useState(0);
+
   const [isInitialLoading, setIsInitialLoading] = useState(true);
   const hasLoadedOnceRef = useRef(false);
 
@@ -65,16 +65,7 @@ export default function HomeScreen() {
       const s = await calculateStreak(user.id);
       setStreak(s);
 
-      // XP
-      const { count: hLogs } = await supabase
-        .from('habit_logs')
-        .select('*', { count: 'exact', head: true })
-        .eq('user_id', user.id);
-      const { count: cLogs } = await supabase
-        .from('challenge_logs')
-        .select('*', { count: 'exact', head: true })
-        .eq('user_id', user.id);
-      setXp(calculateXP(hLogs || 0, cLogs || 0));
+
 
       const todayDate = new Date();
       const dayKeys = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
@@ -220,21 +211,7 @@ export default function HomeScreen() {
             {profile ? `${profile.first_name} ${profile.last_name}` : '...'}
           </Text>
         </View>
-        {/* Level bar */}
-        {(() => {
-          const level = getLevelFromXP(xp);
-          return (
-            <View style={{ backgroundColor: colors.surface, borderRadius: 14, paddingHorizontal: 16, paddingVertical: 6, borderWidth: 1, borderColor: colors.border, minWidth: 120 }}>
-              <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 3 }}>
-                <Text style={{ color: level.color, fontWeight: '700', fontSize: 11 }}>{level.title}</Text>
-                <Text style={{ color: colors.textSecondary, fontSize: 10 }}>Lv.{level.level}</Text>
-              </View>
-              <View style={{ height: 5, backgroundColor: colors.border, borderRadius: 3, overflow: 'hidden' }}>
-                <View style={{ height: '100%', width: `${level.progress * 100}%`, backgroundColor: level.color, borderRadius: 3 }} />
-              </View>
-            </View>
-          );
-        })()}
+
       </View>
 
       <ScrollView contentContainerStyle={styles.scrollContent}>
