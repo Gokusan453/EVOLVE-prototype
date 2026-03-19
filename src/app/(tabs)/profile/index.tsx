@@ -178,7 +178,7 @@ export default function SettingsScreen() {
                     </View>
                     <View style={styles.statItem}>
                         <Ionicons name="flame" size={28} color={'#F59E0B'} style={styles.statIcon} />
-                        <Text style={styles.statLabel}>Streak</Text>
+                        <Text style={styles.statLabel}>Perfect day</Text>
                         <Text style={styles.statValue}>{streak} 🔥</Text>
                     </View>
                 </View>

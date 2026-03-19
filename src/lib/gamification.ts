@@ -14,11 +14,11 @@ export const LEVELS = [
 export const BADGES = [
     { id: 'first_step', emoji: '🌱', label: 'First Step', description: 'Complete your first habit', color: '#86EFAC' },
     { id: 'challenger', emoji: '💪', label: 'Challenger', description: 'Join your first challenge', color: '#93C5FD' },
-    { id: 'on_fire', emoji: '🔥', label: 'On Fire', description: '7-day streak', color: '#FDBA74' },
+    { id: 'on_fire', emoji: '🔥', label: 'On Fire', description: '7-day perfect streak', color: '#FDBA74' },
     { id: 'half_century', emoji: '⭐', label: 'Half Century', description: '50 tasks completed', color: '#FDE047' },
     { id: 'century', emoji: '🏆', label: 'Century', description: '100 tasks completed', color: '#FCD34D' },
     { id: 'social', emoji: '🤝', label: 'Social', description: '5 friends added', color: '#5EEAD4' },
-    { id: 'unstoppable', emoji: '⚡', label: 'Unstoppable', description: '30-day streak', color: '#FCA5A5' },
+    { id: 'unstoppable', emoji: '⚡', label: 'Unstoppable', description: '30-day perfect streak', color: '#FCA5A5' },
     { id: 'legend', emoji: '👑', label: 'Legend', description: 'Reach level 6', color: '#C4B5FD' },
 ];
 
@@ -59,36 +59,121 @@ export function getLevelFromXP(xp: number) {
     };
 }
 
-// ── Calculate Streak ──
+// ── Calculate Streak (Perfect Day Streak) ──
 export async function calculateStreak(userId: string): Promise<number> {
     const today = new Date();
+    const dayKeys = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
+
+    const yearStart = new Date(today);
+    yearStart.setDate(today.getDate() - 365);
+    const yearStartStr = yearStart.toISOString().split('T')[0];
+
+    type HabitRow = {
+        id: string;
+        days: string[];
+        start_date: string;
+        end_date: string | null;
+    };
+
+    type ChallengeRow = {
+        id: string;
+        month: number;
+        year: number;
+        days: string[];
+    };
+
+    const { data: habitsData } = await supabase
+        .from('habits')
+        .select('id, days, start_date, end_date')
+        .eq('user_id', userId);
+
+    const { data: joinedRows } = await supabase
+        .from('challenge_participants')
+        .select('challenge_id')
+        .eq('user_id', userId);
+
+    const challengeIds = (joinedRows || []).map((r: any) => r.challenge_id);
+    let challengesData: ChallengeRow[] = [];
+    if (challengeIds.length > 0) {
+        const { data } = await supabase
+            .from('challenges')
+            .select('id, month, year, days')
+            .in('id', challengeIds);
+        challengesData = (data || []) as ChallengeRow[];
+    }
+
+    const { data: habitLogs } = await supabase
+        .from('habit_logs')
+        .select('habit_id, completed_at')
+        .eq('user_id', userId)
+        .gte('completed_at', `${yearStartStr}T00:00:00`);
+
+    const { data: challengeLogs } = await supabase
+        .from('challenge_logs')
+        .select('challenge_id, completed_at')
+        .eq('user_id', userId)
+        .gte('completed_at', `${yearStartStr}T00:00:00`);
+
+    const habitLogsByDate = new Map<string, Set<string>>();
+    for (const log of habitLogs || []) {
+        const dateKey = new Date(log.completed_at).toISOString().split('T')[0];
+        const set = habitLogsByDate.get(dateKey) || new Set<string>();
+        set.add(log.habit_id);
+        habitLogsByDate.set(dateKey, set);
+    }
+
+    const challengeLogsByDate = new Map<string, Set<string>>();
+    for (const log of challengeLogs || []) {
+        const dateKey = new Date(log.completed_at).toISOString().split('T')[0];
+        const set = challengeLogsByDate.get(dateKey) || new Set<string>();
+        set.add(log.challenge_id);
+        challengeLogsByDate.set(dateKey, set);
+    }
+
+    const habits = (habitsData || []) as HabitRow[];
     let streak = 0;
 
     for (let i = 0; i < 365; i++) {
         const checkDate = new Date(today);
         checkDate.setDate(today.getDate() - i);
         const dateStr = checkDate.toISOString().split('T')[0];
+        const dayKey = dayKeys[checkDate.getDay()];
+        const month = checkDate.getMonth() + 1;
+        const year = checkDate.getFullYear();
 
-        const { count: habitCount } = await supabase
-            .from('habit_logs')
-            .select('*', { count: 'exact', head: true })
-            .eq('user_id', userId)
-            .gte('completed_at', `${dateStr}T00:00:00`)
-            .lte('completed_at', `${dateStr}T23:59:59`);
+        const plannedHabits = habits.filter((h) => {
+            if (!h.days.includes(dayKey)) return false;
+            if (h.start_date && new Date(h.start_date) > checkDate) return false;
+            if (h.end_date && new Date(h.end_date) < checkDate) return false;
+            return true;
+        });
 
-        const { count: challengeCount } = await supabase
-            .from('challenge_logs')
-            .select('*', { count: 'exact', head: true })
-            .eq('user_id', userId)
-            .gte('completed_at', `${dateStr}T00:00:00`)
-            .lte('completed_at', `${dateStr}T23:59:59`);
+        const plannedChallenges = challengesData.filter((c) => {
+            if (c.month !== month || c.year !== year) return false;
+            if (!c.days.includes(dayKey)) return false;
+            return true;
+        });
 
-        const totalToday = (habitCount || 0) + (challengeCount || 0);
+        const plannedHabitIds = plannedHabits.map((h) => h.id);
+        const plannedChallengeIds = plannedChallenges.map((c) => c.id);
+        const plannedTotal = plannedHabitIds.length + plannedChallengeIds.length;
 
-        if (totalToday > 0) {
+        // No scheduled tasks on this day should not break the streak.
+        if (plannedTotal === 0) {
+            continue;
+        }
+
+        const doneHabitIds = habitLogsByDate.get(dateStr) || new Set<string>();
+        const doneChallengeIds = challengeLogsByDate.get(dateStr) || new Set<string>();
+
+        const allHabitsDone = plannedHabitIds.every((id) => doneHabitIds.has(id));
+        const allChallengesDone = plannedChallengeIds.every((id) => doneChallengeIds.has(id));
+        const isPerfectDay = allHabitsDone && allChallengesDone;
+
+        if (isPerfectDay) {
             streak++;
         } else if (i > 0) {
-            // Day 0 (today) can be 0 without breaking streak
+            // Day 0 (today) can be incomplete without breaking streak.
             break;
         }
     }
