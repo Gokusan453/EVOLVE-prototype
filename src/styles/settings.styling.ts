@@ -137,4 +137,18 @@ export const createSettingsStyles = (colors: any) =>
             fontSize: 16,
             fontWeight: '600',
         },
+        deleteAccountButton: {
+            backgroundColor: colors.surface,
+            borderRadius: 12,
+            paddingVertical: 16,
+            alignItems: 'center',
+            marginTop: 10,
+            borderWidth: 1,
+            borderColor: colors.error,
+        },
+        deleteAccountText: {
+            color: colors.error,
+            fontSize: 16,
+            fontWeight: '600',
+        },
     });

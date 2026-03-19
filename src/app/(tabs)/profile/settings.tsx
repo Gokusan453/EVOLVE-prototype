@@ -4,7 +4,7 @@ import { supabase } from '@/lib/supabase';
 import { createSettingsStyles } from '@/styles/settings.styling';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import { Switch, Text, TouchableOpacity, View } from 'react-native';
+import { Alert, Switch, Text, TouchableOpacity, View } from 'react-native';
 
 export default function PreferencesScreen() {
     const { colors, mode, toggleTheme } = useTheme();
@@ -19,9 +19,53 @@ export default function PreferencesScreen() {
     const styles = createSettingsStyles(colors);
     const router = useRouter();
 
+    const deleteUserData = async () => {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return;
+
+        const deleteOrThrow = async (
+            promise: Promise<{ error: { message: string } | null }>
+        ) => {
+            const { error } = await promise;
+            if (error) {
+                throw new Error(error.message);
+            }
+        };
+
+        await deleteOrThrow(
+            supabase.from('challenge_logs').delete().eq('user_id', user.id)
+        );
+        await deleteOrThrow(
+            supabase.from('habit_logs').delete().eq('user_id', user.id)
+        );
+        await deleteOrThrow(
+            supabase.from('challenge_participants').delete().eq('user_id', user.id)
+        );
+        await deleteOrThrow(
+            supabase.from('habits').delete().eq('user_id', user.id)
+        );
+        await deleteOrThrow(
+            supabase.from('friendships').delete().or(`sender_id.eq.${user.id},receiver_id.eq.${user.id}`)
+        );
+        await deleteOrThrow(
+            supabase.from('profiles').delete().eq('id', user.id)
+        );
+    };
+
     const handleLogout = async () => {
         await supabase.auth.signOut();
         router.replace('/(auth)/start');
+    };
+
+    const handleDeleteAccount = async () => {
+        try {
+            await deleteUserData();
+            await supabase.auth.signOut();
+            Alert.alert('Account deleted', 'Your account data has been removed.');
+            router.replace('/(auth)/start');
+        } catch (error: any) {
+            Alert.alert('Could not delete account', error?.message || 'Please try again.');
+        }
     };
 
     return (
@@ -76,8 +120,40 @@ export default function PreferencesScreen() {
                     </View>
                 </View>
 
-                <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+                <TouchableOpacity
+                    style={styles.logoutButton}
+                    onPress={() => {
+                        Alert.alert('Log out?', 'Are you sure you want to log out?', [
+                            { text: 'Cancel', style: 'cancel' },
+                            {
+                                text: 'Log out',
+                                style: 'destructive',
+                                onPress: handleLogout,
+                            },
+                        ]);
+                    }}
+                >
                     <Text style={styles.logoutText}>Log out</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                    style={styles.deleteAccountButton}
+                    onPress={() => {
+                        Alert.alert(
+                            'Delete account?',
+                            'This will remove your account data from the app. This action cannot be undone.',
+                            [
+                                { text: 'Cancel', style: 'cancel' },
+                                {
+                                    text: 'Delete',
+                                    style: 'destructive',
+                                    onPress: handleDeleteAccount,
+                                },
+                            ]
+                        );
+                    }}
+                >
+                    <Text style={styles.deleteAccountText}>Delete account</Text>
                 </TouchableOpacity>
             </View>
         </View>
