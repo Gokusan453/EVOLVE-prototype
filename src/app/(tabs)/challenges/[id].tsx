@@ -7,7 +7,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useCallback, useState } from 'react';
-import { Alert, ScrollView, Text, TouchableOpacity, View } from 'react-native';
+import { Alert, Image, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 
 const DAYS_MAP = [
     { key: 'mon', label: 'M' },
@@ -30,7 +30,9 @@ type Challenge = {
 
 type LeaderboardEntry = {
     user_id: string;
-    username: string;
+    displayName: string;
+    displayUsername: string | null;
+    avatar_url: string | null;
     score: number;
 };
 
@@ -105,7 +107,7 @@ export default function ChallengeDetailScreen() {
 
                 const { data: profile } = await supabase
                     .from('profiles')
-                    .select('username, first_name, last_name')
+                    .select('username, first_name, last_name, avatar_url')
                     .eq('id', p.user_id)
                     .single();
 
@@ -115,7 +117,9 @@ export default function ChallengeDetailScreen() {
 
                 entries.push({
                     user_id: p.user_id,
-                    username: displayName,
+                    displayName,
+                    displayUsername: profile?.username || null,
+                    avatar_url: profile?.avatar_url || null,
                     score: logCount || 0,
                 });
             }
@@ -294,10 +298,18 @@ export default function ChallengeDetailScreen() {
                                 index === leaderboard.length - 1 && styles.leaderboardRowLast,
                             ]}
                         >
-                            <View style={[styles.rankCircle, getRankStyle(index + 1)]}>
-                                <Text style={styles.rankText}>{index + 1}</Text>
-                            </View>
-                            <Text style={styles.leaderboardName}>{entry.username}</Text>
+                            {entry.avatar_url ? (
+                                <Image source={{ uri: entry.avatar_url }} style={{ width: 36, height: 36, borderRadius: 18, marginRight: 10 }} />
+                            ) : (
+                                <View style={{ width: 36, height: 36, borderRadius: 18, marginRight: 10, backgroundColor: colors.border, alignItems: 'center', justifyContent: 'center' }}>
+                                    <Text style={{ color: colors.text, fontWeight: '600', fontSize: 13 }}>
+                                        {entry.displayName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)}
+                                    </Text>
+                                </View>
+                            )}
+                            <Text style={[styles.leaderboardName, { flex: 1 }]}>
+                                {entry.displayUsername ? `@${entry.displayUsername}` : entry.displayName}
+                            </Text>
                             <Text style={styles.leaderboardScore}>{entry.score}</Text>
                         </View>
                     ))}
