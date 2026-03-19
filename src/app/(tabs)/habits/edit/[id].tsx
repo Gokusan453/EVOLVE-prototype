@@ -28,7 +28,6 @@ export default function EditHabitScreen() {
     const [endDate, setEndDate] = useState('');
     const [hasEndDate, setHasEndDate] = useState(false);
     const [selectedDays, setSelectedDays] = useState<string[]>([]);
-    const [isPrivate, setIsPrivate] = useState(true);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
 
@@ -45,7 +44,6 @@ export default function EditHabitScreen() {
                 setDescription(data.description || '');
                 setStartDate(data.start_date);
                 setSelectedDays(data.days || []);
-                setIsPrivate(data.is_private);
                 if (data.end_date) {
                     setHasEndDate(true);
                     setEndDate(data.end_date);
@@ -83,7 +81,6 @@ export default function EditHabitScreen() {
                 start_date: startDate,
                 end_date: hasEndDate && endDate ? endDate : null,
                 days: selectedDays,
-                is_private: isPrivate,
             })
             .eq('id', id);
 

@@ -47,7 +47,6 @@ export default function AddHabitScreen() {
     const [showStartPicker, setShowStartPicker] = useState(false);
     const [showEndPicker, setShowEndPicker] = useState(false);
     const [selectedDays, setSelectedDays] = useState<string[]>([]);
-    const [isPrivate, setIsPrivate] = useState(true);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
 
@@ -91,7 +90,6 @@ export default function AddHabitScreen() {
             start_date: startDate,
             end_date: hasEndDate && endDate ? endDate : null,
             days: selectedDays,
-            is_private: isPrivate,
         });
 
         setLoading(false);
