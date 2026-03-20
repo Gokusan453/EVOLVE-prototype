@@ -9,6 +9,9 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useCallback, useState } from 'react';
 import { Alert, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 
+const localDateStr = (d: Date) =>
+    `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+
 const DAYS_MAP = [
     { key: 'mon', label: 'M' },
     { key: 'tue', label: 'T' },
@@ -26,10 +29,8 @@ type Habit = {
     start_date: string;
     end_date: string | null;
     days: string[];
-    is_private: boolean;
 };
 
-type ChartPeriod = 'week' | 'month' | 'year';
 
 export default function HabitDetailScreen() {
     const { id } = useLocalSearchParams<{ id: string }>();
@@ -40,8 +41,8 @@ export default function HabitDetailScreen() {
     const [habit, setHabit] = useState<Habit | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [isDoneToday, setIsDoneToday] = useState(false);
-    const [chartData, setChartData] = useState<{ label: string; count: number }[]>([]);
-    const [chartPeriod, setChartPeriod] = useState<ChartPeriod>('week');
+    const [calendarMonth, setCalendarMonth] = useState(new Date());
+    const [calendarLogs, setCalendarLogs] = useState<Set<string>>(new Set());
 
     const fetchHabit = async () => {
         setIsLoading(true);
@@ -63,7 +64,7 @@ export default function HabitDetailScreen() {
         if (!user) return;
 
         // Check if done today
-        const today = new Date().toISOString().split('T')[0];
+        const today = localDateStr(new Date());
         const { data: todayLogs } = await supabase
             .from('habit_logs')
             .select('id')
@@ -75,77 +76,29 @@ export default function HabitDetailScreen() {
         setIsDoneToday((todayLogs?.length || 0) > 0);
     };
 
-    const fetchChartData = async () => {
+
+    const fetchCalendarLogs = async (monthDate: Date) => {
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) return;
 
-        const now = new Date();
-        let startDate: Date;
-        let labels: string[] = [];
+        const year = monthDate.getFullYear();
+        const month = monthDate.getMonth();
+        const firstDay = localDateStr(new Date(year, month, 1));
+        const lastDay = localDateStr(new Date(year, month + 1, 0));
 
-        if (chartPeriod === 'week') {
-            startDate = new Date();
-            startDate.setDate(now.getDate() - 6);
-            const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-            for (let i = 6; i >= 0; i--) {
-                const d = new Date();
-                d.setDate(now.getDate() - i);
-                labels.push(dayNames[d.getDay()]);
-            }
-        } else if (chartPeriod === 'month') {
-            startDate = new Date();
-            startDate.setDate(now.getDate() - 29);
-            for (let i = 3; i >= 0; i--) {
-                const weekStart = new Date();
-                weekStart.setDate(now.getDate() - (i * 7 + 6));
-                labels.push(`W${4 - i}`);
-            }
-        } else {
-            startDate = new Date();
-            startDate.setFullYear(now.getFullYear() - 1);
-            const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-            for (let i = 11; i >= 0; i--) {
-                const d = new Date();
-                d.setMonth(now.getMonth() - i);
-                labels.push(monthNames[d.getMonth()]);
-            }
-        }
-
-        const startStr = startDate.toISOString().split('T')[0];
         const { data: logs } = await supabase
             .from('habit_logs')
             .select('completed_at')
             .eq('habit_id', id)
             .eq('user_id', user.id)
-            .gte('completed_at', `${startStr}T00:00:00`);
+            .gte('completed_at', `${firstDay}T00:00:00`)
+            .lte('completed_at', `${lastDay}T23:59:59`);
 
-        if (chartPeriod === 'week') {
-            const counts: Record<string, number> = {};
-            labels.forEach((l) => (counts[l] = 0));
-            logs?.forEach((log) => {
-                const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-                const day = dayNames[new Date(log.completed_at).getDay()];
-                if (counts[day] !== undefined) counts[day]++;
-            });
-            setChartData(labels.map((l) => ({ label: l[0], count: counts[l] || 0 })));
-        } else if (chartPeriod === 'month') {
-            const weekCounts = [0, 0, 0, 0];
-            logs?.forEach((log) => {
-                const daysAgo = Math.floor((now.getTime() - new Date(log.completed_at).getTime()) / 86400000);
-                const weekIdx = Math.min(3, Math.floor(daysAgo / 7));
-                weekCounts[3 - weekIdx]++;
-            });
-            setChartData(labels.map((l, i) => ({ label: l, count: weekCounts[i] })));
-        } else {
-            const monthCounts: number[] = new Array(12).fill(0);
-            logs?.forEach((log) => {
-                const logDate = new Date(log.completed_at);
-                const monthsAgo = (now.getFullYear() - logDate.getFullYear()) * 12 + (now.getMonth() - logDate.getMonth());
-                const idx = 11 - Math.min(11, monthsAgo);
-                monthCounts[idx]++;
-            });
-            setChartData(labels.map((l, i) => ({ label: l[0], count: monthCounts[i] })));
-        }
+        const dates = new Set<string>();
+        logs?.forEach(log => {
+            dates.add(localDateStr(new Date(log.completed_at)));
+        });
+        setCalendarLogs(dates);
     };
 
     useFocusEffect(
@@ -155,11 +108,61 @@ export default function HabitDetailScreen() {
         }, [id])
     );
 
+
     useFocusEffect(
         useCallback(() => {
-            fetchChartData();
-        }, [id, chartPeriod])
+            fetchCalendarLogs(calendarMonth);
+        }, [id, calendarMonth])
     );
+
+    const buildCalendarDays = () => {
+        const year = calendarMonth.getFullYear();
+        const month = calendarMonth.getMonth();
+        const firstDayOfMonth = new Date(year, month, 1);
+        const lastDayOfMonth = new Date(year, month + 1, 0);
+        const daysInMonth = lastDayOfMonth.getDate();
+
+        // Monday = 0 offset
+        let startDay = firstDayOfMonth.getDay() - 1;
+        if (startDay < 0) startDay = 6;
+
+        const dayKeys = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
+        const today = localDateStr(new Date());
+        const cells: { date: string | null; status: 'done' | 'missed' | 'not_scheduled' | 'future' | null }[] = [];
+
+        // Empty cells before first day
+        for (let i = 0; i < startDay; i++) {
+            cells.push({ date: null, status: null });
+        }
+
+        for (let day = 1; day <= daysInMonth; day++) {
+            const d = new Date(year, month, day);
+            const dateStr = localDateStr(d);
+            const dayOfWeek = d.getDay();
+            const dayKey = dayKeys[dayOfWeek === 0 ? 6 : dayOfWeek - 1];
+            const isScheduled = habit?.days.includes(dayKey) ?? false;
+            const isDone = calendarLogs.has(dateStr);
+            const isFuture = dateStr > today;
+            const isBeforeStart = habit?.start_date ? dateStr < habit.start_date : false;
+
+            let status: 'done' | 'missed' | 'not_scheduled' | 'future';
+            if (isFuture || isBeforeStart) {
+                status = 'not_scheduled';
+            } else if (isDone) {
+                status = 'done';
+            } else if (isScheduled) {
+                status = 'missed';
+            } else {
+                status = 'not_scheduled';
+            }
+
+            cells.push({ date: String(day), status });
+        }
+
+        return cells;
+    };
+
+    const calendarMonthLabel = calendarMonth.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
 
     const { triggerFeedback } = useSettings();
 
@@ -173,9 +176,11 @@ export default function HabitDetailScreen() {
         const todayStart = new Date(now);
         todayStart.setHours(0, 0, 0, 0);
 
+        const todayStr = localDateStr(now);
+
         if (!habitItem.days.includes(getTodayKey())) return false;
-        if (habitItem.start_date && new Date(habitItem.start_date) > now) return false;
-        if (habitItem.end_date && new Date(habitItem.end_date) < todayStart) return false;
+        if (habitItem.start_date && habitItem.start_date > todayStr) return false;
+        if (habitItem.end_date && habitItem.end_date < todayStr) return false;
 
         return true;
     };
@@ -197,7 +202,7 @@ export default function HabitDetailScreen() {
         });
 
         setIsDoneToday(true);
-        fetchChartData();
+        fetchCalendarLogs(calendarMonth);
         triggerFeedback();
     };
 
@@ -225,9 +230,6 @@ export default function HabitDetailScreen() {
         });
     };
 
-    const maxCount = Math.max(1, ...chartData.map((d) => d.count));
-    const totalDone = chartData.reduce((a, b) => a + b.count, 0);
-    const totalPossible = chartPeriod === 'week' ? 7 : chartPeriod === 'month' ? 30 : 365;
     const canMarkToday = isScheduledForToday(habit);
 
     return (
@@ -251,17 +253,6 @@ export default function HabitDetailScreen() {
             </View>
 
             <ScrollView contentContainerStyle={styles.scrollContent}>
-                {/* Progress Bar */}
-                <View style={styles.progressCard}>
-                    <Text style={styles.progressText}>
-                        {chartPeriod === 'week' ? "This week's" : chartPeriod === 'month' ? "This month's" : "This year's"} progress
-                    </Text>
-                    <View style={styles.progressBarBg}>
-                        <View style={[styles.progressBarFill, {
-                            width: `${Math.min(100, (totalDone / totalPossible) * 100)}%`,
-                        }]} />
-                    </View>
-                </View>
 
                 {/* Info */}
                 <View style={styles.infoCard}>
@@ -294,34 +285,70 @@ export default function HabitDetailScreen() {
                     ))}
                 </View>
 
-                {/* Chart with filter */}
+                {/* Calendar */}
                 <View style={styles.chartCard}>
-                    <View style={styles.chartFilterRow}>
-                        {(['week', 'month', 'year'] as ChartPeriod[]).map((period) => (
-                            <TouchableOpacity
-                                key={period}
-                                style={[styles.chartFilterButton, chartPeriod === period && styles.chartFilterButtonActive]}
-                                onPress={() => setChartPeriod(period)}
-                            >
-                                <Text style={[styles.chartFilterText, chartPeriod === period && styles.chartFilterTextActive]}>
-                                    {period === 'week' ? 'Week' : period === 'month' ? 'Month' : 'Year'}
-                                </Text>
-                            </TouchableOpacity>
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+                        <TouchableOpacity onPress={() => {
+                            const prev = new Date(calendarMonth);
+                            prev.setMonth(prev.getMonth() - 1);
+                            const startMonth = new Date(habit.start_date);
+                            if (prev.getFullYear() > startMonth.getFullYear() || (prev.getFullYear() === startMonth.getFullYear() && prev.getMonth() >= startMonth.getMonth())) {
+                                setCalendarMonth(prev);
+                            }
+                        }}>
+                            <Ionicons name="chevron-back" size={22} color={colors.text} />
+                        </TouchableOpacity>
+                        <Text style={{ color: colors.text, fontWeight: '700', fontSize: 15 }}>{calendarMonthLabel}</Text>
+                        <TouchableOpacity onPress={() => {
+                            const next = new Date(calendarMonth);
+                            next.setMonth(next.getMonth() + 1);
+                            if (next <= new Date()) setCalendarMonth(next);
+                        }}>
+                            <Ionicons name="chevron-forward" size={22} color={colors.text} />
+                        </TouchableOpacity>
+                    </View>
+                    <View style={{ flexDirection: 'row', marginBottom: 6 }}>
+                        {['M', 'T', 'W', 'T', 'F', 'S', 'S'].map((d, i) => (
+                            <Text key={`hdr-${i}`} style={{ flex: 1, textAlign: 'center', fontSize: 11, fontWeight: '600', color: colors.textMuted }}>{d}</Text>
                         ))}
                     </View>
-                    <View style={styles.chartRow}>
-                        {chartData.map((bar, i) => (
-                            <View key={i} style={styles.chartBarContainer}>
-                                <View style={[
-                                    styles.chartBar,
-                                    bar.count > 0 ? { height: (bar.count / maxCount) * 80 } : styles.chartBarEmpty,
-                                    bar.count === 0 && { height: 4 },
-                                ]} />
-                                <Text style={styles.chartLabel}>{bar.label}</Text>
+                    <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
+                        {buildCalendarDays().map((cell, i) => (
+                            <View key={`cal-${i}`} style={{ width: '14.28%', alignItems: 'center', marginBottom: 6 }}>
+                                {cell.date ? (
+                                    <View style={{
+                                        width: 30, height: 30, borderRadius: 15,
+                                        alignItems: 'center', justifyContent: 'center',
+                                        backgroundColor:
+                                            cell.status === 'done' ? colors.primary :
+                                            cell.status === 'missed' ? colors.error + '30' :
+                                            'transparent',
+                                    }}>
+                                        <Text style={{
+                                            fontSize: 13, fontWeight: '500',
+                                            color:
+                                                cell.status === 'done' ? colors.onPrimary :
+                                                cell.status === 'missed' ? colors.error :
+                                                cell.status === 'future' ? colors.textMuted :
+                                                colors.textSecondary,
+                                        }}>{cell.date}</Text>
+                                    </View>
+                                ) : <View style={{ width: 30, height: 30 }} />}
                             </View>
                         ))}
                     </View>
+                    <View style={{ flexDirection: 'row', justifyContent: 'center', gap: 16, marginTop: 8 }}>
+                        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                            <View style={{ width: 10, height: 10, borderRadius: 5, backgroundColor: colors.primary }} />
+                            <Text style={{ fontSize: 11, color: colors.textSecondary }}>Done</Text>
+                        </View>
+                        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                            <View style={{ width: 10, height: 10, borderRadius: 5, backgroundColor: colors.error + '30' }} />
+                            <Text style={{ fontSize: 11, color: colors.textSecondary }}>Missed</Text>
+                        </View>
+                    </View>
                 </View>
+
 
                 {/* Mark as Done */}
                 <TouchableOpacity

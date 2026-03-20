@@ -79,15 +79,17 @@ export default function HomeScreen() {
         .select('*')
         .eq('user_id', user.id);
 
+      const todayStr = `${todayDate.getFullYear()}-${String(todayDate.getMonth() + 1).padStart(2, '0')}-${String(todayDate.getDate()).padStart(2, '0')}`;
+
       const activeHabits = (habitsData || []).filter(h => {
         if (!h.days.includes(todayName)) return false;
-        if (h.start_date && new Date(h.start_date) > todayDate) return false;
-        if (h.end_date && new Date(h.end_date) < todayStart) return false;
+        if (h.start_date && h.start_date > todayStr) return false;
+        if (h.end_date && h.end_date < todayStr) return false;
         return true;
       });
 
       // Today's habit logs
-      const today = new Date().toISOString().split('T')[0];
+      const today = todayStr;
       const { data: habitLogsToday } = await supabase
         .from('habit_logs')
         .select('habit_id')
@@ -118,8 +120,8 @@ export default function HomeScreen() {
 
       const activeChallenges = challengesData.filter(c => {
         if (!c.days.includes(todayName)) return false;
-        if (c.start_date && new Date(c.start_date) > todayDate) return false;
-        if (c.end_date && new Date(c.end_date) < todayStart) return false;
+        if (c.start_date && c.start_date > todayStr) return false;
+        if (c.end_date && c.end_date < todayStr) return false;
         return true;
       });
 

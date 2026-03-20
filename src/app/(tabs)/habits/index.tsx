@@ -49,7 +49,8 @@ export default function HabitsListScreen() {
             if (!habitsData) return;
 
             // Check which habits are done today
-            const today = new Date().toISOString().split('T')[0];
+            const now = new Date();
+            const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
             const { data: logsData } = await supabase
                 .from('habit_logs')
                 .select('habit_id')
@@ -72,13 +73,12 @@ export default function HabitsListScreen() {
 
     const isHabitScheduledToday = (habit: Habit) => {
         const now = new Date();
-        const todayStart = new Date(now);
-        todayStart.setHours(0, 0, 0, 0);
+        const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
         const todayDay = dayMap[now.getDay()];
 
         if (!habit.days.includes(todayDay)) return false;
-        if (habit.start_date && new Date(habit.start_date) > now) return false;
-        if (habit.end_date && new Date(habit.end_date) < todayStart) return false;
+        if (habit.start_date && habit.start_date > todayStr) return false;
+        if (habit.end_date && habit.end_date < todayStr) return false;
 
         return true;
     };
