@@ -9,6 +9,9 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useCallback, useState } from 'react';
 import { Alert, Image, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 
+const localDateStr = (d: Date) =>
+    `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+
 const DAYS_MAP = [
     { key: 'mon', label: 'M' },
     { key: 'tue', label: 'T' },
@@ -49,6 +52,7 @@ export default function ChallengeDetailScreen() {
     const [isJoined, setIsJoined] = useState(false);
     const [userId, setUserId] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(true);
+    const [calendarLogs, setCalendarLogs] = useState<Set<string>>(new Set());
 
     const fetchData = async () => {
         setIsLoading(true);
@@ -77,7 +81,7 @@ export default function ChallengeDetailScreen() {
             setIsJoined((myParticipation?.length || 0) > 0);
 
             // Check if done today
-            const today = new Date().toISOString().split('T')[0];
+            const today = localDateStr(new Date());
             const { data: todayLogs } = await supabase
                 .from('challenge_logs')
                 .select('id')
@@ -136,6 +140,79 @@ export default function ChallengeDetailScreen() {
             fetchData();
         }, [id])
     );
+
+    const fetchCalendarLogs = async () => {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user || !challenge) return;
+
+        const firstDay = localDateStr(new Date(challenge.year, challenge.month - 1, 1));
+        const lastDay = localDateStr(new Date(challenge.year, challenge.month, 0));
+
+        const { data: logs } = await supabase
+            .from('challenge_logs')
+            .select('completed_at')
+            .eq('challenge_id', id)
+            .eq('user_id', user.id)
+            .gte('completed_at', `${firstDay}T00:00:00`)
+            .lte('completed_at', `${lastDay}T23:59:59`);
+
+        const dates = new Set<string>();
+        logs?.forEach(log => {
+            dates.add(localDateStr(new Date(log.completed_at)));
+        });
+        setCalendarLogs(dates);
+    };
+
+    useFocusEffect(
+        useCallback(() => {
+            if (challenge) fetchCalendarLogs();
+        }, [id, challenge])
+    );
+
+    const buildCalendarDays = () => {
+        if (!challenge) return [];
+        const year = challenge.year;
+        const month = challenge.month - 1; // JS months are 0-indexed
+        const firstDayOfMonth = new Date(year, month, 1);
+        const lastDayOfMonth = new Date(year, month + 1, 0);
+        const daysInMonth = lastDayOfMonth.getDate();
+
+        let startDay = firstDayOfMonth.getDay() - 1;
+        if (startDay < 0) startDay = 6;
+
+        const dayKeys = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
+        const today = localDateStr(new Date());
+        const cells: { date: string | null; status: 'done' | 'missed' | 'not_scheduled' | 'future' | null }[] = [];
+
+        for (let i = 0; i < startDay; i++) {
+            cells.push({ date: null, status: null });
+        }
+
+        for (let day = 1; day <= daysInMonth; day++) {
+            const d = new Date(year, month, day);
+            const dateStr = localDateStr(d);
+            const dayOfWeek = d.getDay();
+            const dayKey = dayKeys[dayOfWeek === 0 ? 6 : dayOfWeek - 1];
+            const isScheduled = challenge.days.includes(dayKey);
+            const isDone = calendarLogs.has(dateStr);
+            const isFuture = dateStr > today;
+
+            let status: 'done' | 'missed' | 'not_scheduled' | 'future';
+            if (isFuture) {
+                status = 'not_scheduled';
+            } else if (isDone) {
+                status = 'done';
+            } else if (isScheduled) {
+                status = 'missed';
+            } else {
+                status = 'not_scheduled';
+            }
+
+            cells.push({ date: String(day), status });
+        }
+
+        return cells;
+    };
 
     const getTodayKey = () => {
         const keys = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
@@ -287,6 +364,100 @@ export default function ChallengeDetailScreen() {
                     ))}
                 </View>
 
+                {/* Calendar */}
+                {isJoined && (
+                    <View style={styles.leaderboardCard}>
+                        <Text style={{ color: colors.text, fontWeight: '700', fontSize: 15, textAlign: 'center', marginBottom: 12 }}>
+                            {getMonthLabel().charAt(0).toUpperCase() + getMonthLabel().slice(1)}
+                        </Text>
+                        <View style={{ flexDirection: 'row', marginBottom: 6 }}>
+                            {['M', 'T', 'W', 'T', 'F', 'S', 'S'].map((d, i) => (
+                                <Text key={`hdr-${i}`} style={{ flex: 1, textAlign: 'center', fontSize: 11, fontWeight: '600', color: colors.textMuted }}>{d}</Text>
+                            ))}
+                        </View>
+                        <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
+                            {buildCalendarDays().map((cell, i) => (
+                                <View key={`cal-${i}`} style={{ width: '14.28%', alignItems: 'center', marginBottom: 6 }}>
+                                    {cell.date ? (
+                                        <View style={{
+                                            width: 30, height: 30, borderRadius: 15,
+                                            alignItems: 'center', justifyContent: 'center',
+                                            backgroundColor:
+                                                cell.status === 'done' ? colors.primary :
+                                                cell.status === 'missed' ? colors.error + '30' :
+                                                'transparent',
+                                        }}>
+                                            <Text style={{
+                                                fontSize: 13, fontWeight: '500',
+                                                color:
+                                                    cell.status === 'done' ? colors.onPrimary :
+                                                    cell.status === 'missed' ? colors.error :
+                                                    colors.textSecondary,
+                                            }}>{cell.date}</Text>
+                                        </View>
+                                    ) : <View style={{ width: 30, height: 30 }} />}
+                                </View>
+                            ))}
+                        </View>
+                        <View style={{ flexDirection: 'row', justifyContent: 'center', gap: 16, marginTop: 8 }}>
+                            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                                <View style={{ width: 10, height: 10, borderRadius: 5, backgroundColor: colors.primary }} />
+                                <Text style={{ fontSize: 11, color: colors.textSecondary }}>Done</Text>
+                            </View>
+                            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                                <View style={{ width: 10, height: 10, borderRadius: 5, backgroundColor: colors.error + '30' }} />
+                                <Text style={{ fontSize: 11, color: colors.textSecondary }}>Missed</Text>
+                            </View>
+                        </View>
+                    </View>
+                )}
+
+                {/* Mark as Done / Join */}
+                {isJoined ? (
+                    <TouchableOpacity
+                        style={[styles.doneButton, (isDoneToday || !canMarkToday) && styles.doneButtonCompleted]}
+                        onPress={handleMarkDone}
+                        disabled={isDoneToday || !canMarkToday}
+                    >
+                        <Text style={styles.doneButtonText}>
+                            {isDoneToday ? 'Done for today ✓' : canMarkToday ? 'Mark as done' : 'Not scheduled today'}
+                        </Text>
+                    </TouchableOpacity>
+                ) : (
+                    <TouchableOpacity
+                        style={styles.doneButton}
+                        onPress={async () => {
+                            if (!userId) return;
+
+                            const { error: resetError } = await supabase
+                                .from('challenge_logs')
+                                .delete()
+                                .eq('challenge_id', id)
+                                .eq('user_id', userId);
+
+                            if (resetError) {
+                                Alert.alert('Could not reset progress', resetError.message);
+                                return;
+                            }
+
+                            const { error: joinError } = await supabase.from('challenge_participants').insert({
+                                challenge_id: id,
+                                user_id: userId,
+                            });
+
+                            if (joinError) {
+                                Alert.alert('Could not join challenge', joinError.message);
+                                return;
+                            }
+
+                            setIsJoined(true);
+                            fetchData();
+                        }}
+                    >
+                        <Text style={styles.doneButtonText}>Join challenge</Text>
+                    </TouchableOpacity>
+                )}
+
                 {/* Leaderboard */}
                 <View style={styles.leaderboardCard}>
                     <Text style={styles.leaderboardTitle}>🏆 Leaderboard</Text>
@@ -318,52 +489,7 @@ export default function ChallengeDetailScreen() {
                     )}
                 </View>
 
-                {/* Mark as Done / Join */}
-                {isJoined ? (
-                    <TouchableOpacity
-                        style={[styles.doneButton, (isDoneToday || !canMarkToday) && styles.doneButtonCompleted]}
-                        onPress={handleMarkDone}
-                        disabled={isDoneToday || !canMarkToday}
-                    >
-                        <Text style={styles.doneButtonText}>
-                            {isDoneToday ? 'Done for today ✓' : canMarkToday ? 'Mark as done' : 'Not scheduled today'}
-                        </Text>
-                    </TouchableOpacity>
-                ) : (
-                    <TouchableOpacity
-                        style={styles.doneButton}
-                        onPress={async () => {
-                            if (!userId) return;
 
-                            // Rejoin should always start from zero score for this challenge.
-                            const { error: resetError } = await supabase
-                                .from('challenge_logs')
-                                .delete()
-                                .eq('challenge_id', id)
-                                .eq('user_id', userId);
-
-                            if (resetError) {
-                                Alert.alert('Could not reset progress', resetError.message);
-                                return;
-                            }
-
-                            const { error: joinError } = await supabase.from('challenge_participants').insert({
-                                challenge_id: id,
-                                user_id: userId,
-                            });
-
-                            if (joinError) {
-                                Alert.alert('Could not join challenge', joinError.message);
-                                return;
-                            }
-
-                            setIsJoined(true);
-                            fetchData();
-                        }}
-                    >
-                        <Text style={styles.doneButtonText}>Join challenge</Text>
-                    </TouchableOpacity>
-                )}
             </ScrollView>
         </View>
     );

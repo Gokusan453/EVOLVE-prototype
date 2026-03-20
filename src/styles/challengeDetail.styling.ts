@@ -181,6 +181,7 @@ export const createChallengeDetailStyles = (colors: any) =>
             borderRadius: 12,
             alignItems: 'center',
             marginTop: 8,
+            marginBottom: 32,
         },
         doneButtonCompleted: {
             backgroundColor: colors.border,
