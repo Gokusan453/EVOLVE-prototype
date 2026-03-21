@@ -316,13 +316,6 @@ export default function ChallengeDetailScreen() {
         return d.toLocaleDateString('nl-NL', { month: 'long', year: 'numeric' });
     };
 
-    const getRankStyle = (rank: number) => {
-        if (rank === 1) return styles.rankGold;
-        if (rank === 2) return styles.rankSilver;
-        if (rank === 3) return styles.rankBronze;
-        return styles.rankDefault;
-    };
-
     return (
         <View style={styles.container}>
             {/* Header */}

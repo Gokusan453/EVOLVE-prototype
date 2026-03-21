@@ -146,31 +146,6 @@ export const createChallengeDetailStyles = (colors: any) =>
         leaderboardRowLast: {
             borderBottomWidth: 0,
         },
-        rankCircle: {
-            width: 28,
-            height: 28,
-            borderRadius: 14,
-            alignItems: 'center',
-            justifyContent: 'center',
-            marginRight: 12,
-        },
-        rankGold: {
-            backgroundColor: colors.warning,
-        },
-        rankSilver: {
-            backgroundColor: colors.rankSilver,
-        },
-        rankBronze: {
-            backgroundColor: colors.rankBronze,
-        },
-        rankDefault: {
-            backgroundColor: colors.border,
-        },
-        rankText: {
-            fontSize: 13,
-            fontWeight: 'bold',
-            color: colors.onPrimary,
-        },
         leaderboardName: {
             flex: 1,
             fontSize: 14,
