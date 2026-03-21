@@ -300,11 +300,11 @@ export default function FriendsScreen() {
             </View>
             {isFriend(item.id) ? (
                 <View style={[styles.actionButton, styles.pendingButton]}>
-                    <Text style={styles.actionButtonText}>Friends</Text>
+                    <Text style={styles.actionButtonTextMuted}>Friends</Text>
                 </View>
             ) : hasSentRequest(item.id) ? (
                 <View style={[styles.actionButton, styles.pendingButton]}>
-                    <Text style={styles.actionButtonText}>Pending</Text>
+                    <Text style={styles.actionButtonTextMuted}>Pending</Text>
                 </View>
             ) : (
                 <TouchableOpacity style={[styles.actionButton, styles.addButton]} onPress={() => sendRequest(item.id)}>

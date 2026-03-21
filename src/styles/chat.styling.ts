@@ -1,4 +1,5 @@
 import { StyleSheet } from 'react-native';
+import { createButtonStyles } from './buttons.styling';
 
 export const createChatStyles = (colors: any) =>
     StyleSheet.create({
@@ -122,14 +123,10 @@ export const createChatStyles = (colors: any) =>
         },
         sendButton: {
             marginLeft: 8,
-            width: 42,
-            height: 42,
-            borderRadius: 21,
-            backgroundColor: colors.primary,
-            alignItems: 'center',
-            justifyContent: 'center',
+            ...createButtonStyles(colors).iconActionCompactRound,
+            ...createButtonStyles(colors).iconActionPrimary,
         },
         sendButtonDisabled: {
-            backgroundColor: colors.border,
+            ...createButtonStyles(colors).smallActionMuted,
         },
     });

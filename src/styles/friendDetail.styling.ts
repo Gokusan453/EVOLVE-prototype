@@ -1,4 +1,5 @@
 import { StyleSheet } from 'react-native';
+import { createButtonStyles } from './buttons.styling';
 
 export const createFriendDetailStyles = (colors: any) =>
     StyleSheet.create({
@@ -224,15 +225,11 @@ export const createFriendDetailStyles = (colors: any) =>
 
         // Remove button
         removeButton: {
-            backgroundColor: colors.error,
-            paddingVertical: 16,
-            borderRadius: 12,
-            alignItems: 'center',
+            ...createButtonStyles(colors).ctaButton,
+            ...createButtonStyles(colors).ctaDanger,
             marginTop: 16,
         },
         removeText: {
-            color: colors.onError,
-            fontSize: 16,
-            fontWeight: '600',
+            ...createButtonStyles(colors).textOnError,
         },
     });

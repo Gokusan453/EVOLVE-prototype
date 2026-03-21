@@ -31,6 +31,13 @@ export const createButtonStyles = (colors: Palette) => ({
         borderWidth: 1,
         borderColor: colors.border,
     },
+    iconActionCompactRound: {
+        width: 42,
+        height: 42,
+        borderRadius: 21,
+        alignItems: 'center' as const,
+        justifyContent: 'center' as const,
+    },
 
     smallAction: {
         paddingVertical: 9,
@@ -41,6 +48,9 @@ export const createButtonStyles = (colors: Palette) => ({
     },
     smallActionPrimary: {
         backgroundColor: colors.primary,
+    },
+    smallActionDanger: {
+        backgroundColor: colors.error,
     },
     smallActionMuted: {
         backgroundColor: colors.border,

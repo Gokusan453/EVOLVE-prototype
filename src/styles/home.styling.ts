@@ -188,27 +188,20 @@ export const createHomeStyles = (colors: any) =>
             gap: 10,
         },
         emptyPrimaryButton: {
-            backgroundColor: colors.primary,
-            paddingHorizontal: 16,
-            paddingVertical: 10,
-            borderRadius: 12,
+            ...createButtonStyles(colors).smallAction,
+            ...createButtonStyles(colors).smallActionPrimary,
         },
         emptyPrimaryButtonText: {
-            color: colors.onPrimary,
-            fontWeight: '600',
+            ...createButtonStyles(colors).textOnPrimary,
             fontSize: 13,
         },
         emptySecondaryButton: {
-            backgroundColor: colors.surface,
-            borderWidth: 1,
-            borderColor: colors.border,
+            ...createButtonStyles(colors).smallAction,
+            ...createButtonStyles(colors).ctaOutlineNeutral,
             paddingHorizontal: 14,
-            paddingVertical: 10,
-            borderRadius: 12,
         },
         emptySecondaryButtonText: {
-            color: colors.text,
-            fontWeight: '600',
+            ...createButtonStyles(colors).textPrimary,
             fontSize: 13,
         },
 

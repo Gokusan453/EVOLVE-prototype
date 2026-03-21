@@ -1,4 +1,5 @@
 import { StyleSheet } from 'react-native';
+import { createButtonStyles } from './buttons.styling';
 
 export const createEditProfileStyles = (colors: any) =>
     StyleSheet.create({
@@ -52,15 +53,14 @@ export const createEditProfileStyles = (colors: any) =>
         },
         changePhotoButton: {
             marginTop: 12,
-            paddingVertical: 8,
+            ...createButtonStyles(colors).smallAction,
+            ...createButtonStyles(colors).smallActionPrimary,
             paddingHorizontal: 20,
             borderRadius: 20,
-            backgroundColor: colors.primary,
         },
         changePhotoText: {
-            color: colors.onPrimary,
+            ...createButtonStyles(colors).textOnPrimary,
             fontSize: 14,
-            fontWeight: '600',
         },
 
         // Form
@@ -86,10 +86,8 @@ export const createEditProfileStyles = (colors: any) =>
 
         // Save
         saveButton: {
-            backgroundColor: colors.primary,
-            paddingVertical: 16,
-            borderRadius: 12,
-            alignItems: 'center',
+            ...createButtonStyles(colors).ctaButton,
+            ...createButtonStyles(colors).ctaPrimary,
             marginTop: 32,
             width: '100%',
         },
@@ -97,9 +95,8 @@ export const createEditProfileStyles = (colors: any) =>
             opacity: 0.6,
         },
         saveButtonText: {
-            color: colors.onPrimary,
+            ...createButtonStyles(colors).textOnPrimary,
             fontSize: 16,
-            fontWeight: '600',
         },
         errorText: {
             color: colors.error,

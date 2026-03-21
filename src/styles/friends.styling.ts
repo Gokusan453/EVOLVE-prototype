@@ -1,4 +1,5 @@
 import { StyleSheet } from 'react-native';
+import { createButtonStyles } from './buttons.styling';
 
 export const createFriendsStyles = (colors: any) =>
     StyleSheet.create({
@@ -110,28 +111,31 @@ export const createFriendsStyles = (colors: any) =>
 
         // Action buttons
         actionButton: {
-            paddingVertical: 8,
-            paddingHorizontal: 16,
-            borderRadius: 8,
+            ...createButtonStyles(colors).smallAction,
             marginLeft: 8,
         },
         addButton: {
-            backgroundColor: colors.primary,
+            ...createButtonStyles(colors).smallActionPrimary,
         },
         acceptButton: {
-            backgroundColor: colors.primary,
+            ...createButtonStyles(colors).smallActionPrimary,
         },
         rejectButton: {
-            backgroundColor: colors.error,
+            ...createButtonStyles(colors).smallActionDanger,
         },
         removeButton: {
-            backgroundColor: colors.border,
+            ...createButtonStyles(colors).smallActionMuted,
         },
         pendingButton: {
-            backgroundColor: colors.border,
+            ...createButtonStyles(colors).smallActionMuted,
         },
         actionButtonText: {
             color: colors.onPrimary,
+            fontSize: 12,
+            fontWeight: '600',
+        },
+        actionButtonTextMuted: {
+            color: colors.textSecondary,
             fontSize: 12,
             fontWeight: '600',
         },

@@ -1,5 +1,6 @@
 import { LightColors } from '@/constants/theme';
 import { StyleSheet } from 'react-native';
+import { createButtonStyles } from './buttons.styling';
 
 type AppColors = typeof LightColors;
 
@@ -141,14 +142,13 @@ export const createOnboardingStyles = (colors: AppColors) => StyleSheet.create({
         flex: 1,
     },
     primaryButton: {
-        backgroundColor: colors.primary,
-        borderRadius: 12,
+        ...createButtonStyles(colors).ctaButton,
+        ...createButtonStyles(colors).ctaPrimary,
         paddingVertical: 15,
-        alignItems: 'center',
         marginBottom: 10,
     },
     primaryButtonText: {
-        color: colors.onPrimary,
+        ...createButtonStyles(colors).textOnPrimary,
         fontSize: 16,
         fontWeight: '700',
     },
