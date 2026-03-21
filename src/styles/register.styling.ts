@@ -1,5 +1,6 @@
 import { Colors } from '@/constants/theme';
 import { StyleSheet } from 'react-native';
+import { createButtonStyles } from './buttons.styling';
 
 export const registerStyles = StyleSheet.create({
     container: {
@@ -54,19 +55,16 @@ export const registerStyles = StyleSheet.create({
         padding: 6,
     },
     button: {
-        backgroundColor: Colors.primary,
-        paddingVertical: 16,
-        borderRadius: 12,
-        alignItems: 'center',
+        ...createButtonStyles(Colors).ctaButton,
+        ...createButtonStyles(Colors).ctaPrimary,
         marginTop: 8,
     },
     buttonDisabled: {
         opacity: 0.6,
     },
     buttonText: {
-        color: Colors.onPrimary,
+        ...createButtonStyles(Colors).textOnPrimary,
         fontSize: 16,
-        fontWeight: '600',
     },
     footer: {
         flexDirection: 'row',
