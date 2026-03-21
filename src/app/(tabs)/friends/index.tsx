@@ -206,13 +206,6 @@ export default function FriendsScreen() {
         await supabase.from('friendships').delete().eq('id', friendshipId);
     };
 
-    const removeFriend = async (friendshipId: string) => {
-        // Remove from friends instantly
-        setFriends((prev) => prev.filter((f) => f.friendshipId !== friendshipId));
-        triggerFeedback();
-        await supabase.from('friendships').delete().eq('id', friendshipId);
-    };
-
     const getInitials = (profile: UserProfile) =>
         `${profile.first_name?.[0] || ''}${profile.last_name?.[0] || ''}`.toUpperCase() || '?';
 

@@ -175,34 +175,6 @@ export default function ChallengesListScreen() {
         fetchChallenges();
     };
 
-    const handleLeave = async (challengeId: string) => {
-        if (!userId) return;
-
-        const { error: logsDeleteError } = await supabase
-            .from('challenge_logs')
-            .delete()
-            .eq('challenge_id', challengeId)
-            .eq('user_id', userId);
-
-        if (logsDeleteError) {
-            Alert.alert('Could not reset progress', logsDeleteError.message);
-            return;
-        }
-
-        const { error: leaveError } = await supabase
-            .from('challenge_participants')
-            .delete()
-            .eq('challenge_id', challengeId)
-            .eq('user_id', userId);
-
-        if (leaveError) {
-            Alert.alert('Could not leave challenge', leaveError.message);
-            return;
-        }
-
-        fetchChallenges();
-    };
-
     const notJoined = challenges.filter((c) => !c.is_joined);
     const joined = challenges.filter((c) => c.is_joined);
 

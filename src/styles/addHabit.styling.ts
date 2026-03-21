@@ -52,22 +52,9 @@ export const createAddHabitStyles = (colors: any) =>
             alignItems: 'center',
             justifyContent: 'space-between',
         },
-        dateInput: {
-            backgroundColor: colors.surface,
-            borderWidth: 1,
-            borderColor: colors.border,
-            borderRadius: 12,
-            paddingHorizontal: 16,
-            paddingVertical: 14,
-            flex: 1,
-        },
         dateText: {
             fontSize: 16,
             color: colors.text,
-        },
-        datePlaceholder: {
-            fontSize: 16,
-            color: colors.textMuted,
         },
 
         // Days selector

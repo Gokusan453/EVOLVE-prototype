@@ -1,7 +1,6 @@
 import { ListPageSkeleton } from '@/components/Skeletons';
 import { useSettings } from '@/contexts/SettingsContext';
 import { useTheme } from '@/contexts/ThemeContext';
-import { calculateStreak } from '@/lib/gamification';
 import { supabase } from '@/lib/supabase';
 import { createHomeStyles } from '@/styles/home.styling';
 import { Ionicons } from '@expo/vector-icons';
@@ -39,7 +38,6 @@ export default function HomeScreen() {
 
   // To-do items (not done today)
   const [todos, setTodos] = useState<TodoItem[]>([]);
-  const [streak, setStreak] = useState(0);
 
   const [isInitialLoading, setIsInitialLoading] = useState(true);
   const hasLoadedOnceRef = useRef(false);
@@ -60,12 +58,6 @@ export default function HomeScreen() {
         .eq('id', user.id)
         .single();
       if (profileData) setProfile(profileData);
-
-      // Streak
-      const s = await calculateStreak(user.id);
-      setStreak(s);
-
-
 
       const todayDate = new Date();
       const dayKeys = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];

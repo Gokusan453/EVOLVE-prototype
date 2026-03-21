@@ -33,9 +33,6 @@ export const LightColors = {
     successSoft: '#86EFAc',
     successSoftBorder: '#4ADE80',
     successSoftText: '#166534',
-
-    rankSilver: '#9CA3AF',
-    rankBronze: '#D97706',
 } as const;
 
 export const DarkColors = {
@@ -69,9 +66,6 @@ export const DarkColors = {
     successSoft: '#86EFAc',
     successSoftBorder: '#4ADE80',
     successSoftText: '#166534',
-
-    rankSilver: '#9CA3AF',
-    rankBronze: '#D97706',
 } as const;
 
 // Default export for backwards compatibility
