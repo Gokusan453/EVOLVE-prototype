@@ -170,6 +170,12 @@ export default function FriendsScreen() {
         setSearchResults(data || []);
     };
 
+    const clearSearch = () => {
+        setSearchQuery('');
+        setSearchResults([]);
+        setIsSearching(false);
+    };
+
     const sendRequest = async (receiverId: string) => {
         if (!userId) return;
         await supabase.from('friendships').insert({
@@ -326,14 +332,26 @@ export default function FriendsScreen() {
 
             {/* Search bar — always visible */}
             <View style={styles.searchContainer}>
-                <TextInput
-                    style={styles.searchInput}
-                    placeholder="Search users..."
-                    placeholderTextColor={colors.textMuted}
-                    value={searchQuery}
-                    onChangeText={handleSearch}
-                    autoCapitalize="none"
-                />
+                <View style={styles.searchInputWrap}>
+                    <TextInput
+                        style={styles.searchInput}
+                        placeholder="Search users..."
+                        placeholderTextColor={colors.textMuted}
+                        value={searchQuery}
+                        onChangeText={handleSearch}
+                        autoCapitalize="none"
+                    />
+                    {searchQuery.length > 0 ? (
+                        <TouchableOpacity
+                            style={styles.searchClearButton}
+                            onPress={clearSearch}
+                            accessibilityRole="button"
+                            accessibilityLabel="Clear search"
+                        >
+                            <Ionicons name="close" size={16} color={colors.textMuted} />
+                        </TouchableOpacity>
+                    ) : null}
+                </View>
             </View>
 
             {/* Show search results when typing */}

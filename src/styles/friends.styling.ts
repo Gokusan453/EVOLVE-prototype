@@ -49,15 +49,32 @@ export const createFriendsStyles = (colors: any) =>
             paddingHorizontal: 20,
             marginBottom: 16,
         },
+        searchInputWrap: {
+            position: 'relative',
+            justifyContent: 'center',
+        },
         searchInput: {
             backgroundColor: colors.surface,
             borderWidth: 1,
             borderColor: colors.border,
             borderRadius: 12,
             paddingHorizontal: 16,
+            paddingRight: 42,
             paddingVertical: 12,
             fontSize: 15,
             color: colors.text,
+        },
+        searchClearButton: {
+            position: 'absolute',
+            right: 12,
+            width: 24,
+            height: 24,
+            borderRadius: 12,
+            alignItems: 'center',
+            justifyContent: 'center',
+            backgroundColor: colors.background,
+            borderWidth: 1,
+            borderColor: colors.border,
         },
 
         // User cards
