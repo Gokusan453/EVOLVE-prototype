@@ -70,8 +70,6 @@ export default function HomeScreen() {
       const todayDate = new Date();
       const dayKeys = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
       const todayName = dayKeys[todayDate.getDay()];
-      const todayStart = new Date(todayDate);
-      todayStart.setHours(0, 0, 0, 0);
 
       // ── HABITS ──
       const { data: habitsData } = await supabase
@@ -207,7 +205,7 @@ export default function HomeScreen() {
             <Text style={styles.avatarText}>{getInitials()}</Text>
           </View>
         )}
-        <View style={{ flex: 1, marginHorizontal: 10 }}>
+        <View style={styles.headerInfoWrap}>
           <Text style={styles.greeting}>Welcome back,</Text>
           <Text style={styles.userName} numberOfLines={1}>
             {profile ? `${profile.first_name} ${profile.last_name}` : '...'}
@@ -227,7 +225,7 @@ export default function HomeScreen() {
           onPress={() => router.push('/(tabs)/habits')}
         >
           <View style={styles.summaryHeader}>
-            <View style={{ flex: 1 }}>
+            <View style={styles.summaryContent}>
               <Text style={styles.summaryName}>Habits</Text>
               <Text style={styles.summaryInfo}>Your daily habits</Text>
               <Text style={styles.progressText}>{habitsDone}/{habitsTotal} done</Text>
@@ -244,7 +242,7 @@ export default function HomeScreen() {
           onPress={() => router.push('/(tabs)/challenges')}
         >
           <View style={styles.summaryHeader}>
-            <View style={{ flex: 1 }}>
+            <View style={styles.summaryContent}>
               <Text style={styles.summaryName}>Challenges</Text>
               <Text style={styles.summaryInfo}>Your active challenges</Text>
               <Text style={styles.progressText}>{challengesDone}/{challengesTotal} done</Text>
@@ -263,9 +261,9 @@ export default function HomeScreen() {
           habitsTotal === 0 && challengesTotal === 0 ? (
             /* No habits or challenges created yet */
             <View style={styles.emptyBox}>
-              <Text style={{ fontSize: 36 }}>🌱</Text>
-              <Text style={[styles.emptyText, { marginTop: 8, fontWeight: '700', fontSize: 17 }]}>Start your Evolve journey!</Text>
-              <Text style={[styles.emptyText, { marginTop: 4, fontSize: 13, textAlign: 'center' }]}>Start by creating a habit or explore challenges to join.</Text>
+              <Text style={styles.emptyEmoji}>🌱</Text>
+              <Text style={styles.emptyTitle}>Start your Evolve journey!</Text>
+              <Text style={styles.emptySubtitle}>Start by creating a habit or explore challenges to join.</Text>
               <View style={styles.emptyActionsRow}>
                 <TouchableOpacity
                   style={styles.emptyPrimaryButton}
@@ -286,13 +284,13 @@ export default function HomeScreen() {
             /* All habits/challenges done for today */
             <View style={styles.emptyBox}>
               <Ionicons name="checkmark-circle" size={40} color={colors.primary} />
-              <Text style={[styles.emptyText, { marginTop: 8 }]}>You're all caught up for today!</Text>
+              <Text style={styles.emptyDoneText}>You're all caught up for today!</Text>
             </View>
           )
         ) : (
           todos.map((item) => (
             <View key={`todo-${item.id}`} style={styles.todoCard}>
-              <View style={{ flex: 1, paddingRight: 12 }}>
+              <View style={styles.todoContent}>
                 <Text style={styles.todoName}>{item.name}</Text>
                 {item.description ? (
                   <Text style={styles.todoDescription} numberOfLines={1}>{item.description}</Text>

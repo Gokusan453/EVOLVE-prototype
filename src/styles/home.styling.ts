@@ -1,4 +1,5 @@
 import { StyleSheet } from 'react-native';
+import { createButtonStyles } from './buttons.styling';
 
 export const createHomeStyles = (colors: any) =>
     StyleSheet.create({
@@ -9,18 +10,21 @@ export const createHomeStyles = (colors: any) =>
         },
         header: {
             flexDirection: 'row',
-            justifyContent: 'space-between',
             alignItems: 'center',
             paddingHorizontal: 20,
-            marginBottom: 20,
+            marginBottom: 30,
+            gap: 10,
+        },
+        headerInfoWrap: {
+            flex: 1,
         },
         greeting: {
-            fontSize: 16,
+            fontSize: 15,
             color: colors.textSecondary,
-            marginBottom: 4,
+            marginBottom: 2,
         },
         userName: {
-            fontSize: 24,
+            fontSize: 22,
             fontWeight: 'bold',
             color: colors.text,
         },
@@ -43,8 +47,8 @@ export const createHomeStyles = (colors: any) =>
             fontWeight: 'bold',
         },
         scrollContent: {
-            paddingHorizontal: 20,
-            paddingBottom: 40,
+            paddingHorizontal: 22,
+            paddingBottom: 56,
         },
         sectionTitle: {
             fontSize: 18,
@@ -53,19 +57,21 @@ export const createHomeStyles = (colors: any) =>
             marginBottom: 12,
         },
 
-        // ── Summary cards (top) ──
         summaryCard: {
             backgroundColor: colors.surface,
             borderWidth: 1,
             borderColor: colors.border,
-            borderRadius: 12,
-            padding: 16,
-            marginBottom: 12,
+            borderRadius: 14,
+            padding: 18,
+            marginBottom: 14,
         },
         summaryHeader: {
             flexDirection: 'row',
             alignItems: 'center',
-            marginBottom: 12,
+            marginBottom: 10,
+        },
+        summaryContent: {
+            flex: 1,
         },
         summaryName: {
             fontSize: 16,
@@ -75,8 +81,8 @@ export const createHomeStyles = (colors: any) =>
         summaryInfo: {
             fontSize: 14,
             color: colors.textSecondary,
-            marginTop: 2,
-            marginBottom: 8,
+            marginTop: 4,
+            marginBottom: 10,
         },
         progressText: {
             fontSize: 13,
@@ -98,25 +104,27 @@ export const createHomeStyles = (colors: any) =>
             borderRadius: 4,
         },
 
-        // ── Separator ──
         dottedSeparator: {
             height: 1,
             borderWidth: 1,
             borderColor: colors.border,
             borderStyle: 'dashed',
-            marginVertical: 24,
+            marginVertical: 26,
         },
 
-        // ── To-do cards (bottom) ──
         todoCard: {
             backgroundColor: colors.surface,
             borderWidth: 1,
             borderColor: colors.border,
-            borderRadius: 12,
-            padding: 16,
-            marginBottom: 12,
+            borderRadius: 14,
+            padding: 18,
+            marginBottom: 14,
             flexDirection: 'row',
             alignItems: 'center',
+        },
+        todoContent: {
+            flex: 1,
+            paddingRight: 12,
         },
         todoName: {
             fontSize: 16,
@@ -129,12 +137,8 @@ export const createHomeStyles = (colors: any) =>
             marginTop: 2,
         },
         markDoneBtn: {
-            backgroundColor: colors.successSoft,
-            borderWidth: 1,
-            borderColor: colors.successSoftBorder,
-            paddingHorizontal: 16,
-            paddingVertical: 10,
-            borderRadius: 8,
+            ...createButtonStyles(colors).smallAction,
+            ...createButtonStyles(colors).smallActionSoft,
         },
         markDoneText: {
             color: colors.successSoftText,
@@ -143,21 +147,44 @@ export const createHomeStyles = (colors: any) =>
         },
         emptyBox: {
             backgroundColor: colors.surface,
-            padding: 24,
-            borderRadius: 12,
+            paddingVertical: 28,
+            paddingHorizontal: 24,
+            borderRadius: 14,
             alignItems: 'center',
             justifyContent: 'center',
             borderWidth: 1,
             borderColor: colors.border,
             borderStyle: 'dashed',
         },
+        emptyEmoji: {
+            fontSize: 42,
+        },
+        emptyTitle: {
+            color: colors.text,
+            fontSize: 18,
+            fontWeight: '700',
+            marginTop: 10,
+            textAlign: 'center',
+        },
+        emptySubtitle: {
+            color: colors.textSecondary,
+            fontSize: 13,
+            marginTop: 6,
+            textAlign: 'center',
+            lineHeight: 18,
+        },
         emptyText: {
             color: colors.textSecondary,
             fontSize: 15,
         },
+        emptyDoneText: {
+            color: colors.textSecondary,
+            fontSize: 15,
+            marginTop: 10,
+        },
         emptyActionsRow: {
             flexDirection: 'row',
-            marginTop: 14,
+            marginTop: 16,
             gap: 10,
         },
         emptyPrimaryButton: {
@@ -185,7 +212,6 @@ export const createHomeStyles = (colors: any) =>
             fontSize: 13,
         },
 
-        // ── AI Chat FAB ──
         fabPill: {
             position: 'absolute',
             bottom: 24,
@@ -196,10 +222,10 @@ export const createHomeStyles = (colors: any) =>
             borderRadius: 20,
             borderWidth: 1.5,
             borderColor: '#4ade80',
-            shadowColor: '#000',
+            shadowColor: '#86f6ae',
             shadowOffset: { width: 0, height: 3 },
-            shadowOpacity: 0.15,
-            shadowRadius: 6,
+            shadowOpacity: 0.9,
+            shadowRadius: 11,
             elevation: 5,
         },
         fabPillText: {

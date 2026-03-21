@@ -212,11 +212,11 @@ export default function ChallengesListScreen() {
 
     return (
         <View style={styles.container}>
-            <View style={{ position: 'relative', justifyContent: 'center', alignItems: 'center', marginBottom: 16 }}>
+            <View style={styles.headerWrap}>
                 <Text style={styles.header}>Challenges</Text>
                 {userRole === 'admin' && (
                     <TouchableOpacity
-                        style={{ position: 'absolute', right: 20, top: -4, width: 36, height: 36, borderRadius: 18, backgroundColor: colors.primary, alignItems: 'center', justifyContent: 'center' }}
+                        style={styles.adminAddButton}
                         onPress={() => router.push('/(tabs)/challenges/add')}
                     >
                         <Ionicons name="add" size={24} color={colors.onPrimary} />

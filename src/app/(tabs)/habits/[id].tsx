@@ -244,7 +244,7 @@ export default function HabitDetailScreen() {
                 </View>
                 <View style={styles.headerActions}>
                     <TouchableOpacity style={[styles.actionButton, styles.editButton]} onPress={() => router.push(`/(tabs)/habits/edit/${id}`)}>
-                        <Ionicons name="pencil" size={18} color={colors.onPrimary} />
+                        <Ionicons name="pencil" size={20} color={colors.text} />
                     </TouchableOpacity>
                     <TouchableOpacity style={[styles.actionButton, styles.deleteButton]} onPress={handleDelete}>
                         <Ionicons name="trash-outline" size={18} color={colors.onPrimary} />

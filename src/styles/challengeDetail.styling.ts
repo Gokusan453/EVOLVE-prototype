@@ -1,4 +1,5 @@
 import { StyleSheet } from 'react-native';
+import { createButtonStyles } from './buttons.styling';
 
 export const createChallengeDetailStyles = (colors: any) =>
     StyleSheet.create({
@@ -29,14 +30,13 @@ export const createChallengeDetailStyles = (colors: any) =>
             flex: 1,
         },
         actionButton: {
-            width: 36,
-            height: 36,
-            borderRadius: 10,
-            alignItems: 'center',
-            justifyContent: 'center',
+            ...createButtonStyles(colors).iconActionBase,
+        },
+        editButton: {
+            ...createButtonStyles(colors).iconActionGhost,
         },
         deleteButton: {
-            backgroundColor: colors.error,
+            ...createButtonStyles(colors).iconActionDanger,
         },
         scrollContent: {
             paddingHorizontal: 20,
@@ -176,10 +176,8 @@ export const createChallengeDetailStyles = (colors: any) =>
 
         // Mark as done
         doneButton: {
-            backgroundColor: colors.primary,
-            paddingVertical: 16,
-            borderRadius: 12,
-            alignItems: 'center',
+            ...createButtonStyles(colors).ctaButton,
+            ...createButtonStyles(colors).ctaPrimary,
             marginTop: 8,
             marginBottom: 32,
         },

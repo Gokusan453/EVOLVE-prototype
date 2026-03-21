@@ -133,7 +133,7 @@ export default function SettingsScreen() {
                     </View>
 
                     <TouchableOpacity style={styles.editButton} onPress={() => router.push('/(tabs)/profile/edit-profile')}>
-                        <Ionicons name="pencil" size={18} color={colors.onPrimary} />
+                        <Ionicons name="pencil" size={20} color={colors.text} />
                     </TouchableOpacity>
                 </View>
 

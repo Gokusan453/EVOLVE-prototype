@@ -1,4 +1,5 @@
 import { StyleSheet } from 'react-native';
+import { createButtonStyles } from './buttons.styling';
 
 export const createHabitsStyles = (colors: any) =>
     StyleSheet.create({
@@ -74,13 +75,11 @@ export const createHabitsStyles = (colors: any) =>
             marginTop: 2,
         },
         doneButton: {
-            backgroundColor: colors.primary,
-            paddingVertical: 8,
-            paddingHorizontal: 16,
-            borderRadius: 8,
+            ...createButtonStyles(colors).smallAction,
+            ...createButtonStyles(colors).smallActionPrimary,
         },
         doneButtonCompleted: {
-            backgroundColor: colors.border,
+            ...createButtonStyles(colors).smallActionMuted,
         },
         doneButtonText: {
             color: colors.onPrimary,

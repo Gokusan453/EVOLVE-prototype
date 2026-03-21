@@ -1,4 +1,5 @@
 import { StyleSheet } from 'react-native';
+import { createButtonStyles } from './buttons.styling';
 
 export const createSettingsStyles = (colors: any) =>
     StyleSheet.create({
@@ -64,12 +65,8 @@ export const createSettingsStyles = (colors: any) =>
             marginTop: 2,
         },
         editButton: {
-            backgroundColor: colors.primary,
-            width: 36,
-            height: 36,
-            borderRadius: 10,
-            alignItems: 'center',
-            justifyContent: 'center',
+            ...createButtonStyles(colors).iconActionBase,
+            ...createButtonStyles(colors).iconActionGhost,
         },
 
         // Stats
@@ -126,29 +123,19 @@ export const createSettingsStyles = (colors: any) =>
 
         // Logout
         logoutButton: {
-            backgroundColor: colors.error,
-            borderRadius: 12,
-            paddingVertical: 16,
-            alignItems: 'center',
+            ...createButtonStyles(colors).ctaButton,
+            ...createButtonStyles(colors).ctaDanger,
             marginTop: 8,
         },
         logoutText: {
-            color: colors.onError,
-            fontSize: 16,
-            fontWeight: '600',
+            ...createButtonStyles(colors).textOnError,
         },
         deleteAccountButton: {
-            backgroundColor: colors.surface,
-            borderRadius: 12,
-            paddingVertical: 16,
-            alignItems: 'center',
+            ...createButtonStyles(colors).ctaButton,
+            ...createButtonStyles(colors).ctaOutlineDanger,
             marginTop: 10,
-            borderWidth: 1,
-            borderColor: colors.error,
         },
         deleteAccountText: {
-            color: colors.error,
-            fontSize: 16,
-            fontWeight: '600',
+            ...createButtonStyles(colors).textDanger,
         },
     });

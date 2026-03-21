@@ -1,4 +1,5 @@
 import { StyleSheet } from 'react-native';
+import { createButtonStyles } from './buttons.styling';
 
 export const createHabitDetailStyles = (colors: any) =>
     StyleSheet.create({
@@ -31,17 +32,13 @@ export const createHabitDetailStyles = (colors: any) =>
             gap: 8,
         },
         actionButton: {
-            width: 36,
-            height: 36,
-            borderRadius: 10,
-            alignItems: 'center',
-            justifyContent: 'center',
+            ...createButtonStyles(colors).iconActionBase,
         },
         editButton: {
-            backgroundColor: colors.primary,
+            ...createButtonStyles(colors).iconActionGhost,
         },
         deleteButton: {
-            backgroundColor: colors.error,
+            ...createButtonStyles(colors).iconActionDanger,
         },
         scrollContent: {
             paddingHorizontal: 20,
@@ -123,10 +120,8 @@ export const createHabitDetailStyles = (colors: any) =>
 
         // Mark as done
         doneButton: {
-            backgroundColor: colors.primary,
-            paddingVertical: 16,
-            borderRadius: 12,
-            alignItems: 'center',
+            ...createButtonStyles(colors).ctaButton,
+            ...createButtonStyles(colors).ctaPrimary,
             marginTop: 8,
         },
         doneButtonCompleted: {

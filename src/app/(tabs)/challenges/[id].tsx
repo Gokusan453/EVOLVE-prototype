@@ -337,7 +337,7 @@ export default function ChallengeDetailScreen() {
                 <View style={{ flexDirection: 'row', gap: 8 }}>
                     {userRole === 'admin' && (
                         <TouchableOpacity
-                            style={[styles.actionButton, { backgroundColor: colors.surface, borderColor: colors.border, borderWidth: 1 }]}
+                            style={[styles.actionButton, styles.editButton]}
                             onPress={() => router.push(`/(tabs)/challenges/edit/${id}`)}
                         >
                             <Ionicons name="pencil" size={20} color={colors.text} />

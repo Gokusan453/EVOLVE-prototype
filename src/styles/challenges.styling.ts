@@ -1,4 +1,5 @@
 import { StyleSheet } from 'react-native';
+import { createButtonStyles } from './buttons.styling';
 
 export const createChallengesStyles = (colors: any) =>
     StyleSheet.create({
@@ -13,6 +14,19 @@ export const createChallengesStyles = (colors: any) =>
             color: colors.text,
             textAlign: 'center',
             marginBottom: 16,
+        },
+        headerWrap: {
+            position: 'relative',
+            justifyContent: 'center',
+            alignItems: 'center',
+            marginBottom: 16,
+        },
+        adminAddButton: {
+            ...createButtonStyles(colors).iconActionBase,
+            ...createButtonStyles(colors).iconActionPrimary,
+            position: 'absolute',
+            right: 20,
+            top: -4,
         },
 
         // Challenge cards
@@ -57,10 +71,9 @@ export const createChallengesStyles = (colors: any) =>
             alignItems: 'center',
         },
         joinButton: {
-            backgroundColor: colors.primary,
-            paddingVertical: 8,
+            ...createButtonStyles(colors).smallAction,
+            ...createButtonStyles(colors).smallActionPrimary,
             paddingHorizontal: 20,
-            borderRadius: 8,
         },
         joinButtonText: {
             color: colors.onPrimary,
@@ -68,7 +81,7 @@ export const createChallengesStyles = (colors: any) =>
             fontWeight: '600',
         },
         joinedButton: {
-            backgroundColor: colors.border,
+            ...createButtonStyles(colors).smallActionMuted,
         },
 
         // Empty state
