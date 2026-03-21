@@ -8,6 +8,10 @@ type NotificationsModule = typeof import('expo-notifications');
 
 let notificationsModulePromise: Promise<NotificationsModule | null> | null = null;
 
+const DAILY_REMINDER_ID_KEY = 'daily_reminder_notification_id';
+const DAILY_REMINDER_HOUR = 10;
+const DAILY_REMINDER_MINUTE = 0;
+
 const getNotificationsModule = async (): Promise<NotificationsModule | null> => {
     if (!notificationsModulePromise) {
         notificationsModulePromise = (async () => {
@@ -35,6 +39,7 @@ type SettingsContextType = {
     setSound: (val: boolean) => void;
     setVibrations: (val: boolean) => void;
     triggerFeedback: () => void;
+    sendAppNotification: (title: string, body: string) => Promise<void>;
 };
 
 const SettingsContext = createContext<SettingsContextType>({
@@ -45,6 +50,7 @@ const SettingsContext = createContext<SettingsContextType>({
     setSound: () => { },
     setVibrations: () => { },
     triggerFeedback: () => { },
+    sendAppNotification: async () => { },
 });
 
 export const useSettings = () => useContext(SettingsContext);
@@ -53,16 +59,21 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
     const [notifications, setNotificationsState] = useState(true);
     const [sound, setSoundState] = useState(true);
     const [vibrations, setVibrationsState] = useState(true);
+    const [settingsLoaded, setSettingsLoaded] = useState(false);
 
     // Load settings on mount
     useEffect(() => {
         const load = async () => {
-            const stored = await AsyncStorage.getItem('app_settings');
-            if (stored) {
-                const parsed = JSON.parse(stored);
-                setNotificationsState(parsed.notifications ?? true);
-                setSoundState(parsed.sound ?? true);
-                setVibrationsState(parsed.vibrations ?? true);
+            try {
+                const stored = await AsyncStorage.getItem('app_settings');
+                if (stored) {
+                    const parsed = JSON.parse(stored);
+                    setNotificationsState(parsed.notifications ?? true);
+                    setSoundState(parsed.sound ?? true);
+                    setVibrationsState(parsed.vibrations ?? true);
+                }
+            } finally {
+                setSettingsLoaded(true);
             }
         };
         load();
@@ -87,6 +98,63 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
         configureNotifications();
     }, []);
 
+    const ensureNotificationPermission = async (notificationsModule: NotificationsModule) => {
+        const currentPermissions = await notificationsModule.getPermissionsAsync();
+        if (currentPermissions.granted) return true;
+
+        const requestedPermissions = await notificationsModule.requestPermissionsAsync();
+        return requestedPermissions.granted;
+    };
+
+    const cancelDailyReminder = async (notificationsModule: NotificationsModule) => {
+        const existingId = await AsyncStorage.getItem(DAILY_REMINDER_ID_KEY);
+        if (existingId) {
+            await notificationsModule.cancelScheduledNotificationAsync(existingId);
+        }
+        await AsyncStorage.removeItem(DAILY_REMINDER_ID_KEY);
+    };
+
+    const scheduleDailyReminder = async (notificationsModule: NotificationsModule) => {
+        await cancelDailyReminder(notificationsModule);
+
+        const reminderTrigger = {
+            type: 'daily',
+            hour: DAILY_REMINDER_HOUR,
+            minute: DAILY_REMINDER_MINUTE,
+        } as any;
+
+        const reminderId = await notificationsModule.scheduleNotificationAsync({
+            content: {
+                title: 'Daily reminder',
+                body: 'Vergeet niet je habits & challenges van vandaag te checken.',
+            },
+            trigger: reminderTrigger,
+        });
+
+        await AsyncStorage.setItem(DAILY_REMINDER_ID_KEY, reminderId);
+    };
+
+    useEffect(() => {
+        if (!settingsLoaded) return;
+
+        const syncReminder = async () => {
+            const notificationsModule = await getNotificationsModule();
+            if (!notificationsModule) return;
+
+            if (!notifications) {
+                await cancelDailyReminder(notificationsModule);
+                return;
+            }
+
+            const permissions = await notificationsModule.getPermissionsAsync();
+            if (!permissions.granted) return;
+
+            await scheduleDailyReminder(notificationsModule);
+        };
+
+        syncReminder();
+    }, [notifications, settingsLoaded]);
+
     const save = async (key: string, value: boolean) => {
         const stored = await AsyncStorage.getItem('app_settings');
         const current = stored ? JSON.parse(stored) : {};
@@ -95,8 +163,23 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
     };
 
     const setNotifications = (val: boolean) => {
-        setNotificationsState(val);
-        save('notifications', val);
+        const applyNotifications = async () => {
+            const notificationsModule = await getNotificationsModule();
+
+            if (val && notificationsModule) {
+                const hasPermission = await ensureNotificationPermission(notificationsModule);
+                if (!hasPermission) {
+                    setNotificationsState(false);
+                    save('notifications', false);
+                    return;
+                }
+            }
+
+            setNotificationsState(val);
+            save('notifications', val);
+        };
+
+        applyNotifications();
     };
 
     const setSound = (val: boolean) => {
@@ -107,6 +190,24 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
     const setVibrations = (val: boolean) => {
         setVibrationsState(val);
         save('vibrations', val);
+    };
+
+    const sendAppNotification = async (title: string, body: string) => {
+        if (!notifications) return;
+
+        const notificationsModule = await getNotificationsModule();
+        if (!notificationsModule) return;
+
+        const permissions = await notificationsModule.getPermissionsAsync();
+        if (!permissions.granted) return;
+
+        await notificationsModule.scheduleNotificationAsync({
+            content: {
+                title,
+                body,
+            },
+            trigger: null,
+        });
     };
 
     // Play in-app success sound
@@ -127,7 +228,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
         }
     };
 
-    // Trigger all feedback (sound + vibration + notification)
+    // Trigger in-app feedback only (sound + vibration)
     const triggerFeedback = async () => {
         // Vibration
         if (vibrations) {
@@ -137,20 +238,6 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
         // In-app sound
         if (sound) {
             playSound();
-        }
-
-        // Push notification
-        if (notifications) {
-            const notificationsModule = await getNotificationsModule();
-            if (!notificationsModule) return;
-
-            await notificationsModule.scheduleNotificationAsync({
-                content: {
-                    title: 'Well done! 🎉',
-                    body: 'You completed a task today. Keep going!',
-                },
-                trigger: null,
-            });
         }
     };
 
@@ -164,6 +251,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
                 setSound,
                 setVibrations,
                 triggerFeedback,
+                sendAppNotification,
             }}
         >
             {children}

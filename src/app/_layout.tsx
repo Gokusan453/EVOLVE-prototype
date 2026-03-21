@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react';
 import 'react-native-reanimated';
 
 import StartupSplash from '@/components/StartupSplash';
-import { SettingsProvider } from '@/contexts/SettingsContext';
+import { SettingsProvider, useSettings } from '@/contexts/SettingsContext';
 import { ThemeProvider, useTheme } from '@/contexts/ThemeContext';
 import { hasPendingOnboardingForUser } from '@/lib/onboarding';
 import { supabase } from '@/lib/supabase';
@@ -19,6 +19,7 @@ function RootNavigator() {
   const segments = useSegments();
   const router = useRouter();
   const { colors, mode } = useTheme();
+  const { notifications, sendAppNotification } = useSettings();
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -107,6 +108,48 @@ function RootNavigator() {
       router.replace('/(tabs)');
     }
   }, [session, isReady, segments, hasPendingOnboarding]);
+
+  useEffect(() => {
+    const currentUserId = session?.user?.id;
+    if (!currentUserId || !notifications) return;
+
+    const channel = supabase
+      .channel(`friend-request-notifications-${currentUserId}`)
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'friendships',
+          filter: `receiver_id=eq.${currentUserId}`,
+        },
+        async (payload) => {
+          const newRow = payload.new as {
+            sender_id?: string;
+            status?: string;
+          };
+
+          if (newRow.status !== 'pending' || !newRow.sender_id) return;
+
+          const { data: senderProfile } = await supabase
+            .from('profiles')
+            .select('first_name, last_name, username')
+            .eq('id', newRow.sender_id)
+            .single();
+
+          const senderName = senderProfile
+            ? `${senderProfile.first_name ?? ''} ${senderProfile.last_name ?? ''}`.trim() || senderProfile.username || 'Someone'
+            : 'Someone';
+
+          await sendAppNotification('New friend request', `${senderName} sent you a friend request.`);
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [session?.user?.id, notifications, sendAppNotification]);
 
   if (showStartupSplash) {
     return <StartupSplash progress={startupProgress} />;

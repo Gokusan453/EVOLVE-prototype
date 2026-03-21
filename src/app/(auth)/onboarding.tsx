@@ -66,8 +66,8 @@ export default function OnboardingScreen() {
                         activeOpacity={0.85}
                     >
                         <View style={styles.reminderTextWrap}>
-                            <Text style={styles.reminderTitle}>Daily reminders</Text>
-                            <Text style={styles.reminderSubtitle}>Get a gentle push when it is time to act.</Text>
+                            <Text style={styles.reminderTitle}>Daily reminder</Text>
+                            <Text style={styles.reminderSubtitle}>At 10:00: do not forget to check your habits and challenges.</Text>
                         </View>
                         <View style={[styles.pill, notifications && styles.pillActive]}>
                             <Text style={[styles.pillText, notifications && styles.pillTextActive]}>
