@@ -125,24 +125,24 @@ export const startStyles = StyleSheet.create({
     },
     loginButton: {
         ...buttonStyles.ctaButton,
+        ...buttonStyles.ctaOutlineNeutral,
+        width: '100%',
+        paddingVertical: 14,
+    },
+    loginButtonText: {
+        ...buttonStyles.textPrimary,
+        fontSize: 15,
+    },
+    registerButton: {
+        ...buttonStyles.ctaButton,
         ...buttonStyles.ctaPrimary,
         width: '100%',
         marginBottom: 12,
         paddingVertical: 18,
     },
-    loginButtonText: {
+    registerButtonText: {
         ...buttonStyles.textOnPrimary,
         fontSize: 18,
         fontWeight: '700',
-    },
-    registerButton: {
-        ...buttonStyles.ctaButton,
-        ...buttonStyles.ctaOutlineNeutral,
-        width: '100%',
-        paddingVertical: 14,
-    },
-    registerButtonText: {
-        ...buttonStyles.textPrimary,
-        fontSize: 15,
     },
 });

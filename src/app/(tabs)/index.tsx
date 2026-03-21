@@ -1,3 +1,4 @@
+import AnimatedPressable from '@/components/AnimatedPressable';
 import { ListPageSkeleton } from '@/components/Skeletons';
 import { useSettings } from '@/contexts/SettingsContext';
 import { useTheme } from '@/contexts/ThemeContext';
@@ -7,7 +8,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
 import { useRouter } from 'expo-router';
 import { useCallback, useRef, useState } from 'react';
-import { Image, ScrollView, Text, TouchableOpacity, View } from 'react-native';
+import { Image, ScrollView, Text, View } from 'react-native';
 
 type Profile = {
   first_name: string;
@@ -212,9 +213,10 @@ export default function HomeScreen() {
         <Text style={styles.sectionTitle}>Todays</Text>
 
         {/* Habits summary card */}
-        <TouchableOpacity
+        <AnimatedPressable
           style={styles.summaryCard}
           onPress={() => router.push('/(tabs)/habits')}
+          pressedScale={0.985}
         >
           <View style={styles.summaryHeader}>
             <View style={styles.summaryContent}>
@@ -226,12 +228,13 @@ export default function HomeScreen() {
           <View style={styles.progressBarBg}>
             <View style={[styles.progressBarFill, { width: `${Math.max(habitPct * 100, 2)}%` }]} />
           </View>
-        </TouchableOpacity>
+        </AnimatedPressable>
 
         {/* Challenges summary card */}
-        <TouchableOpacity
+        <AnimatedPressable
           style={styles.summaryCard}
           onPress={() => router.push('/(tabs)/challenges')}
+          pressedScale={0.985}
         >
           <View style={styles.summaryHeader}>
             <View style={styles.summaryContent}>
@@ -243,7 +246,7 @@ export default function HomeScreen() {
           <View style={styles.progressBarBg}>
             <View style={[styles.progressBarFill, { width: `${Math.max(challengePct * 100, 2)}%` }]} />
           </View>
-        </TouchableOpacity>
+        </AnimatedPressable>
 
         {/* ── DASHED SEPARATOR ── */}
         <View style={styles.dottedSeparator} />
@@ -257,19 +260,19 @@ export default function HomeScreen() {
               <Text style={styles.emptyTitle}>Start your Evolve journey!</Text>
               <Text style={styles.emptySubtitle}>Start by creating a habit or explore challenges to join.</Text>
               <View style={styles.emptyActionsRow}>
-                <TouchableOpacity
+                <AnimatedPressable
                   style={styles.emptyPrimaryButton}
                   onPress={() => router.push('/(tabs)/habits/add')}
                 >
                   <Text style={styles.emptyPrimaryButtonText}>+ Create habit</Text>
-                </TouchableOpacity>
+                </AnimatedPressable>
 
-                <TouchableOpacity
+                <AnimatedPressable
                   style={styles.emptySecondaryButton}
                   onPress={() => router.push('/(tabs)/challenges')}
                 >
                   <Text style={styles.emptySecondaryButtonText}>View challenges</Text>
-                </TouchableOpacity>
+                </AnimatedPressable>
               </View>
             </View>
           ) : (
@@ -288,25 +291,25 @@ export default function HomeScreen() {
                   <Text style={styles.todoDescription} numberOfLines={1}>{item.description}</Text>
                 ) : null}
               </View>
-              <TouchableOpacity
+              <AnimatedPressable
                 style={styles.markDoneBtn}
                 onPress={() => handleMarkDone(item)}
               >
                 <Text style={styles.markDoneText}>Mark as done</Text>
-              </TouchableOpacity>
+              </AnimatedPressable>
             </View>
           ))
         )}
       </ScrollView>
 
       {/* ── AI Chat Floating Button ── */}
-      <TouchableOpacity
+      <AnimatedPressable
         style={styles.fabPill}
         onPress={() => router.push('/chat')}
-        activeOpacity={0.8}
+        pressedScale={0.94}
       >
         <Text style={styles.fabPillText}>✦ EVO</Text>
-      </TouchableOpacity>
+      </AnimatedPressable>
     </View>
   );
 }

@@ -11,17 +11,17 @@ export default function StartScreen() {
             <Text style={styles.subtitle}>Track your habits, challenge yourself</Text>
 
             <TouchableOpacity
-                style={styles.loginButton}
-                onPress={() => router.push('/(auth)/login')}
-            >
-                <Text style={styles.loginButtonText}>Login</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
                 style={styles.registerButton}
                 onPress={() => router.push('/(auth)/register')}
             >
                 <Text style={styles.registerButtonText}>Create an account</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+                style={styles.loginButton}
+                onPress={() => router.push('/(auth)/login')}
+            >
+                <Text style={styles.loginButtonText}>Login</Text>
             </TouchableOpacity>
         </View>
     );

@@ -1,15 +1,22 @@
 import { useTheme } from '@/contexts/ThemeContext';
 import { hasUnsavedChanges, setUnsavedChanges } from '@/lib/unsavedChanges';
 import { Ionicons } from '@expo/vector-icons';
-import { Tabs, useRouter } from 'expo-router';
+import { Tabs, useRouter, useSegments } from 'expo-router';
 import { Alert } from 'react-native';
 
 export default function TabLayout() {
   const { colors } = useTheme();
   const router = useRouter();
+  const segments = useSegments();
 
-  const handleTabPress = (route: string) => ({
+  const handleTabPress = (tabName: string, route: string) => ({
     tabPress: (e: any) => {
+      const currentTab = segments[1] ?? 'index';
+      if (currentTab === tabName) {
+        e.preventDefault();
+        return;
+      }
+
       if (hasUnsavedChanges()) {
         e.preventDefault();
         Alert.alert(
@@ -39,6 +46,7 @@ export default function TabLayout() {
       screenOptions={{
         tabBarActiveTintColor: colors.tabIconSelected,
         tabBarInactiveTintColor: colors.tabIconDefault,
+        animation: 'fade',
         tabBarStyle: {
           backgroundColor: colors.tabBar,
           borderTopColor: colors.border,
@@ -54,7 +62,7 @@ export default function TabLayout() {
             <Ionicons name="trophy-outline" size={size} color={color} />
           ),
         }}
-        listeners={handleTabPress('/(tabs)/challenges')}
+        listeners={handleTabPress('challenges', '/(tabs)/challenges')}
       />
       <Tabs.Screen
         name="habits"
@@ -64,7 +72,7 @@ export default function TabLayout() {
             <Ionicons name="checkmark-circle-outline" size={size} color={color} />
           ),
         }}
-        listeners={handleTabPress('/(tabs)/habits')}
+        listeners={handleTabPress('habits', '/(tabs)/habits')}
       />
       <Tabs.Screen
         name="index"
@@ -74,7 +82,7 @@ export default function TabLayout() {
             <Ionicons name="home-outline" size={size} color={color} />
           ),
         }}
-        listeners={handleTabPress('/(tabs)/')}
+        listeners={handleTabPress('index', '/(tabs)/')}
       />
       <Tabs.Screen
         name="friends"
@@ -84,7 +92,7 @@ export default function TabLayout() {
             <Ionicons name="people-outline" size={size} color={color} />
           ),
         }}
-        listeners={handleTabPress('/(tabs)/friends')}
+        listeners={handleTabPress('friends', '/(tabs)/friends')}
       />
       <Tabs.Screen
         name="profile"
@@ -94,7 +102,7 @@ export default function TabLayout() {
             <Ionicons name="person-outline" size={size} color={color} />
           ),
         }}
-        listeners={handleTabPress('/(tabs)/profile')}
+        listeners={handleTabPress('profile', '/(tabs)/profile')}
       />
       <Tabs.Screen
         name="profile/settings"
