@@ -334,7 +334,7 @@ export default function ChallengeDetailScreen() {
                     <Text style={styles.headerTitle} numberOfLines={1}>{challenge.name}</Text>
                 </View>
 
-                <View style={{ flexDirection: 'row', gap: 8 }}>
+                <View style={styles.headerActions}>
                     {userRole === 'admin' && (
                         <TouchableOpacity
                             style={[styles.actionButton, styles.editButton]}
@@ -414,7 +414,7 @@ export default function ChallengeDetailScreen() {
 
                 {/* Month Progress */}
                 <View style={styles.dateCard}>
-                    <Text style={{ color: colors.textSecondary, fontSize: 13, marginBottom: 8 }}>
+                    <Text style={styles.monthLabel}>
                         {getMonthLabel().charAt(0).toUpperCase() + getMonthLabel().slice(1)}
                     </Text>
                     <View style={styles.progressBarBg}>
@@ -439,46 +439,59 @@ export default function ChallengeDetailScreen() {
                 {/* Calendar */}
                 {isJoined && (
                     <View style={styles.leaderboardCard}>
-                        <Text style={{ color: colors.text, fontWeight: '700', fontSize: 15, textAlign: 'center', marginBottom: 12 }}>
+                        <Text style={styles.calendarTitle}>
                             {getMonthLabel().charAt(0).toUpperCase() + getMonthLabel().slice(1)}
                         </Text>
-                        <View style={{ flexDirection: 'row', marginBottom: 6 }}>
+                        <View style={styles.calendarWeekRow}>
                             {['M', 'T', 'W', 'T', 'F', 'S', 'S'].map((d, i) => (
-                                <Text key={`hdr-${i}`} style={{ flex: 1, textAlign: 'center', fontSize: 11, fontWeight: '600', color: colors.textMuted }}>{d}</Text>
+                                <Text key={`hdr-${i}`} style={styles.calendarWeekLabel}>{d}</Text>
                             ))}
                         </View>
-                        <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
+                        <View style={styles.calendarGrid}>
                             {buildCalendarDays().map((cell, i) => (
-                                <View key={`cal-${i}`} style={{ width: '14.28%', alignItems: 'center', marginBottom: 6 }}>
+                                <View key={`cal-${i}`} style={styles.calendarCell}>
                                     {cell.date ? (
-                                        <View style={{
-                                            width: 30, height: 30, borderRadius: 15,
-                                            alignItems: 'center', justifyContent: 'center',
-                                            backgroundColor:
-                                                cell.status === 'done' ? colors.primary :
-                                                cell.status === 'missed' ? colors.error + '30' :
-                                                'transparent',
-                                        }}>
-                                            <Text style={{
-                                                fontSize: 13, fontWeight: '500',
-                                                color:
-                                                    cell.status === 'done' ? colors.onPrimary :
-                                                    cell.status === 'missed' ? colors.error :
-                                                    colors.textSecondary,
-                                            }}>{cell.date}</Text>
+                                        <View
+                                            style={[
+                                                styles.calendarDayBubble,
+                                                {
+                                                    backgroundColor:
+                                                        cell.status === 'done'
+                                                            ? colors.primary
+                                                            : cell.status === 'missed'
+                                                                ? colors.error + '30'
+                                                                : 'transparent',
+                                                },
+                                            ]}
+                                        >
+                                            <Text
+                                                style={[
+                                                    styles.calendarDayText,
+                                                    {
+                                                        color:
+                                                            cell.status === 'done'
+                                                                ? colors.onPrimary
+                                                                : cell.status === 'missed'
+                                                                    ? colors.error
+                                                                    : colors.textSecondary,
+                                                    },
+                                                ]}
+                                            >
+                                                {cell.date}
+                                            </Text>
                                         </View>
-                                    ) : <View style={{ width: 30, height: 30 }} />}
+                                    ) : <View style={styles.calendarDayEmpty} />}
                                 </View>
                             ))}
                         </View>
-                        <View style={{ flexDirection: 'row', justifyContent: 'center', gap: 16, marginTop: 8 }}>
-                            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
-                                <View style={{ width: 10, height: 10, borderRadius: 5, backgroundColor: colors.primary }} />
-                                <Text style={{ fontSize: 11, color: colors.textSecondary }}>Done</Text>
+                        <View style={styles.legendRow}>
+                            <View style={styles.legendItem}>
+                                <View style={[styles.legendDot, { backgroundColor: colors.primary }]} />
+                                <Text style={styles.legendText}>Done</Text>
                             </View>
-                            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
-                                <View style={{ width: 10, height: 10, borderRadius: 5, backgroundColor: colors.error + '30' }} />
-                                <Text style={{ fontSize: 11, color: colors.textSecondary }}>Missed</Text>
+                            <View style={styles.legendItem}>
+                                <View style={[styles.legendDot, { backgroundColor: colors.error + '30' }]} />
+                                <Text style={styles.legendText}>Missed</Text>
                             </View>
                         </View>
                     </View>
@@ -542,22 +555,22 @@ export default function ChallengeDetailScreen() {
                             ]}
                         >
                             {entry.avatar_url ? (
-                                <Image source={{ uri: entry.avatar_url }} style={{ width: 36, height: 36, borderRadius: 18, marginRight: 10 }} />
+                                <Image source={{ uri: entry.avatar_url }} style={styles.avatar} />
                             ) : (
-                                <View style={{ width: 36, height: 36, borderRadius: 18, marginRight: 10, backgroundColor: colors.border, alignItems: 'center', justifyContent: 'center' }}>
-                                    <Text style={{ color: colors.text, fontWeight: '600', fontSize: 13 }}>
+                                <View style={styles.avatarFallback}>
+                                    <Text style={styles.avatarFallbackText}>
                                         {entry.displayName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)}
                                     </Text>
                                 </View>
                             )}
-                            <Text style={[styles.leaderboardName, { flex: 1 }]}>
+                            <Text style={styles.leaderboardName}>
                                 {entry.displayUsername ? `@${entry.displayUsername}` : entry.displayName}
                             </Text>
                             <Text style={styles.leaderboardScore}>{entry.score}</Text>
                         </View>
                     ))}
                     {leaderboard.length === 0 && (
-                        <Text style={{ color: colors.textMuted, fontSize: 14 }}>No participants yet</Text>
+                        <Text style={styles.leaderboardEmpty}>No participants yet</Text>
                     )}
                 </View>
 

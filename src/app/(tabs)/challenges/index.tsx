@@ -224,61 +224,49 @@ export default function ChallengesListScreen() {
                 )}
             </View>
 
-            <ScrollView contentContainerStyle={{ paddingBottom: 40 }}>
+            <ScrollView contentContainerStyle={styles.scrollContent}>
                 {/* Discover — horizontal scroll */}
                 {notJoined.length > 0 && (
                     <>
-                        <Text style={{ color: colors.text, fontSize: 18, fontWeight: '700', paddingHorizontal: 20, marginBottom: 12 }}>
+                        <Text style={[styles.sectionTitle, styles.discoverTitle]}>
                             Discover
                         </Text>
                         <ScrollView
                             horizontal
                             showsHorizontalScrollIndicator={false}
-                            contentContainerStyle={{ paddingHorizontal: 20, gap: 14 }}
-                            style={{ marginBottom: 28 }}
+                            contentContainerStyle={styles.discoverListContent}
+                            style={styles.discoverList}
                         >
                             {notJoined.map((item) => (
                                 <TouchableOpacity
                                     key={item.id}
-                                    style={{
-                                        backgroundColor: colors.surface,
-                                        borderRadius: 16,
-                                        padding: 16,
-                                        width: 200,
-                                        borderWidth: 1,
-                                        borderColor: colors.border,
-                                    }}
+                                    style={styles.discoverCard}
                                     onPress={() => router.push(`/(tabs)/challenges/${item.id}`)}
                                 >
-                                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
-                                        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                                    <View style={styles.discoverTopRow}>
+                                        <View style={styles.discoverParticipantRow}>
                                             <Ionicons name="people" size={14} color={colors.textSecondary} />
-                                            <Text style={{ color: colors.textSecondary, fontSize: 12 }}>{item.participant_count}</Text>
+                                            <Text style={styles.discoverParticipantText}>{item.participant_count}</Text>
                                         </View>
                                     </View>
-                                    <Text style={{ color: colors.text, fontSize: 15, fontWeight: '700', marginBottom: 2 }} numberOfLines={2}>
+                                    <Text style={styles.discoverName} numberOfLines={2}>
                                         {item.name}
                                     </Text>
                                     
                                     {userRole === 'admin' && (
-                                        <Text style={{ fontSize: 11, color: colors.primary, fontWeight: '600', marginBottom: 6 }}>
+                                        <Text style={styles.adminMonthLabel}>
                                             {new Date(item.year, item.month - 1).toLocaleDateString('nl-NL', { month: 'short', year: 'numeric' }).toUpperCase()}
                                         </Text>
                                     )}
 
-                                    <Text style={{ color: colors.textSecondary, fontSize: 12, marginBottom: 14 }} numberOfLines={3}>
+                                    <Text style={styles.discoverDescription} numberOfLines={3}>
                                         {item.description}
                                     </Text>
                                     <TouchableOpacity
-                                        style={{
-                                            backgroundColor: colors.primary,
-                                            borderRadius: 20,
-                                            paddingVertical: 8,
-                                            alignItems: 'center',
-                                        }}
+                                        style={styles.discoverJoinButton}
                                         onPress={() => handleJoin(item.id)}
                                     >
-                                        <Text style={{ color: colors.onPrimary, fontWeight: '700', fontSize: 13 }}>Join</Text>
+                                        <Text style={styles.discoverJoinButtonText}>Join</Text>
                                     </TouchableOpacity>
                                 </TouchableOpacity>
                             ))}
@@ -287,13 +275,13 @@ export default function ChallengesListScreen() {
                 )}
 
                 {/* My Challenges — vertical list */}
-                <View style={{ paddingHorizontal: 20 }}>
-                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-                        <Text style={{ color: colors.text, fontSize: 18, fontWeight: '700' }}>
+                <View style={styles.myChallengesSection}>
+                    <View style={styles.myChallengesHeaderRow}>
+                        <Text style={styles.sectionTitle}>
                             My Challenges
                         </Text>
-                        <View style={{ backgroundColor: colors.surface, borderRadius: 12, paddingHorizontal: 10, paddingVertical: 4, borderWidth: 1, borderColor: colors.border }}>
-                            <Text style={{ color: colors.textSecondary, fontSize: 12, fontWeight: '600' }}>{joined.length} Active</Text>
+                        <View style={styles.activeBadge}>
+                            <Text style={styles.activeBadgeText}>{joined.length} Active</Text>
                         </View>
                     </View>
 
@@ -305,10 +293,10 @@ export default function ChallengesListScreen() {
                                 onPress={() => router.push(`/(tabs)/challenges/${item.id}`)}
                             >
                                 <View style={styles.cardTopRow}>
-                                    <View style={{ flex: 1, marginRight: 8 }}>
+                                    <View style={styles.cardTitleWrap}>
                                         <Text style={styles.challengeName}>{item.name}</Text>
                                         {userRole === 'admin' && (
-                                            <Text style={{ fontSize: 11, color: colors.primary, fontWeight: '600', marginTop: 2 }}>
+                                            <Text style={[styles.adminMonthLabel, styles.adminMonthLabelCompact]}>
                                                 {new Date(item.year, item.month - 1).toLocaleDateString('nl-NL', { month: 'short', year: 'numeric' }).toUpperCase()}
                                             </Text>
                                         )}
@@ -325,27 +313,27 @@ export default function ChallengesListScreen() {
                                     <View />
                                     {item.is_done_today ? (
                                         <View style={[styles.joinButton, styles.joinedButton]}>
-                                            <Text style={styles.joinButtonText}>Done ✓</Text>
+                                            <Text style={styles.joinedButtonText}>Done ✓</Text>
                                         </View>
                                     ) : isChallengeScheduledToday(item) ? (
                                         <TouchableOpacity
                                             style={styles.joinButton}
                                             onPress={() => handleMarkDone(item.id)}
                                         >
-                                            <Text style={[styles.joinButtonText, { color: colors.onPrimary }]}>Mark as done</Text>
+                                            <Text style={styles.joinButtonText}>Mark as done</Text>
                                         </TouchableOpacity>
                                     ) : (
                                         <View style={[styles.joinButton, styles.joinedButton]}>
-                                            <Text style={styles.joinButtonText}>Not today</Text>
+                                            <Text style={styles.joinedButtonText}>Not today</Text>
                                         </View>
                                     )}
                                 </View>
                             </TouchableOpacity>
                         ))
                     ) : (
-                        <View style={{ alignItems: 'center', paddingVertical: 40 }}>
+                        <View style={styles.emptyJoinedState}>
                             <Ionicons name="flash-outline" size={40} color={colors.textMuted} />
-                            <Text style={{ color: colors.textMuted, fontSize: 14, marginTop: 12, textAlign: 'center' }}>
+                            <Text style={styles.emptyJoinedText}>
                                 You haven't joined any challenges yet.{'\n'}Start one above!
                             </Text>
                         </View>
