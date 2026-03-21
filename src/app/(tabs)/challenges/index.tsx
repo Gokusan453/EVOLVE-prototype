@@ -30,6 +30,7 @@ export default function ChallengesListScreen() {
 
     const [challenges, setChallenges] = useState<Challenge[]>([]);
     const [userId, setUserId] = useState<string | null>(null);
+    const [userRole, setUserRole] = useState<string>('user');
     const [isInitialLoading, setIsInitialLoading] = useState(true);
     const hasLoadedOnceRef = useRef(false);
 
@@ -42,16 +43,36 @@ export default function ChallengesListScreen() {
             if (!user) return;
             setUserId(user.id);
 
+            const { data: profile } = await supabase
+                .from('profiles')
+                .select('role')
+                .eq('id', user.id)
+                .single();
+                
+            if (profile && profile.role) {
+                // Remove any literal single quotes that might have been typed in Supabase Dashboard
+                const normalizedRole = profile.role.replace(/'/g, '').trim();
+                setUserRole(normalizedRole);
+            }
+
             const now = new Date();
             const currentMonth = now.getMonth() + 1;
             const currentYear = now.getFullYear();
 
-            const { data: challengesData } = await supabase
+            let query = supabase
                 .from('challenges')
                 .select('*')
-                .eq('month', currentMonth)
-                .eq('year', currentYear)
+                .order('year', { ascending: true })
+                .order('month', { ascending: true })
                 .order('created_at', { ascending: true });
+
+            if (!profile || (profile.role !== 'admin' && profile.role !== "'admin'")) {
+                query = query.eq('month', currentMonth).eq('year', currentYear);
+            } else {
+                query = query.gte('year', currentYear);
+            }
+
+            const { data: challengesData } = await query;
 
             if (!challengesData) return;
 
@@ -191,7 +212,17 @@ export default function ChallengesListScreen() {
 
     return (
         <View style={styles.container}>
-            <Text style={styles.header}>Challenges</Text>
+            <View style={{ position: 'relative', justifyContent: 'center', alignItems: 'center', marginBottom: 16 }}>
+                <Text style={styles.header}>Challenges</Text>
+                {userRole === 'admin' && (
+                    <TouchableOpacity
+                        style={{ position: 'absolute', right: 20, top: -4, width: 36, height: 36, borderRadius: 18, backgroundColor: colors.primary, alignItems: 'center', justifyContent: 'center' }}
+                        onPress={() => router.push('/(tabs)/challenges/add')}
+                    >
+                        <Ionicons name="add" size={24} color={colors.onPrimary} />
+                    </TouchableOpacity>
+                )}
+            </View>
 
             <ScrollView contentContainerStyle={{ paddingBottom: 40 }}>
                 {/* Discover — horizontal scroll */}

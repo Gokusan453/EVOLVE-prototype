@@ -51,6 +51,7 @@ export default function ChallengeDetailScreen() {
     const [isDoneToday, setIsDoneToday] = useState(false);
     const [isJoined, setIsJoined] = useState(false);
     const [userId, setUserId] = useState<string | null>(null);
+    const [userRole, setUserRole] = useState<string>('user');
     const [isLoading, setIsLoading] = useState(true);
     const [calendarLogs, setCalendarLogs] = useState<Set<string>>(new Set());
 
@@ -60,6 +61,17 @@ export default function ChallengeDetailScreen() {
             const { data: { user } } = await supabase.auth.getUser();
             if (!user) return;
             setUserId(user.id);
+
+            const { data: profile } = await supabase
+                .from('profiles')
+                .select('role')
+                .eq('id', user.id)
+                .single();
+                
+            if (profile && profile.role) {
+                const normalizedRole = profile.role.replace(/'/g, '').trim();
+                setUserRole(normalizedRole);
+            }
 
             // Fetch challenge
             const { data: challengeData } = await supabase
@@ -249,6 +261,35 @@ export default function ChallengeDetailScreen() {
         triggerFeedback();
     };
 
+    const handleDelete = () => {
+        Alert.alert(
+            'Delete Challenge',
+            'Are you sure you want to delete this challenge? This will remove all progress for everyone.',
+            [
+                { text: 'Cancel', style: 'cancel' },
+                {
+                    text: 'Delete',
+                    style: 'destructive',
+                    onPress: async () => {
+                        // Thanks to cascading deletes, deleting the challenge might automatically
+                        // delete logs and participants, but let's be explicit just in case.
+                        await supabase.from('challenge_logs').delete().eq('challenge_id', id);
+                        await supabase.from('challenge_participants').delete().eq('challenge_id', id);
+                        
+                        const { error } = await supabase.from('challenges').delete().eq('id', id);
+                        
+                        if (error) {
+                            Alert.alert('Error deleting challenge', error.message);
+                        } else {
+                            triggerFeedback();
+                            router.back();
+                        }
+                    },
+                },
+            ]
+        );
+    };
+
     if (isLoading && !challenge) return <DetailPageSkeleton title="Challenge" rows={4} />;
     if (!challenge) return null;
     const canMarkToday = isChallengeScheduledToday(challenge);
@@ -283,52 +324,73 @@ export default function ChallengeDetailScreen() {
                     <Text style={styles.headerTitle} numberOfLines={1}>{challenge.name}</Text>
                 </View>
 
-                {isJoined && (
-                    <TouchableOpacity
-                        style={[styles.actionButton, styles.deleteButton]}
-                        onPress={() => {
-                            Alert.alert(
-                                'Leave Challenge',
-                                'Are you sure you want to leave this challenge?',
-                                [
-                                    { text: 'Cancel', style: 'cancel' },
-                                    {
-                                        text: 'Leave',
-                                        style: 'destructive',
-                                        onPress: async () => {
-                                            if (!userId) return;
-                                            const { error: logsDeleteError } = await supabase
-                                                .from('challenge_logs')
-                                                .delete()
-                                                .eq('challenge_id', id)
-                                                .eq('user_id', userId);
+                <View style={{ flexDirection: 'row', gap: 8 }}>
+                    {userRole === 'admin' && (
+                        <TouchableOpacity
+                            style={[styles.actionButton, { backgroundColor: colors.surface, borderColor: colors.border, borderWidth: 1 }]}
+                            onPress={() => router.push(`/(tabs)/challenges/edit/${id}`)}
+                        >
+                            <Ionicons name="pencil" size={20} color={colors.text} />
+                        </TouchableOpacity>
+                    )}
 
-                                            if (logsDeleteError) {
-                                                Alert.alert('Could not reset progress', logsDeleteError.message);
-                                                return;
-                                            }
+                    {isJoined && (
+                        <TouchableOpacity
+                            style={[styles.actionButton, styles.deleteButton]}
+                            onPress={() => {
+                                Alert.alert(
+                                    'Leave Challenge',
+                                    'Are you sure you want to leave this challenge?',
+                                    [
+                                        { text: 'Cancel', style: 'cancel' },
+                                        {
+                                            text: 'Leave',
+                                            style: 'destructive',
+                                            onPress: async () => {
+                                                if (!userId) return;
+                                                const { error: logsDeleteError } = await supabase
+                                                    .from('challenge_logs')
+                                                    .delete()
+                                                    .eq('challenge_id', id)
+                                                    .eq('user_id', userId);
 
-                                            const { error: leaveError } = await supabase
-                                                .from('challenge_participants')
-                                                .delete()
-                                                .eq('challenge_id', id)
-                                                .eq('user_id', userId);
+                                                if (logsDeleteError) {
+                                                    Alert.alert('Could not reset progress', logsDeleteError.message);
+                                                    return;
+                                                }
 
-                                            if (leaveError) {
-                                                Alert.alert('Could not leave challenge', leaveError.message);
-                                                return;
-                                            }
+                                                const { error: leaveError } = await supabase
+                                                    .from('challenge_participants')
+                                                    .delete()
+                                                    .eq('challenge_id', id)
+                                                    .eq('user_id', userId);
 
-                                            router.back();
+                                                if (leaveError) {
+                                                    Alert.alert('Could not leave challenge', leaveError.message);
+                                                    return;
+                                                }
+
+                                                router.back();
+                                                triggerFeedback();
+                                            },
                                         },
-                                    },
-                                ]
-                            );
-                        }}
-                    >
-                        <Ionicons name="exit-outline" size={18} color={colors.onPrimary} />
-                    </TouchableOpacity>
-                )}
+                                    ]
+                                );
+                            }}
+                        >
+                            <Ionicons name="exit-outline" size={20} color={colors.onError} />
+                        </TouchableOpacity>
+                    )}
+
+                    {userRole === 'admin' && (
+                        <TouchableOpacity
+                            style={[styles.actionButton, styles.deleteButton]}
+                            onPress={handleDelete}
+                        >
+                            <Ionicons name="trash" size={20} color={colors.onError} />
+                        </TouchableOpacity>
+                    )}
+                </View>
             </View>
 
             <ScrollView contentContainerStyle={styles.scrollContent}>
