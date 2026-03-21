@@ -1,4 +1,5 @@
 import { StyleSheet } from 'react-native';
+import { createButtonStyles } from './buttons.styling';
 
 export const createAddHabitStyles = (colors: any) =>
     StyleSheet.create({
@@ -126,19 +127,16 @@ export const createAddHabitStyles = (colors: any) =>
 
         // Submit
         submitButton: {
-            backgroundColor: colors.primary,
-            paddingVertical: 16,
-            borderRadius: 12,
-            alignItems: 'center',
+            ...createButtonStyles(colors).ctaButton,
+            ...createButtonStyles(colors).ctaPrimary,
             marginTop: 32,
         },
         submitButtonDisabled: {
             opacity: 0.6,
         },
         submitButtonText: {
-            color: colors.onPrimary,
+            ...createButtonStyles(colors).textOnPrimary,
             fontSize: 16,
-            fontWeight: '600',
         },
         errorText: {
             color: colors.error,

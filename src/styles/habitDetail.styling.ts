@@ -88,6 +88,72 @@ export const createHabitDetailStyles = (colors: any) =>
         dateArrow: {
             color: colors.textMuted,
         },
+        calendarHeader: {
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            marginBottom: 12,
+        },
+        calendarMonthLabel: {
+            color: colors.text,
+            fontWeight: '700',
+            fontSize: 15,
+        },
+        calendarWeekRow: {
+            flexDirection: 'row',
+            marginBottom: 6,
+        },
+        calendarWeekLabel: {
+            flex: 1,
+            textAlign: 'center',
+            fontSize: 11,
+            fontWeight: '600',
+            color: colors.textMuted,
+        },
+        calendarGrid: {
+            flexDirection: 'row',
+            flexWrap: 'wrap',
+        },
+        calendarCell: {
+            width: '14.28%',
+            alignItems: 'center',
+            marginBottom: 6,
+        },
+        calendarDayBubble: {
+            width: 30,
+            height: 30,
+            borderRadius: 15,
+            alignItems: 'center',
+            justifyContent: 'center',
+        },
+        calendarDayText: {
+            fontSize: 13,
+            fontWeight: '500',
+        },
+        calendarDayEmpty: {
+            width: 30,
+            height: 30,
+        },
+        legendRow: {
+            flexDirection: 'row',
+            justifyContent: 'center',
+            gap: 16,
+            marginTop: 8,
+        },
+        legendItem: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: 4,
+        },
+        legendDot: {
+            width: 10,
+            height: 10,
+            borderRadius: 5,
+        },
+        legendText: {
+            fontSize: 11,
+            color: colors.textSecondary,
+        },
 
         // Days
         daysRow: {

@@ -247,7 +247,7 @@ export default function HabitDetailScreen() {
                         <Ionicons name="pencil" size={20} color={colors.text} />
                     </TouchableOpacity>
                     <TouchableOpacity style={[styles.actionButton, styles.deleteButton]} onPress={handleDelete}>
-                        <Ionicons name="trash-outline" size={18} color={colors.onPrimary} />
+                        <Ionicons name="trash-outline" size={20} color={colors.onPrimary} />
                     </TouchableOpacity>
                 </View>
             </View>
@@ -287,7 +287,7 @@ export default function HabitDetailScreen() {
 
                 {/* Calendar */}
                 <View style={styles.dateCard}>
-                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+                    <View style={styles.calendarHeader}>
                         <TouchableOpacity onPress={() => {
                             const prev = new Date(calendarMonth);
                             prev.setMonth(prev.getMonth() - 1);
@@ -298,7 +298,7 @@ export default function HabitDetailScreen() {
                         }}>
                             <Ionicons name="chevron-back" size={22} color={colors.text} />
                         </TouchableOpacity>
-                        <Text style={{ color: colors.text, fontWeight: '700', fontSize: 15 }}>{calendarMonthLabel}</Text>
+                        <Text style={styles.calendarMonthLabel}>{calendarMonthLabel}</Text>
                         <TouchableOpacity onPress={() => {
                             const next = new Date(calendarMonth);
                             next.setMonth(next.getMonth() + 1);
@@ -307,44 +307,58 @@ export default function HabitDetailScreen() {
                             <Ionicons name="chevron-forward" size={22} color={colors.text} />
                         </TouchableOpacity>
                     </View>
-                    <View style={{ flexDirection: 'row', marginBottom: 6 }}>
+                    <View style={styles.calendarWeekRow}>
                         {['M', 'T', 'W', 'T', 'F', 'S', 'S'].map((d, i) => (
-                            <Text key={`hdr-${i}`} style={{ flex: 1, textAlign: 'center', fontSize: 11, fontWeight: '600', color: colors.textMuted }}>{d}</Text>
+                            <Text key={`hdr-${i}`} style={styles.calendarWeekLabel}>{d}</Text>
                         ))}
                     </View>
-                    <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
+                    <View style={styles.calendarGrid}>
                         {buildCalendarDays().map((cell, i) => (
-                            <View key={`cal-${i}`} style={{ width: '14.28%', alignItems: 'center', marginBottom: 6 }}>
+                            <View key={`cal-${i}`} style={styles.calendarCell}>
                                 {cell.date ? (
-                                    <View style={{
-                                        width: 30, height: 30, borderRadius: 15,
-                                        alignItems: 'center', justifyContent: 'center',
-                                        backgroundColor:
-                                            cell.status === 'done' ? colors.primary :
-                                            cell.status === 'missed' ? colors.error + '30' :
-                                            'transparent',
-                                    }}>
-                                        <Text style={{
-                                            fontSize: 13, fontWeight: '500',
-                                            color:
-                                                cell.status === 'done' ? colors.onPrimary :
-                                                cell.status === 'missed' ? colors.error :
-                                                cell.status === 'future' ? colors.textMuted :
-                                                colors.textSecondary,
-                                        }}>{cell.date}</Text>
+                                    <View
+                                        style={[
+                                            styles.calendarDayBubble,
+                                            {
+                                                backgroundColor:
+                                                    cell.status === 'done'
+                                                        ? colors.primary
+                                                        : cell.status === 'missed'
+                                                            ? colors.error + '30'
+                                                            : 'transparent',
+                                            },
+                                        ]}
+                                    >
+                                        <Text
+                                            style={[
+                                                styles.calendarDayText,
+                                                {
+                                                    color:
+                                                        cell.status === 'done'
+                                                            ? colors.onPrimary
+                                                            : cell.status === 'missed'
+                                                                ? colors.error
+                                                                : cell.status === 'future'
+                                                                    ? colors.textMuted
+                                                                    : colors.textSecondary,
+                                                },
+                                            ]}
+                                        >
+                                            {cell.date}
+                                        </Text>
                                     </View>
-                                ) : <View style={{ width: 30, height: 30 }} />}
+                                ) : <View style={styles.calendarDayEmpty} />}
                             </View>
                         ))}
                     </View>
-                    <View style={{ flexDirection: 'row', justifyContent: 'center', gap: 16, marginTop: 8 }}>
-                        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
-                            <View style={{ width: 10, height: 10, borderRadius: 5, backgroundColor: colors.primary }} />
-                            <Text style={{ fontSize: 11, color: colors.textSecondary }}>Done</Text>
+                    <View style={styles.legendRow}>
+                        <View style={styles.legendItem}>
+                            <View style={[styles.legendDot, { backgroundColor: colors.primary }]} />
+                            <Text style={styles.legendText}>Done</Text>
                         </View>
-                        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
-                            <View style={{ width: 10, height: 10, borderRadius: 5, backgroundColor: colors.error + '30' }} />
-                            <Text style={{ fontSize: 11, color: colors.textSecondary }}>Missed</Text>
+                        <View style={styles.legendItem}>
+                            <View style={[styles.legendDot, { backgroundColor: colors.error + '30' }]} />
+                            <Text style={styles.legendText}>Missed</Text>
                         </View>
                     </View>
                 </View>
