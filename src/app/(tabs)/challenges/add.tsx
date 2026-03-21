@@ -29,11 +29,19 @@ export default function AddChallengeScreen() {
     const [selectedDays, setSelectedDays] = useState<string[]>([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
+    const [isNextMonth, setIsNextMonth] = useState(false);
 
     const now = new Date();
     const currentMonth = now.getMonth() + 1;
     const currentYear = now.getFullYear();
+    
+    // Calculate target month and year
+    const targetMonth = isNextMonth ? (now.getMonth() === 11 ? 1 : now.getMonth() + 2) : currentMonth;
+    const targetYear = isNextMonth && now.getMonth() === 11 ? currentYear + 1 : currentYear;
+
     const monthLabel = now.toLocaleDateString('nl-NL', { month: 'long', year: 'numeric' });
+    const nextMonthDate = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+    const nextMonthLabel = nextMonthDate.toLocaleDateString('nl-NL', { month: 'long', year: 'numeric' });
 
     useEffect(() => {
         const hasData = name.trim().length > 0 || selectedDays.length > 0 || description.trim().length > 0;
@@ -63,10 +71,10 @@ export default function AddChallengeScreen() {
         const { error: insertError } = await supabase.from('challenges').insert({
             name: name.trim(),
             description: description.trim() || null,
-            month: currentMonth,
-            year: currentYear,
-            start_date: `${currentYear}-${String(currentMonth).padStart(2, '0')}-01`,
-            end_date: `${currentYear}-${String(currentMonth).padStart(2, '0')}-${new Date(currentYear, currentMonth, 0).getDate()}`,
+            month: targetMonth,
+            year: targetYear,
+            start_date: `${targetYear}-${String(targetMonth).padStart(2, '0')}-01`,
+            end_date: `${targetYear}-${String(targetMonth).padStart(2, '0')}-${new Date(targetYear, targetMonth, 0).getDate()}`,
             days: selectedDays,
         });
 
@@ -117,19 +125,50 @@ export default function AddChallengeScreen() {
                     keyboardShouldPersistTaps="handled"
                     showsVerticalScrollIndicator={false}
                 >
-                    {/* Month info */}
-                    <View style={{
-                        backgroundColor: colors.primary + '15',
-                        borderRadius: 12,
-                        padding: 12,
-                        flexDirection: 'row',
-                        alignItems: 'center',
-                        gap: 8,
-                    }}>
-                        <Ionicons name="calendar-outline" size={18} color={colors.primary} />
-                        <Text style={{ color: colors.primary, fontSize: 14, fontWeight: '600' }}>
-                            Challenge for {monthLabel.charAt(0).toUpperCase() + monthLabel.slice(1)}
-                        </Text>
+                    {/* Month selector */}
+                    <Text style={styles.label}>Challenge month</Text>
+                    <View style={{ flexDirection: 'row', gap: 8 }}>
+                        <TouchableOpacity
+                            style={{
+                                flex: 1,
+                                paddingVertical: 12,
+                                borderRadius: 12,
+                                alignItems: 'center',
+                                borderWidth: 1,
+                                borderColor: !isNextMonth ? colors.primary : colors.border,
+                                backgroundColor: !isNextMonth ? colors.primary + '15' : 'transparent',
+                            }}
+                            onPress={() => setIsNextMonth(false)}
+                        >
+                            <Text style={{
+                                fontSize: 13,
+                                fontWeight: !isNextMonth ? '700' : '600',
+                                color: !isNextMonth ? colors.primary : colors.textSecondary
+                            }}>
+                                {monthLabel.charAt(0).toUpperCase() + monthLabel.slice(1)}
+                            </Text>
+                        </TouchableOpacity>
+
+                        <TouchableOpacity
+                            style={{
+                                flex: 1,
+                                paddingVertical: 12,
+                                borderRadius: 12,
+                                alignItems: 'center',
+                                borderWidth: 1,
+                                borderColor: isNextMonth ? colors.primary : colors.border,
+                                backgroundColor: isNextMonth ? colors.primary + '15' : 'transparent',
+                            }}
+                            onPress={() => setIsNextMonth(true)}
+                        >
+                            <Text style={{
+                                fontSize: 13,
+                                fontWeight: isNextMonth ? '700' : '600',
+                                color: isNextMonth ? colors.primary : colors.textSecondary
+                            }}>
+                                {nextMonthLabel.charAt(0).toUpperCase() + nextMonthLabel.slice(1)}
+                            </Text>
+                        </TouchableOpacity>
                     </View>
 
                     {/* Name */}

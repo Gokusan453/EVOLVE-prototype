@@ -256,9 +256,16 @@ export default function ChallengesListScreen() {
                                             <Text style={{ color: colors.textSecondary, fontSize: 12 }}>{item.participant_count}</Text>
                                         </View>
                                     </View>
-                                    <Text style={{ color: colors.text, fontSize: 15, fontWeight: '700', marginBottom: 6 }} numberOfLines={2}>
+                                    <Text style={{ color: colors.text, fontSize: 15, fontWeight: '700', marginBottom: 2 }} numberOfLines={2}>
                                         {item.name}
                                     </Text>
+                                    
+                                    {userRole === 'admin' && (
+                                        <Text style={{ fontSize: 11, color: colors.primary, fontWeight: '600', marginBottom: 6 }}>
+                                            {new Date(item.year, item.month - 1).toLocaleDateString('nl-NL', { month: 'short', year: 'numeric' }).toUpperCase()}
+                                        </Text>
+                                    )}
+
                                     <Text style={{ color: colors.textSecondary, fontSize: 12, marginBottom: 14 }} numberOfLines={3}>
                                         {item.description}
                                     </Text>
@@ -298,7 +305,14 @@ export default function ChallengesListScreen() {
                                 onPress={() => router.push(`/(tabs)/challenges/${item.id}`)}
                             >
                                 <View style={styles.cardTopRow}>
-                                    <Text style={styles.challengeName}>{item.name}</Text>
+                                    <View style={{ flex: 1, marginRight: 8 }}>
+                                        <Text style={styles.challengeName}>{item.name}</Text>
+                                        {userRole === 'admin' && (
+                                            <Text style={{ fontSize: 11, color: colors.primary, fontWeight: '600', marginTop: 2 }}>
+                                                {new Date(item.year, item.month - 1).toLocaleDateString('nl-NL', { month: 'short', year: 'numeric' }).toUpperCase()}
+                                            </Text>
+                                        )}
+                                    </View>
                                     <View style={styles.participantCount}>
                                         <Ionicons name="people" size={16} color={colors.textSecondary} />
                                         <Text style={styles.participantText}>{item.participant_count}</Text>

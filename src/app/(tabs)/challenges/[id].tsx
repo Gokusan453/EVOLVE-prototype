@@ -296,6 +296,16 @@ export default function ChallengeDetailScreen() {
 
     const getMonthProgress = () => {
         const now = new Date();
+        const currentYear = now.getFullYear();
+        const currentMonth = now.getMonth() + 1;
+
+        if (challenge.year > currentYear || (challenge.year === currentYear && challenge.month > currentMonth)) {
+            return 0;
+        }
+        if (challenge.year < currentYear || (challenge.year === currentYear && challenge.month < currentMonth)) {
+            return 100;
+        }
+
         const daysInMonth = new Date(challenge.year, challenge.month, 0).getDate();
         const currentDay = now.getDate();
         return Math.min(100, (currentDay / daysInMonth) * 100);
