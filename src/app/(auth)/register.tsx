@@ -1,7 +1,7 @@
 import { Colors } from '@/constants/theme';
 import { setPendingOnboardingUserId } from '@/lib/onboarding';
 import { supabase } from '@/lib/supabase';
-import { registerStyles as styles } from '@/styles/register.styling';
+import { registerStyles as styles } from '@/styles/auth.styling';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
@@ -68,7 +68,7 @@ export default function RegisterScreen() {
 
     return (
         <KeyboardAvoidingView
-            style={{ flex: 1 }}
+            style={styles.keyboardContainer}
             behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         >
             <View style={styles.container}>
@@ -77,109 +77,109 @@ export default function RegisterScreen() {
                 </TouchableOpacity>
 
                 <ScrollView
-                    contentContainerStyle={{ justifyContent: 'center', flexGrow: 1 }}
+                    contentContainerStyle={styles.scrollContent}
                     keyboardShouldPersistTaps="handled"
                     showsVerticalScrollIndicator={false}
                 >
                     <Text style={styles.title}>Create an account</Text>
 
-                {error ? <Text style={styles.errorText}>{error}</Text> : null}
+                    {error ? <Text style={styles.errorText}>{error}</Text> : null}
 
-                <TextInput
-                    style={styles.input}
-                    placeholder="Email"
-                    placeholderTextColor={Colors.textSecondary}
-                    value={email}
-                    onChangeText={setEmail}
-                    keyboardType="email-address"
-                    autoCapitalize="none"
-                />
-
-                <TextInput
-                    style={styles.input}
-                    placeholder="Username"
-                    placeholderTextColor={Colors.textSecondary}
-                    value={username}
-                    onChangeText={setUsername}
-                    autoCapitalize="none"
-                />
-
-                <TextInput
-                    style={styles.input}
-                    placeholder="First name"
-                    placeholderTextColor={Colors.textSecondary}
-                    value={firstName}
-                    onChangeText={setFirstName}
-                />
-
-                <TextInput
-                    style={styles.input}
-                    placeholder="Last name"
-                    placeholderTextColor={Colors.textSecondary}
-                    value={lastName}
-                    onChangeText={setLastName}
-                />
-
-                <View style={styles.passwordInputWrapper}>
                     <TextInput
-                        style={styles.passwordInput}
-                        placeholder="Password"
+                        style={styles.input}
+                        placeholder="Email"
                         placeholderTextColor={Colors.textSecondary}
-                        value={password}
-                        onChangeText={setPassword}
-                        secureTextEntry={!showPassword}
-                        textContentType="oneTimeCode"
+                        value={email}
+                        onChangeText={setEmail}
+                        keyboardType="email-address"
+                        autoCapitalize="none"
                     />
-                    <TouchableOpacity
-                        style={styles.eyeButton}
-                        onPress={() => setShowPassword((prev) => !prev)}
-                    >
-                        <Ionicons
-                            name={showPassword ? 'eye-off-outline' : 'eye-outline'}
-                            size={20}
-                            color={Colors.textSecondary}
-                        />
-                    </TouchableOpacity>
-                </View>
 
-                <View style={styles.passwordInputWrapper}>
                     <TextInput
-                        style={styles.passwordInput}
-                        placeholder="Confirm password"
+                        style={styles.input}
+                        placeholder="Username"
                         placeholderTextColor={Colors.textSecondary}
-                        value={confirmPassword}
-                        onChangeText={setConfirmPassword}
-                        secureTextEntry={!showConfirmPassword}
-                        textContentType="oneTimeCode"
+                        value={username}
+                        onChangeText={setUsername}
+                        autoCapitalize="none"
                     />
-                    <TouchableOpacity
-                        style={styles.eyeButton}
-                        onPress={() => setShowConfirmPassword((prev) => !prev)}
-                    >
-                        <Ionicons
-                            name={showConfirmPassword ? 'eye-off-outline' : 'eye-outline'}
-                            size={20}
-                            color={Colors.textSecondary}
+
+                    <TextInput
+                        style={styles.input}
+                        placeholder="First name"
+                        placeholderTextColor={Colors.textSecondary}
+                        value={firstName}
+                        onChangeText={setFirstName}
+                    />
+
+                    <TextInput
+                        style={styles.input}
+                        placeholder="Last name"
+                        placeholderTextColor={Colors.textSecondary}
+                        value={lastName}
+                        onChangeText={setLastName}
+                    />
+
+                    <View style={styles.passwordInputWrapper}>
+                        <TextInput
+                            style={styles.passwordInput}
+                            placeholder="Password"
+                            placeholderTextColor={Colors.textSecondary}
+                            value={password}
+                            onChangeText={setPassword}
+                            secureTextEntry={!showPassword}
+                            textContentType="oneTimeCode"
                         />
-                    </TouchableOpacity>
-                </View>
+                        <TouchableOpacity
+                            style={styles.eyeButton}
+                            onPress={() => setShowPassword((prev) => !prev)}
+                        >
+                            <Ionicons
+                                name={showPassword ? 'eye-off-outline' : 'eye-outline'}
+                                size={20}
+                                color={Colors.textSecondary}
+                            />
+                        </TouchableOpacity>
+                    </View>
 
-                <TouchableOpacity
-                    style={[styles.button, loading && styles.buttonDisabled]}
-                    onPress={handleRegister}
-                    disabled={loading}
-                >
-                    <Text style={styles.buttonText}>
-                        {loading ? 'Creating account...' : 'Create an account'}
-                    </Text>
-                </TouchableOpacity>
+                    <View style={styles.passwordInputWrapper}>
+                        <TextInput
+                            style={styles.passwordInput}
+                            placeholder="Confirm password"
+                            placeholderTextColor={Colors.textSecondary}
+                            value={confirmPassword}
+                            onChangeText={setConfirmPassword}
+                            secureTextEntry={!showConfirmPassword}
+                            textContentType="oneTimeCode"
+                        />
+                        <TouchableOpacity
+                            style={styles.eyeButton}
+                            onPress={() => setShowConfirmPassword((prev) => !prev)}
+                        >
+                            <Ionicons
+                                name={showConfirmPassword ? 'eye-off-outline' : 'eye-outline'}
+                                size={20}
+                                color={Colors.textSecondary}
+                            />
+                        </TouchableOpacity>
+                    </View>
 
-                <View style={styles.footer}>
-                    <Text style={styles.footerText}>Already have an account? </Text>
-                    <TouchableOpacity onPress={() => router.replace('/(auth)/login')}>
-                        <Text style={styles.footerLink}>Login</Text>
+                    <TouchableOpacity
+                        style={[styles.button, loading && styles.buttonDisabled]}
+                        onPress={handleRegister}
+                        disabled={loading}
+                    >
+                        <Text style={styles.buttonText}>
+                            {loading ? 'Creating account...' : 'Create an account'}
+                        </Text>
                     </TouchableOpacity>
-                </View>
+
+                    <View style={styles.footer}>
+                        <Text style={styles.footerText}>Already have an account? </Text>
+                        <TouchableOpacity onPress={() => router.replace('/(auth)/login')}>
+                            <Text style={styles.footerLink}>Login</Text>
+                        </TouchableOpacity>
+                    </View>
                 </ScrollView>
             </View>
         </KeyboardAvoidingView>

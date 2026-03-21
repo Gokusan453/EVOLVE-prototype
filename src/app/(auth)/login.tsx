@@ -1,6 +1,6 @@
 import { Colors } from '@/constants/theme';
 import { supabase } from '@/lib/supabase';
-import { loginStyles as styles } from '@/styles/login.styling';
+import { loginStyles as styles } from '@/styles/auth.styling';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
@@ -39,7 +39,7 @@ export default function LoginScreen() {
 
     return (
         <KeyboardAvoidingView
-            style={{ flex: 1 }}
+            style={styles.keyboardContainer}
             behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         >
             <View style={styles.container}>
@@ -48,7 +48,7 @@ export default function LoginScreen() {
                 </TouchableOpacity>
 
                 <ScrollView
-                    contentContainerStyle={{ flexGrow: 1, justifyContent: 'center' }}
+                    contentContainerStyle={styles.scrollContent}
                     keyboardShouldPersistTaps="handled"
                     showsVerticalScrollIndicator={false}
                 >

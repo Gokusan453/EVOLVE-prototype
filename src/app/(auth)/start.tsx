@@ -1,4 +1,4 @@
-import { startStyles as styles } from '@/styles/start.styling';
+import { startStyles as styles } from '@/styles/auth.styling';
 import { useRouter } from 'expo-router';
 import { Text, TouchableOpacity, View } from 'react-native';
 

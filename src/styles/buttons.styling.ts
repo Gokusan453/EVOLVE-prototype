@@ -67,6 +67,11 @@ export const createButtonStyles = (colors: Palette) => ({
         borderWidth: 1,
         borderColor: colors.error,
     },
+    ctaOutlineNeutral: {
+        backgroundColor: colors.surface,
+        borderWidth: 1,
+        borderColor: colors.border,
+    },
 
     textOnPrimary: {
         color: colors.onPrimary,
