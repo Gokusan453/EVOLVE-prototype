@@ -48,29 +48,6 @@ export const createHabitDetailStyles = (colors: any) =>
             paddingBottom: 40,
         },
 
-        // Progress bar
-        progressCard: {
-            backgroundColor: colors.primary,
-            borderRadius: 14,
-            padding: 16,
-            marginBottom: 16,
-        },
-        progressText: {
-            color: colors.onPrimary,
-            fontSize: 14,
-            fontWeight: '600',
-            marginBottom: 8,
-        },
-        progressBarBg: {
-            height: 8,
-            backgroundColor: 'rgba(255,255,255,0.3)',
-            borderRadius: 4,
-        },
-        progressBarFill: {
-            height: 8,
-            backgroundColor: colors.onPrimary,
-            borderRadius: 4,
-        },
 
         // Info card
         infoCard: {
@@ -143,64 +120,6 @@ export const createHabitDetailStyles = (colors: any) =>
             color: colors.onPrimary,
         },
 
-        // Weekly chart
-        chartCard: {
-            backgroundColor: colors.surface,
-            borderRadius: 14,
-            padding: 16,
-            marginBottom: 16,
-            borderWidth: 1,
-            borderColor: colors.border,
-        },
-        chartFilterRow: {
-            flexDirection: 'row',
-            justifyContent: 'center',
-            marginBottom: 14,
-            gap: 8,
-        },
-        chartFilterButton: {
-            paddingVertical: 6,
-            paddingHorizontal: 16,
-            borderRadius: 16,
-            borderWidth: 1,
-            borderColor: colors.border,
-        },
-        chartFilterButtonActive: {
-            backgroundColor: colors.primary,
-            borderColor: colors.primary,
-        },
-        chartFilterText: {
-            fontSize: 13,
-            fontWeight: '500',
-            color: colors.textSecondary,
-        },
-        chartFilterTextActive: {
-            color: colors.onPrimary,
-        },
-        chartRow: {
-            flexDirection: 'row',
-            justifyContent: 'space-between',
-            alignItems: 'flex-end',
-            height: 200,
-        },
-        chartBarContainer: {
-            alignItems: 'center',
-            flex: 1,
-        },
-        chartBar: {
-            width: 30,
-            borderRadius: 4,
-            backgroundColor: colors.primary,
-            minHeight: 4,
-        },
-        chartBarEmpty: {
-            backgroundColor: colors.border,
-        },
-        chartLabel: {
-            fontSize: 11,
-            color: colors.textMuted,
-            marginTop: 4,
-        },
 
         // Mark as done
         doneButton: {

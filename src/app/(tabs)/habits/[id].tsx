@@ -286,7 +286,7 @@ export default function HabitDetailScreen() {
                 </View>
 
                 {/* Calendar */}
-                <View style={styles.chartCard}>
+                <View style={styles.dateCard}>
                     <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
                         <TouchableOpacity onPress={() => {
                             const prev = new Date(calendarMonth);
