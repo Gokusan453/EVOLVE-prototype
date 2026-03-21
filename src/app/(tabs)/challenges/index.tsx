@@ -8,6 +8,9 @@ import { useRouter } from 'expo-router';
 import { useCallback, useRef, useState } from 'react';
 import { Alert, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 
+const localDateStr = (d: Date) =>
+    `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+
 type Challenge = {
     id: string;
     name: string;
@@ -17,6 +20,7 @@ type Challenge = {
     days: string[];
     participant_count?: number;
     is_joined?: boolean;
+    is_done_today?: boolean;
 };
 
 export default function ChallengesListScreen() {
@@ -65,10 +69,26 @@ export default function ChallengesListScreen() {
                     .eq('challenge_id', c.id)
                     .eq('user_id', user.id);
 
+                const isJoined = (myParticipation?.length || 0) > 0;
+
+                let isDoneToday = false;
+                if (isJoined) {
+                    const today = localDateStr(new Date());
+                    const { data: todayLogs } = await supabase
+                        .from('challenge_logs')
+                        .select('id')
+                        .eq('challenge_id', c.id)
+                        .eq('user_id', user.id)
+                        .gte('completed_at', `${today}T00:00:00`)
+                        .lte('completed_at', `${today}T23:59:59`);
+                    isDoneToday = (todayLogs?.length || 0) > 0;
+                }
+
                 enriched.push({
                     ...c,
                     participant_count: count || 0,
-                    is_joined: (myParticipation?.length || 0) > 0,
+                    is_joined: isJoined,
+                    is_done_today: isDoneToday,
                 });
             }
 
@@ -110,6 +130,26 @@ export default function ChallengesListScreen() {
             Alert.alert('Could not join challenge', joinError.message);
             return;
         }
+
+        fetchChallenges();
+    };
+
+    const isChallengeScheduledToday = (c: Challenge) => {
+        const now = new Date();
+        const currentMonth = now.getMonth() + 1;
+        const currentYear = now.getFullYear();
+        if (c.month !== currentMonth || c.year !== currentYear) return false;
+        const dayKeys = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
+        return c.days.includes(dayKeys[now.getDay()]);
+    };
+
+    const handleMarkDone = async (challengeId: string) => {
+        if (!userId) return;
+
+        await supabase.from('challenge_logs').insert({
+            challenge_id: challengeId,
+            user_id: userId,
+        });
 
         fetchChallenges();
     };
@@ -238,12 +278,22 @@ export default function ChallengesListScreen() {
                                 ) : null}
                                 <View style={styles.cardBottomRow}>
                                     <View />
-                                    <TouchableOpacity
-                                        style={[styles.joinButton, styles.joinedButton]}
-                                        onPress={() => handleLeave(item.id)}
-                                    >
-                                        <Text style={styles.joinButtonText}>Joined</Text>
-                                    </TouchableOpacity>
+                                    {item.is_done_today ? (
+                                        <View style={[styles.joinButton, styles.joinedButton]}>
+                                            <Text style={styles.joinButtonText}>Done ✓</Text>
+                                        </View>
+                                    ) : isChallengeScheduledToday(item) ? (
+                                        <TouchableOpacity
+                                            style={styles.joinButton}
+                                            onPress={() => handleMarkDone(item.id)}
+                                        >
+                                            <Text style={[styles.joinButtonText, { color: colors.onPrimary }]}>Mark as done</Text>
+                                        </TouchableOpacity>
+                                    ) : (
+                                        <View style={[styles.joinButton, styles.joinedButton]}>
+                                            <Text style={styles.joinButtonText}>Not today</Text>
+                                        </View>
+                                    )}
                                 </View>
                             </TouchableOpacity>
                         ))
