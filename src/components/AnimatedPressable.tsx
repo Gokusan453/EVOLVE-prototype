@@ -2,6 +2,8 @@ import { ReactNode } from 'react';
 import { Pressable, PressableProps, StyleProp, ViewStyle } from 'react-native';
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 
+const AnimatedPressableBase = Animated.createAnimatedComponent(Pressable);
+
 type AnimatedPressableProps = Omit<PressableProps, 'children'> & {
     children: ReactNode;
     style?: StyleProp<ViewStyle>;
@@ -23,8 +25,9 @@ export default function AnimatedPressable({
     }));
 
     return (
-        <Pressable
+        <AnimatedPressableBase
             {...props}
+            style={[style, animatedStyle]}
             onPressIn={(event) => {
                 scale.value = withTiming(pressedScale, { duration: 110 });
                 onPressIn?.(event);
@@ -34,7 +37,7 @@ export default function AnimatedPressable({
                 onPressOut?.(event);
             }}
         >
-            <Animated.View style={[style, animatedStyle]}>{children}</Animated.View>
-        </Pressable>
+            {children}
+        </AnimatedPressableBase>
     );
 }
