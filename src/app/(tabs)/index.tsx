@@ -199,7 +199,7 @@ export default function HomeScreen() {
           </View>
         )}
         <View style={styles.headerInfoWrap}>
-          <Text style={styles.greeting}>Welcome back,</Text>
+          <Text style={styles.greeting}>Welcome,</Text>
           <Text style={styles.userName} numberOfLines={1}>
             {profile ? `${profile.first_name} ${profile.last_name}` : '...'}
           </Text>

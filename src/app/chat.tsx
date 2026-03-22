@@ -13,7 +13,7 @@ import {
     TouchableOpacity,
     View,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const WELCOME_MESSAGE: ChatMessage = {
     role: 'assistant',
@@ -25,6 +25,7 @@ export default function ChatScreen() {
     const router = useRouter();
     const styles = createChatStyles(colors);
     const flatListRef = useRef<FlatList>(null);
+    const insets = useSafeAreaInsets();
 
     const [messages, setMessages] = useState<ChatMessage[]>([WELCOME_MESSAGE]);
     const [input, setInput] = useState('');
@@ -74,13 +75,8 @@ export default function ChatScreen() {
         );
     };
 
-    return (
-        <SafeAreaView style={styles.container} edges={['top']}>
-            <KeyboardAvoidingView
-                style={{ flex: 1 }}
-                behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-                keyboardVerticalOffset={Platform.OS === 'ios' ? 6 : 0}
-            >
+    const content = (
+        <>
             {/* Header */}
             <View style={styles.header}>
                 <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
@@ -113,7 +109,7 @@ export default function ChatScreen() {
             />
 
             {/* Input */}
-            <View style={styles.inputContainer}>
+            <View style={[styles.inputContainer, { paddingBottom: Math.max(insets.bottom, 8) }]}>
                 <TextInput
                     style={styles.textInput}
                     placeholder="Type your message..."
@@ -134,7 +130,22 @@ export default function ChatScreen() {
                     <Ionicons name="send" size={18} color="#FFFFFF" />
                 </TouchableOpacity>
             </View>
-            </KeyboardAvoidingView>
+        </>
+    );
+
+    return (
+        <SafeAreaView style={styles.container} edges={['top']}>
+            {Platform.OS === 'ios' ? (
+                <KeyboardAvoidingView
+                    style={{ flex: 1 }}
+                    behavior="padding"
+                    keyboardVerticalOffset={6}
+                >
+                    {content}
+                </KeyboardAvoidingView>
+            ) : (
+                <View style={{ flex: 1 }}>{content}</View>
+            )}
         </SafeAreaView>
     );
 }
