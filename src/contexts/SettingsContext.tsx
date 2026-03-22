@@ -9,6 +9,7 @@ type NotificationsModule = typeof import('expo-notifications');
 let notificationsModulePromise: Promise<NotificationsModule | null> | null = null;
 
 const DAILY_REMINDER_ID_KEY = 'daily_reminder_notification_id';
+const NOTIFICATION_PERMISSION_ASKED_KEY = 'notification_permission_asked';
 const DAILY_REMINDER_HOUR = 10;
 const DAILY_REMINDER_MINUTE = 0;
 
@@ -84,6 +85,13 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
             const notificationsModule = await getNotificationsModule();
             if (!notificationsModule) return;
 
+            if (Platform.OS === 'android') {
+                await notificationsModule.setNotificationChannelAsync('default', {
+                    name: 'Default',
+                    importance: notificationsModule.AndroidImportance.DEFAULT,
+                });
+            }
+
             notificationsModule.setNotificationHandler({
                 handleNotification: async () => ({
                     shouldShowAlert: true,
@@ -97,6 +105,28 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
 
         configureNotifications();
     }, []);
+
+    useEffect(() => {
+        if (!settingsLoaded || !notifications) return;
+
+        const bootstrapNotificationPermission = async () => {
+            const notificationsModule = await getNotificationsModule();
+            if (!notificationsModule) return;
+
+            const askedBefore = await AsyncStorage.getItem(NOTIFICATION_PERMISSION_ASKED_KEY);
+            if (askedBefore) return;
+
+            const hasPermission = await ensureNotificationPermission(notificationsModule);
+            await AsyncStorage.setItem(NOTIFICATION_PERMISSION_ASKED_KEY, '1');
+
+            if (!hasPermission) {
+                setNotificationsState(false);
+                save('notifications', false);
+            }
+        };
+
+        bootstrapNotificationPermission();
+    }, [settingsLoaded, notifications]);
 
     const ensureNotificationPermission = async (notificationsModule: NotificationsModule) => {
         const currentPermissions = await notificationsModule.getPermissionsAsync();
@@ -199,7 +229,10 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
         if (!notificationsModule) return;
 
         const permissions = await notificationsModule.getPermissionsAsync();
-        if (!permissions.granted) return;
+        if (!permissions.granted) {
+            const granted = await ensureNotificationPermission(notificationsModule);
+            if (!granted) return;
+        }
 
         await notificationsModule.scheduleNotificationAsync({
             content: {
