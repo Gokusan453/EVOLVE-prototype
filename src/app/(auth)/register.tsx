@@ -3,9 +3,10 @@ import { setPendingOnboardingUserId } from '@/lib/onboarding';
 import { supabase } from '@/lib/supabase';
 import { registerStyles as styles } from '@/styles/auth.styling';
 import { Ionicons } from '@expo/vector-icons';
+import * as ImagePicker from 'expo-image-picker';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
-import { KeyboardAvoidingView, Platform, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Image, KeyboardAvoidingView, Platform, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
 export default function RegisterScreen() {
     const router = useRouter();
@@ -19,6 +20,48 @@ export default function RegisterScreen() {
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
+    const [avatarUri, setAvatarUri] = useState<string | null>(null);
+
+    const pickAvatar = async () => {
+        const result = await ImagePicker.launchImageLibraryAsync({
+            mediaTypes: ['images'],
+            allowsEditing: true,
+            aspect: [1, 1],
+            quality: 0.7,
+        });
+
+        if (result.canceled) return;
+        setAvatarUri(result.assets[0].uri);
+    };
+
+    const uploadAvatarForUser = async (userId: string, uri: string) => {
+        const ext = uri.split('.').pop() || 'jpg';
+        const fileName = `${userId}/avatar.${ext}`;
+
+        const response = await fetch(uri);
+        const blob = await response.blob();
+        const arrayBuffer = await new Response(blob).arrayBuffer();
+
+        const { error: uploadError } = await supabase.storage
+            .from('avatars')
+            .upload(fileName, arrayBuffer, {
+                contentType: `image/${ext}`,
+                upsert: true,
+            });
+
+        if (uploadError) {
+            return;
+        }
+
+        const { data: urlData } = supabase.storage
+            .from('avatars')
+            .getPublicUrl(fileName);
+
+        await supabase
+            .from('profiles')
+            .update({ avatar_url: `${urlData.publicUrl}?t=${Date.now()}` })
+            .eq('id', userId);
+    };
 
     const handleRegister = async () => {
         if (!email || !username || !firstName || !lastName || !password || !confirmPassword) {
@@ -55,15 +98,20 @@ export default function RegisterScreen() {
 
         if (authError) {
             setError(authError.message);
-        } else {
-            if (data.user?.id) {
-                await setPendingOnboardingUserId(data.user.id);
-                router.replace('/(auth)/onboarding');
-                return;
+            return;
+        }
+
+        if (data.user?.id) {
+            if (avatarUri) {
+                await uploadAvatarForUser(data.user.id, avatarUri);
             }
 
-            router.replace('/(auth)/login');
+            await setPendingOnboardingUserId(data.user.id);
+            router.replace('/(auth)/onboarding');
+            return;
         }
+
+        router.replace('/(auth)/login');
     };
 
     return (
@@ -84,6 +132,19 @@ export default function RegisterScreen() {
                     <Text style={styles.title}>Create an account</Text>
 
                     {error ? <Text style={styles.errorText}>{error}</Text> : null}
+
+                    <View style={styles.avatarPickerContainer}>
+                        <TouchableOpacity style={styles.avatarPickerButton} onPress={pickAvatar}>
+                            {avatarUri ? (
+                                <Image source={{ uri: avatarUri }} style={styles.avatarPreviewImage} />
+                            ) : (
+                                <View style={styles.avatarPlaceholderWrap}>
+                                    <Ionicons name="camera-outline" size={20} color={Colors.textSecondary} />
+                                    <Text style={styles.avatarPlaceholderText}>Add profile photo</Text>
+                                </View>
+                            )}
+                        </TouchableOpacity>
+                    </View>
 
                     <TextInput
                         style={styles.input}

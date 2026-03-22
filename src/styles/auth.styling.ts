@@ -63,6 +63,36 @@ const formBaseStyles = {
     eyeButton: {
         padding: 6,
     },
+    avatarPickerContainer: {
+        alignItems: 'center' as const,
+        marginBottom: 16,
+    },
+    avatarPickerButton: {
+        width: 96,
+        height: 96,
+        borderRadius: 48,
+        borderWidth: 1,
+        borderColor: Colors.border,
+        backgroundColor: Colors.surface,
+        overflow: 'hidden' as const,
+        alignItems: 'center' as const,
+        justifyContent: 'center' as const,
+    },
+    avatarPreviewImage: {
+        width: '100%' as const,
+        height: '100%' as const,
+    },
+    avatarPlaceholderWrap: {
+        alignItems: 'center' as const,
+        justifyContent: 'center' as const,
+        paddingHorizontal: 8,
+    },
+    avatarPlaceholderText: {
+        color: Colors.textSecondary,
+        fontSize: 11,
+        marginTop: 4,
+        textAlign: 'center' as const,
+    },
     button: {
         ...buttonStyles.ctaButton,
         ...buttonStyles.ctaPrimary,
