@@ -13,7 +13,7 @@ import {
     TouchableOpacity,
     View,
 } from 'react-native';
-import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 const WELCOME_MESSAGE: ChatMessage = {
     role: 'assistant',
@@ -25,7 +25,6 @@ export default function ChatScreen() {
     const router = useRouter();
     const styles = createChatStyles(colors);
     const flatListRef = useRef<FlatList>(null);
-    const insets = useSafeAreaInsets();
 
     const [messages, setMessages] = useState<ChatMessage[]>([WELCOME_MESSAGE]);
     const [input, setInput] = useState('');
@@ -76,10 +75,10 @@ export default function ChatScreen() {
     };
 
     return (
-        <SafeAreaView style={styles.container} edges={['top']}>
+        <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
             <KeyboardAvoidingView
                 style={{ flex: 1 }}
-                behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+                behavior={Platform.OS === 'ios' ? 'padding' : undefined}
                 keyboardVerticalOffset={Platform.OS === 'ios' ? 6 : 0}
             >
             {/* Header */}
@@ -114,7 +113,7 @@ export default function ChatScreen() {
             />
 
             {/* Input */}
-            <View style={[styles.inputContainer, { paddingBottom: Math.max(insets.bottom, 12) }]}>
+            <View style={styles.inputContainer}>
                 <TextInput
                     style={styles.textInput}
                     placeholder="Type your message..."
