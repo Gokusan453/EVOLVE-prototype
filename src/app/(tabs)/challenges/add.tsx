@@ -24,6 +24,7 @@ export default function AddChallengeScreen() {
     const styles = createAddHabitStyles(colors);
     const router = useRouter();
 
+    // Form state for new challenge creation.
     const [name, setName] = useState('');
     const [description, setDescription] = useState('');
     const [selectedDays, setSelectedDays] = useState<string[]>([]);
@@ -43,18 +44,21 @@ export default function AddChallengeScreen() {
     const nextMonthDate = new Date(now.getFullYear(), now.getMonth() + 1, 1);
     const nextMonthLabel = nextMonthDate.toLocaleDateString('nl-NL', { month: 'long', year: 'numeric' });
 
+    // Registers unsaved-change state for leave guards.
     useEffect(() => {
         const hasData = name.trim().length > 0 || selectedDays.length > 0 || description.trim().length > 0;
         setUnsavedChanges(hasData);
         return () => setUnsavedChanges(false);
     }, [name, selectedDays, description]);
 
+    // Toggles selected schedule days.
     const toggleDay = (day: string) => {
         setSelectedDays((prev) =>
             prev.includes(day) ? prev.filter((d) => d !== day) : [...prev, day]
         );
     };
 
+    // Validates form and inserts challenge row in Supabase.
     const handleCreate = async () => {
         if (!name.trim()) {
             setError('Please enter a challenge name');
@@ -91,10 +95,12 @@ export default function AddChallengeScreen() {
 
     return (
         <View style={styles.container}>
+            {/* Keyboard-safe wrapper for long form fields. */}
             <KeyboardAvoidingView
                 style={{ flex: 1 }}
                 behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
             >
+                {/* Header with guarded back navigation. */}
                 <View style={styles.headerRow}>
                     <TouchableOpacity style={styles.backButton} onPress={() => {
                         const hasData = name.trim().length > 0 || selectedDays.length > 0 || description.trim().length > 0;

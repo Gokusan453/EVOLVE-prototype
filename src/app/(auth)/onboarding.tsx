@@ -9,10 +9,12 @@ import { ScrollView, Text, TouchableOpacity, View } from 'react-native';
 
 export default function OnboardingScreen() {
     const router = useRouter();
+    // Preference and theme state used in onboarding toggles.
     const { notifications, setNotifications } = useSettings();
     const { mode, colors, toggleTheme } = useTheme();
     const styles = createOnboardingStyles(colors);
 
+    // Finalizes onboarding and routes into the main app.
     const finishOnboarding = async () => {
         const { data: { user } } = await supabase.auth.getUser();
         await clearPendingOnboardingUserId(user?.id ?? null);
@@ -26,11 +28,13 @@ export default function OnboardingScreen() {
                 showsVerticalScrollIndicator={false}
                 keyboardShouldPersistTaps="handled"
             >
+                {/* Intro copy for first-time users. */}
                 <View style={styles.headerBlock}>
                     <Text style={styles.title}>Welcome to Evolve</Text>
                     <Text style={styles.subtitle}>Build habits, join monthly challenges, and grow your streak day by day.</Text>
                 </View>
 
+                {/* Core feature overview section. */}
                 <View style={styles.sectionBlock}>
                     <Text style={styles.sectionTitle}>What you can do in Evolve</Text>
                     <View style={styles.infoCard}>
@@ -49,6 +53,7 @@ export default function OnboardingScreen() {
                     </View>
                 </View>
 
+                {/* AI coach explanation with prompt examples. */}
                 <View style={styles.sectionBlock}>
                     <Text style={styles.sectionTitle}>Meet EVO AI</Text>
                     <View style={styles.infoCard}>
@@ -58,6 +63,7 @@ export default function OnboardingScreen() {
                     </View>
                 </View>
 
+                {/* Preference toggles for notifications and theme. */}
                 <View style={styles.sectionBlock}>
                     <Text style={styles.sectionTitle}>Quick preferences</Text>
                     <View style={styles.reminderCard}>
@@ -87,6 +93,7 @@ export default function OnboardingScreen() {
                         </TouchableOpacity>
                     </View>
 
+                    {/* Theme toggle card. */}
                     <TouchableOpacity
                         style={[styles.reminderCard, styles.preferenceSpacing]}
                         onPress={toggleTheme}
@@ -104,11 +111,13 @@ export default function OnboardingScreen() {
                     </TouchableOpacity>
                 </View>
 
+                {/* Final confirmation before entering the app. */}
                 <View style={styles.summaryCard}>
                     <Ionicons name="sparkles-outline" size={18} color={colors.primary} />
                     <Text style={styles.summaryText}>Great, you are set. You can change everything later in Settings.</Text>
                 </View>
 
+                {/* Main continue action. */}
                 <TouchableOpacity
                     style={styles.primaryButton}
                     onPress={finishOnboarding}

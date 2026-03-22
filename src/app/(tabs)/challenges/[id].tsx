@@ -46,6 +46,7 @@ export default function ChallengeDetailScreen() {
     const router = useRouter();
     const { triggerFeedback } = useSettings();
 
+    // Screen state for challenge details, participation, and leaderboard data.
     const [challenge, setChallenge] = useState<Challenge | null>(null);
     const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
     const [isDoneToday, setIsDoneToday] = useState(false);
@@ -55,6 +56,7 @@ export default function ChallengeDetailScreen() {
     const [isLoading, setIsLoading] = useState(true);
     const [calendarLogs, setCalendarLogs] = useState<Set<string>>(new Set());
 
+    // Loads challenge info, join state, daily status, and leaderboard.
     const fetchData = async () => {
         setIsLoading(true);
         try {
@@ -149,10 +151,12 @@ export default function ChallengeDetailScreen() {
 
     useFocusEffect(
         useCallback(() => {
+            // Refreshes detail data whenever screen regains focus.
             fetchData();
         }, [id])
     );
 
+    // Loads current user's completion logs for calendar rendering.
     const fetchCalendarLogs = async () => {
         const { data: { user } } = await supabase.auth.getUser();
         if (!user || !challenge) return;
@@ -181,6 +185,7 @@ export default function ChallengeDetailScreen() {
         }, [id, challenge])
     );
 
+    // Builds a month grid with done/missed/not-scheduled states.
     const buildCalendarDays = () => {
         if (!challenge) return [];
         const year = challenge.year;
@@ -242,6 +247,7 @@ export default function ChallengeDetailScreen() {
         return true;
     };
 
+    // Writes today's completion log when valid.
     const handleMarkDone = async () => {
         if (!challenge) return;
         if (!isChallengeScheduledToday(challenge)) {
@@ -262,6 +268,7 @@ export default function ChallengeDetailScreen() {
     };
 
     const handleDelete = () => {
+        // Admin-only destructive flow to remove challenge and related data.
         Alert.alert(
             'Delete Challenge',
             'Are you sure you want to delete this challenge? This will remove all progress for everyone.',
@@ -294,6 +301,7 @@ export default function ChallengeDetailScreen() {
     if (!challenge) return null;
     const canMarkToday = isChallengeScheduledToday(challenge);
 
+    // Derives progress based on month position relative to today.
     const getMonthProgress = () => {
         const now = new Date();
         const currentYear = now.getFullYear();

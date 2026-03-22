@@ -27,10 +27,12 @@ export default function ChatScreen() {
     const flatListRef = useRef<FlatList>(null);
     const insets = useSafeAreaInsets();
 
+    // Local chat state for message history, input, and loading feedback.
     const [messages, setMessages] = useState<ChatMessage[]>([WELCOME_MESSAGE]);
     const [input, setInput] = useState('');
     const [isLoading, setIsLoading] = useState(false);
 
+    // Sends user message, calls AI, and appends assistant response.
     const handleSend = async () => {
         const text = input.trim();
         if (!text || isLoading) return;
@@ -65,6 +67,7 @@ export default function ChatScreen() {
     };
 
     const renderMessage = ({ item }: { item: ChatMessage }) => {
+        // Chooses bubble style based on message role.
         const isUser = item.role === 'user';
         return (
             <View style={isUser ? styles.messageBubbleUser : styles.messageBubbleAI}>
@@ -75,6 +78,7 @@ export default function ChatScreen() {
         );
     };
 
+    // Main chat layout split into header, message list, and input bar.
     const content = (
         <>
             {/* Header */}
@@ -134,6 +138,7 @@ export default function ChatScreen() {
     );
 
     return (
+        // Safe-area + keyboard wrapper keeps input visible when typing.
         <SafeAreaView style={styles.container} edges={['top']}>
             <KeyboardAvoidingView
                 style={{ flex: 1 }}

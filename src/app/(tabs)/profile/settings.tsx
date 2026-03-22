@@ -19,6 +19,7 @@ export default function PreferencesScreen() {
     const styles = createSettingsStyles(colors);
     const router = useRouter();
 
+    // Deletes all user-owned relational data before account sign-out.
     const deleteUserData = async () => {
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) return;
@@ -52,11 +53,13 @@ export default function PreferencesScreen() {
         );
     };
 
+    // Signs out and returns to auth start screen.
     const handleLogout = async () => {
         await supabase.auth.signOut();
         router.replace('/(auth)/start');
     };
 
+    // Full account deletion flow with error handling.
     const handleDeleteAccount = async () => {
         try {
             await deleteUserData();
@@ -70,6 +73,7 @@ export default function PreferencesScreen() {
 
     return (
         <View style={styles.container}>
+            {/* Header with back action. */}
             <View style={{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: 20, marginBottom: 24 }}>
                 <TouchableOpacity
                     style={{ width: 36, height: 36, borderRadius: 10, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border }}
@@ -81,6 +85,7 @@ export default function PreferencesScreen() {
             </View>
 
             <View style={styles.scrollContent}>
+                {/* App preference toggles. */}
                 <View style={styles.settingsCard}>
                     <View style={[styles.settingsRow, styles.settingsBorder]}>
                         <Text style={styles.settingsLabel}>Darkmode</Text>
@@ -120,6 +125,7 @@ export default function PreferencesScreen() {
                     </View>
                 </View>
 
+                {/* Logout action with confirmation. */}
                 <TouchableOpacity
                     style={styles.logoutButton}
                     onPress={() => {
@@ -136,6 +142,7 @@ export default function PreferencesScreen() {
                     <Text style={styles.logoutText}>Log out</Text>
                 </TouchableOpacity>
 
+                {/* Destructive account deletion action. */}
                 <TouchableOpacity
                     style={styles.deleteAccountButton}
                     onPress={() => {

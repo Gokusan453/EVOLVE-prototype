@@ -5,6 +5,7 @@ export default function ChallengesLayout() {
     const { colors } = useTheme();
 
     return (
+        // Shared stack wrapper for all challenge routes.
         <Stack
             screenOptions={{
                 headerShown: false,

@@ -22,6 +22,7 @@ export default function EditHabitScreen() {
     const styles = createAddHabitStyles(colors);
     const router = useRouter();
 
+    // Form state for editing existing habit data.
     const [name, setName] = useState('');
     const [description, setDescription] = useState('');
     const [startDate, setStartDate] = useState('');
@@ -32,6 +33,7 @@ export default function EditHabitScreen() {
     const [error, setError] = useState('');
 
     useEffect(() => {
+        // Loads current habit values into the form.
         const fetchHabit = async () => {
             const { data } = await supabase
                 .from('habits')
@@ -54,12 +56,14 @@ export default function EditHabitScreen() {
         fetchHabit();
     }, [id]);
 
+    // Toggles selected schedule days.
     const toggleDay = (day: string) => {
         setSelectedDays((prev) =>
             prev.includes(day) ? prev.filter((d) => d !== day) : [...prev, day]
         );
     };
 
+    // Validates and saves updated habit fields.
     const handleSave = async () => {
         if (!name.trim()) {
             setError('Please enter a habit name');
@@ -95,10 +99,12 @@ export default function EditHabitScreen() {
 
     return (
         <View style={styles.container}>
+            {/* Keyboard-safe wrapper for long form inputs. */}
             <KeyboardAvoidingView
                 style={{ flex: 1 }}
                 behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
             >
+                {/* Header with back navigation. */}
                 <View style={styles.headerRow}>
                     <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
                         <Ionicons name="arrow-back" size={24} color={colors.text} />

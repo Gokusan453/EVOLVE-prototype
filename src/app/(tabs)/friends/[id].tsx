@@ -27,6 +27,7 @@ export default function FriendDetailScreen() {
     const router = useRouter();
     const styles = createFriendDetailStyles(colors);
 
+    // State for profile info, stats, badges, and loading.
     const [profile, setProfile] = useState<Profile | null>(null);
     const [friendshipId, setFriendshipId] = useState<string | null>(null);
     const [habitsCount, setHabitsCount] = useState(0);
@@ -39,6 +40,7 @@ export default function FriendDetailScreen() {
 
     useFocusEffect(
         useCallback(() => {
+            // Loads friend profile, relationship, and gamification stats.
             const fetch = async () => {
                 setIsLoading(true);
                 try {
@@ -126,6 +128,7 @@ export default function FriendDetailScreen() {
         }, [id])
     );
 
+    // Removes accepted friendship and navigates back.
     const handleRemove = async () => {
         if (!friendshipId) return;
         await supabase.from('friendships').delete().eq('id', friendshipId);
@@ -146,6 +149,7 @@ export default function FriendDetailScreen() {
 
     return (
         <View style={styles.container}>
+            {/* Top navigation and title row. */}
             <View style={styles.headerRow}>
                 <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
                     <Ionicons name="arrow-back" size={24} color={colors.text} />

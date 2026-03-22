@@ -3,6 +3,7 @@
  */
 
 export const LightColors = {
+    // Brand and accent colors.
     primary: '#10B981',
     primaryLight: '#34D399',
     primaryDark: '#059669',
@@ -36,6 +37,7 @@ export const LightColors = {
 } as const;
 
 export const DarkColors = {
+    // Dark-mode palette keeps same semantic keys.
     primary: '#10B981',
     primaryLight: '#34D399',
     primaryDark: '#059669',

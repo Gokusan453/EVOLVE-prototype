@@ -38,12 +38,14 @@ export default function HabitDetailScreen() {
     const styles = createHabitDetailStyles(colors);
     const router = useRouter();
 
+    // State for habit detail, calendar, and today's status.
     const [habit, setHabit] = useState<Habit | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [isDoneToday, setIsDoneToday] = useState(false);
     const [calendarMonth, setCalendarMonth] = useState(new Date());
     const [calendarLogs, setCalendarLogs] = useState<Set<string>>(new Set());
 
+    // Loads habit metadata.
     const fetchHabit = async () => {
         setIsLoading(true);
         try {
@@ -59,6 +61,7 @@ export default function HabitDetailScreen() {
         }
     };
 
+    // Loads today's completion status.
     const fetchLogs = async () => {
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) return;
@@ -77,6 +80,7 @@ export default function HabitDetailScreen() {
     };
 
 
+    // Loads completion logs for the selected calendar month.
     const fetchCalendarLogs = async (monthDate: Date) => {
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) return;
@@ -103,6 +107,7 @@ export default function HabitDetailScreen() {
 
     useFocusEffect(
         useCallback(() => {
+            // Refreshes detail + today state on screen focus.
             fetchHabit();
             fetchLogs();
         }, [id])
@@ -111,10 +116,12 @@ export default function HabitDetailScreen() {
 
     useFocusEffect(
         useCallback(() => {
+            // Refreshes month calendar whenever month changes.
             fetchCalendarLogs(calendarMonth);
         }, [id, calendarMonth])
     );
 
+    // Builds visual month cells with done/missed/not-scheduled states.
     const buildCalendarDays = () => {
         const year = calendarMonth.getFullYear();
         const month = calendarMonth.getMonth();
@@ -185,6 +192,7 @@ export default function HabitDetailScreen() {
         return true;
     };
 
+    // Marks today as done when allowed.
     const handleMarkDone = async () => {
         if (!habit) return;
         if (!isScheduledForToday(habit)) {
@@ -206,6 +214,7 @@ export default function HabitDetailScreen() {
         triggerFeedback();
     };
 
+    // Deletes this habit after confirmation.
     const handleDelete = () => {
         Alert.alert('Delete habit', 'Are you sure you want to delete this habit?', [
             { text: 'Cancel', style: 'cancel' },

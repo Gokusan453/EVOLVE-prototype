@@ -28,11 +28,13 @@ const XP_PER_CHALLENGE = 15;
 
 // ── Calculate XP ──
 export function calculateXP(habitLogs: number, challengeLogs: number): number {
+    // Computes total XP from habit/challenge completion logs.
     return (habitLogs * XP_PER_HABIT) + (challengeLogs * XP_PER_CHALLENGE);
 }
 
 // ── Get Level from XP ──
 export function getLevelFromXP(xp: number) {
+    // Resolves current level, next level, and progress ratio.
     let current = LEVELS[0];
     for (const level of LEVELS) {
         if (xp >= level.xpRequired) {
@@ -61,6 +63,7 @@ export function getLevelFromXP(xp: number) {
 
 // ── Calculate Streak (Perfect Day Streak) ──
 export async function calculateStreak(userId: string): Promise<number> {
+    // Calculates consecutive perfect days based on planned vs completed tasks.
     const today = new Date();
     const dayKeys = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
 
@@ -191,7 +194,7 @@ export type BadgeProgress = {
 };
 
 export async function getBadgeProgress(userId: string): Promise<BadgeProgress[]> {
-    // Counts
+    // Fetches counters used by badge progress rules.
     const { count: habitLogs } = await supabase
         .from('habit_logs')
         .select('*', { count: 'exact', head: true })

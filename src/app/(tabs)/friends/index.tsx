@@ -32,6 +32,7 @@ export default function FriendsScreen() {
     const router = useRouter();
     const styles = createFriendsStyles(colors);
 
+    // State for tabs, lists, search, and initial loading.
     const [tab, setTab] = useState<Tab>('friends');
     const [friends, setFriends] = useState<FriendshipData[]>([]);
     const [requests, setRequests] = useState<FriendshipData[]>([]);
@@ -44,6 +45,7 @@ export default function FriendsScreen() {
     const [isInitialLoading, setIsInitialLoading] = useState(true);
     const hasLoadedOnceRef = useRef(false);
 
+    // Loads friends, incoming requests, and outgoing pending requests.
     const fetchData = async (opts?: { initial?: boolean }) => {
         const isInitial = opts?.initial ?? false;
         if (isInitial) setIsInitialLoading(true);
@@ -145,12 +147,14 @@ export default function FriendsScreen() {
 
     useFocusEffect(
         useCallback(() => {
+            // Refresh data whenever the screen receives focus.
             const isInitial = !hasLoadedOnceRef.current;
             fetchData({ initial: isInitial });
             if (isInitial) hasLoadedOnceRef.current = true;
         }, [])
     );
 
+    // Finds users by name or username when typing in search.
     const handleSearch = async (query: string) => {
         setSearchQuery(query);
         if (query.length < 2) {
@@ -176,6 +180,7 @@ export default function FriendsScreen() {
         setIsSearching(false);
     };
 
+    // Sends a new friend request to selected user.
     const sendRequest = async (receiverId: string) => {
         if (!userId) return;
         await supabase.from('friendships').insert({
@@ -186,6 +191,7 @@ export default function FriendsScreen() {
         setSentRequests((prev) => [...prev, receiverId]);
     };
 
+    // Accepts incoming friend request and updates local state instantly.
     const acceptRequest = async (friendshipId: string) => {
         // Move from requests to friends instantly
         const accepted = requests.find((r) => r.friendshipId === friendshipId);
@@ -197,12 +203,14 @@ export default function FriendsScreen() {
         await supabase.from('friendships').update({ status: 'accepted' }).eq('id', friendshipId);
     };
 
+    // Rejects incoming friend request.
     const rejectRequest = async (friendshipId: string) => {
         // Remove from requests instantly
         setRequests((prev) => prev.filter((r) => r.friendshipId !== friendshipId));
         await supabase.from('friendships').delete().eq('id', friendshipId);
     };
 
+    // Cancels an outgoing pending request.
     const cancelRequest = async (friendshipId: string) => {
         const cancelled = pending.find((p) => p.friendshipId === friendshipId);
         setPending((prev) => prev.filter((p) => p.friendshipId !== friendshipId));
@@ -224,6 +232,7 @@ export default function FriendsScreen() {
     const hasSentRequest = (profileId: string) =>
         sentRequests.includes(profileId);
 
+    // Row renderer for accepted friends.
     const renderFriend = ({ item }: { item: FriendshipData }) => (
         <TouchableOpacity style={styles.userCard} onPress={() => router.push(`/(tabs)/friends/${item.profile.id}`)}>
             {item.profile.avatar_url ? (
@@ -241,6 +250,7 @@ export default function FriendsScreen() {
         </TouchableOpacity>
     );
 
+    // Row renderer for incoming requests.
     const renderRequest = ({ item }: { item: FriendshipData }) => (
         <View style={styles.userCard}>
             {item.profile.avatar_url ? (
@@ -265,6 +275,7 @@ export default function FriendsScreen() {
         </View>
     );
 
+    // Row renderer for outgoing pending requests.
     const renderPending = ({ item }: { item: FriendshipData }) => (
         <View style={styles.userCard}>
             {item.profile.avatar_url ? (
@@ -284,6 +295,7 @@ export default function FriendsScreen() {
         </View>
     );
 
+    // Row renderer for search results.
     const renderSearchResult = ({ item }: { item: UserProfile }) => (
         <View style={styles.userCard}>
             {item.avatar_url ? (
@@ -324,6 +336,7 @@ export default function FriendsScreen() {
     }
 
     return (
+        // Keyboard-safe container for search input.
         <KeyboardAvoidingView
             style={styles.container}
             behavior={Platform.OS === 'ios' ? 'padding' : 'height'}

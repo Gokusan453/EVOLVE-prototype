@@ -57,12 +57,13 @@ const SettingsContext = createContext<SettingsContextType>({
 export const useSettings = () => useContext(SettingsContext);
 
 export function SettingsProvider({ children }: { children: React.ReactNode }) {
+    // Persistent user preference state.
     const [notifications, setNotificationsState] = useState(true);
     const [sound, setSoundState] = useState(true);
     const [vibrations, setVibrationsState] = useState(true);
     const [settingsLoaded, setSettingsLoaded] = useState(false);
 
-    // Load settings on mount
+    // Loads saved settings on mount.
     useEffect(() => {
         const load = async () => {
             try {
@@ -81,6 +82,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
     }, []);
 
     useEffect(() => {
+        // Configures local notification behavior and channel setup.
         const configureNotifications = async () => {
             const notificationsModule = await getNotificationsModule();
             if (!notificationsModule) return;
@@ -109,6 +111,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
     useEffect(() => {
         if (!settingsLoaded || !notifications) return;
 
+        // Asks notification permission once when notifications are enabled.
         const bootstrapNotificationPermission = async () => {
             const notificationsModule = await getNotificationsModule();
             if (!notificationsModule) return;
@@ -129,6 +132,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
     }, [settingsLoaded, notifications]);
 
     const ensureNotificationPermission = async (notificationsModule: NotificationsModule) => {
+        // Returns true when app has notification permission.
         const currentPermissions = await notificationsModule.getPermissionsAsync();
         if (currentPermissions.granted) return true;
 
@@ -137,6 +141,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
     };
 
     const cancelDailyReminder = async (notificationsModule: NotificationsModule) => {
+        // Cancels previously scheduled daily reminder.
         const existingId = await AsyncStorage.getItem(DAILY_REMINDER_ID_KEY);
         if (existingId) {
             await notificationsModule.cancelScheduledNotificationAsync(existingId);
@@ -145,6 +150,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
     };
 
     const scheduleDailyReminder = async (notificationsModule: NotificationsModule) => {
+        // Schedules a fresh daily reminder at fixed time.
         await cancelDailyReminder(notificationsModule);
 
         const reminderTrigger = {
@@ -167,6 +173,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
     useEffect(() => {
         if (!settingsLoaded) return;
 
+        // Keeps scheduled reminder in sync with notifications toggle.
         const syncReminder = async () => {
             const notificationsModule = await getNotificationsModule();
             if (!notificationsModule) return;
@@ -186,6 +193,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
     }, [notifications, settingsLoaded]);
 
     const save = async (key: string, value: boolean) => {
+        // Persists one setting key in AsyncStorage.
         const stored = await AsyncStorage.getItem('app_settings');
         const current = stored ? JSON.parse(stored) : {};
         current[key] = value;
@@ -193,6 +201,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
     };
 
     const setNotifications = (val: boolean) => {
+        // Applies notifications toggle with permission gate.
         const applyNotifications = async () => {
             const notificationsModule = await getNotificationsModule();
 
@@ -213,16 +222,19 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
     };
 
     const setSound = (val: boolean) => {
+        // Updates and persists in-app sound preference.
         setSoundState(val);
         save('sound', val);
     };
 
     const setVibrations = (val: boolean) => {
+        // Updates and persists vibration preference.
         setVibrationsState(val);
         save('vibrations', val);
     };
 
     const sendAppNotification = async (title: string, body: string) => {
+        // Sends an immediate local notification when allowed.
         if (!notifications) return;
 
         const notificationsModule = await getNotificationsModule();
@@ -243,7 +255,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
         });
     };
 
-    // Play in-app success sound
+    // Plays short in-app success sound.
     const playSound = async () => {
         try {
             const { sound: audioSound } = await Audio.Sound.createAsync(
@@ -261,7 +273,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
         }
     };
 
-    // Trigger in-app feedback only (sound + vibration)
+    // Triggers tactile/audio feedback for user actions.
     const triggerFeedback = async () => {
         // Vibration
         if (vibrations) {

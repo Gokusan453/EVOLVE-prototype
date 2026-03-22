@@ -18,9 +18,11 @@ const ThemeContext = createContext<ThemeContextType>({
 });
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
+    // Stores current theme mode and exposes toggle helper.
     const [mode, setMode] = useState<ThemeMode>('light');
 
     useEffect(() => {
+        // Restores saved theme preference on app start.
         const loadTheme = async () => {
             const savedMode = await AsyncStorage.getItem(THEME_STORAGE_KEY);
             if (savedMode === 'light' || savedMode === 'dark') {
@@ -32,6 +34,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     }, []);
 
     const toggleTheme = () => {
+        // Toggles mode and persists selection.
         setMode((prev) => {
             const nextMode: ThemeMode = prev === 'light' ? 'dark' : 'light';
             AsyncStorage.setItem(THEME_STORAGE_KEY, nextMode);

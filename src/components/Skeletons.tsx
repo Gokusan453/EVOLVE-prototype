@@ -17,6 +17,7 @@ export function ProfilePageSkeleton() {
     const { colors } = useTheme();
 
     return (
+        // Placeholder layout for profile screen while data loads.
         <View style={{ flex: 1, backgroundColor: colors.background, paddingTop: 60 }}>
             <View style={{ alignItems: 'center', marginBottom: 20 }}>
                 <SkeletonBox width={140} height={34} radius={10} />
@@ -63,6 +64,7 @@ function SkeletonBox({ width, height, radius = 8 }: { width: DimensionValue; hei
     const { colors } = useTheme();
 
     return (
+        // Basic reusable skeleton block.
         <View
             style={{
                 width,
@@ -78,6 +80,7 @@ export function ListPageSkeleton({ title, rows = 4, showSearch = false, showTabs
     const { colors } = useTheme();
 
     return (
+        // Generic list-page skeleton with optional search/tabs.
         <View style={{ flex: 1, backgroundColor: colors.background, paddingTop: 60 }}>
             <Text style={{ fontSize: 24, fontWeight: 'bold', color: colors.text, textAlign: 'center', marginBottom: 16 }}>
                 {title}
@@ -140,6 +143,7 @@ export function DetailPageSkeleton({ title, rows = 4 }: DetailPageSkeletonProps)
     const { colors } = useTheme();
 
     return (
+        // Generic detail-page skeleton while content is loading.
         <View style={{ flex: 1, backgroundColor: colors.background, paddingTop: 60 }}>
             <View style={{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, marginBottom: 16 }}>
                 <SkeletonBox width={36} height={36} radius={18} />

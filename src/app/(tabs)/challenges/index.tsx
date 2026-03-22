@@ -30,12 +30,14 @@ export default function ChallengesListScreen() {
     const styles = createChallengesStyles(colors);
     const router = useRouter();
 
+    // Screen state for list data, user info, and loading lifecycle.
     const [challenges, setChallenges] = useState<Challenge[]>([]);
     const [userId, setUserId] = useState<string | null>(null);
     const [userRole, setUserRole] = useState<string>('user');
     const [isInitialLoading, setIsInitialLoading] = useState(true);
     const hasLoadedOnceRef = useRef(false);
 
+    // Loads challenges and enriches each row with join/progress metadata.
     const fetchChallenges = async (opts?: { initial?: boolean }) => {
         const isInitial = opts?.initial ?? false;
         if (isInitial) setIsInitialLoading(true);
@@ -123,12 +125,14 @@ export default function ChallengesListScreen() {
 
     useFocusEffect(
         useCallback(() => {
+            // Fetches on focus and keeps first-load skeleton behavior stable.
             const isInitial = !hasLoadedOnceRef.current;
             fetchChallenges({ initial: isInitial });
             if (isInitial) hasLoadedOnceRef.current = true;
         }, [])
     );
 
+    // Joins challenge and resets previous logs if user re-joins.
     const handleJoin = async (challengeId: string) => {
         if (!userId) return;
 
@@ -167,6 +171,7 @@ export default function ChallengesListScreen() {
         return c.days.includes(dayKeys[now.getDay()]);
     };
 
+    // Marks today's completion for joined challenges.
     const handleMarkDone = async (challengeId: string) => {
         if (!userId) return;
 
@@ -188,6 +193,7 @@ export default function ChallengesListScreen() {
 
     return (
         <View style={styles.container}>
+            {/* Header with optional admin action to create challenge. */}
             <View style={styles.headerWrap}>
                 <Text style={styles.header}>Challenges</Text>
                 {userRole === 'admin' && (

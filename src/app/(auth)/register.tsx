@@ -10,6 +10,7 @@ import { Image, KeyboardAvoidingView, Platform, ScrollView, Text, TextInput, Tou
 
 export default function RegisterScreen() {
     const router = useRouter();
+    // Form and UI state for account creation.
     const [email, setEmail] = useState('');
     const [username, setUsername] = useState('');
     const [firstName, setFirstName] = useState('');
@@ -22,6 +23,7 @@ export default function RegisterScreen() {
     const [error, setError] = useState('');
     const [avatarUri, setAvatarUri] = useState<string | null>(null);
 
+    // Opens image picker so the user can choose an avatar.
     const pickAvatar = async () => {
         const result = await ImagePicker.launchImageLibraryAsync({
             mediaTypes: ['images'],
@@ -34,6 +36,7 @@ export default function RegisterScreen() {
         setAvatarUri(result.assets[0].uri);
     };
 
+    // Uploads the selected avatar and stores the public profile URL.
     const uploadAvatarForUser = async (userId: string, uri: string) => {
         const ext = uri.split('.').pop() || 'jpg';
         const fileName = `${userId}/avatar.${ext}`;
@@ -63,6 +66,7 @@ export default function RegisterScreen() {
             .eq('id', userId);
     };
 
+    // Validates input, creates auth user, and routes to onboarding.
     const handleRegister = async () => {
         if (!email || !username || !firstName || !lastName || !password || !confirmPassword) {
             setError('Please fill in all fields');
@@ -115,11 +119,13 @@ export default function RegisterScreen() {
     };
 
     return (
+        // Keeps the form visible when the keyboard opens.
         <KeyboardAvoidingView
             style={styles.keyboardContainer}
             behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         >
             <View style={styles.container}>
+                {/* Back navigation to previous auth screen. */}
                 <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
                     <Ionicons name="arrow-back" size={24} color={Colors.text} />
                 </TouchableOpacity>
@@ -131,8 +137,10 @@ export default function RegisterScreen() {
                 >
                     <Text style={styles.title}>Create an account</Text>
 
+                    {/* Inline error feedback for form/auth issues. */}
                     {error ? <Text style={styles.errorText}>{error}</Text> : null}
 
+                    {/* Avatar picker with preview or placeholder state. */}
                     <View style={styles.avatarPickerContainer}>
                         <TouchableOpacity style={styles.avatarPickerButton} onPress={pickAvatar}>
                             {avatarUri ? (
@@ -146,6 +154,7 @@ export default function RegisterScreen() {
                         </TouchableOpacity>
                     </View>
 
+                    {/* Basic identity fields for profile metadata. */}
                     <TextInput
                         style={styles.input}
                         placeholder="Email"
@@ -181,6 +190,7 @@ export default function RegisterScreen() {
                         onChangeText={setLastName}
                     />
 
+                    {/* Password + visibility toggle. */}
                     <View style={styles.passwordInputWrapper}>
                         <TextInput
                             style={styles.passwordInput}
@@ -203,6 +213,7 @@ export default function RegisterScreen() {
                         </TouchableOpacity>
                     </View>
 
+                    {/* Confirm password + visibility toggle. */}
                     <View style={styles.passwordInputWrapper}>
                         <TextInput
                             style={styles.passwordInput}
@@ -225,6 +236,7 @@ export default function RegisterScreen() {
                         </TouchableOpacity>
                     </View>
 
+                    {/* Submit button with loading state. */}
                     <TouchableOpacity
                         style={[styles.button, loading && styles.buttonDisabled]}
                         onPress={handleRegister}
@@ -235,6 +247,7 @@ export default function RegisterScreen() {
                         </Text>
                     </TouchableOpacity>
 
+                    {/* Quick link to login screen. */}
                     <View style={styles.footer}>
                         <Text style={styles.footerText}>Already have an account? </Text>
                         <TouchableOpacity onPress={() => router.replace('/(auth)/login')}>

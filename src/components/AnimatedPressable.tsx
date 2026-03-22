@@ -18,8 +18,10 @@ export default function AnimatedPressable({
     onPressOut,
     ...props
 }: AnimatedPressableProps) {
+    // Shared scale value for press in/out animation.
     const scale = useSharedValue(1);
 
+    // Animated style applied directly to the pressable hit area.
     const animatedStyle = useAnimatedStyle(() => ({
         transform: [{ scale: scale.value }],
     }));
@@ -29,10 +31,12 @@ export default function AnimatedPressable({
             {...props}
             style={[style, animatedStyle]}
             onPressIn={(event) => {
+                // Shrink slightly on touch down for tactile feedback.
                 scale.value = withTiming(pressedScale, { duration: 110 });
                 onPressIn?.(event);
             }}
             onPressOut={(event) => {
+                // Return to normal size on touch release.
                 scale.value = withTiming(1, { duration: 120 });
                 onPressOut?.(event);
             }}

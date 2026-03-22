@@ -5,6 +5,7 @@ export default function SettingsLayout() {
     const { colors } = useTheme();
 
     return (
+        // Shared stack wrapper for profile routes.
         <Stack
             screenOptions={{
                 headerShown: false,

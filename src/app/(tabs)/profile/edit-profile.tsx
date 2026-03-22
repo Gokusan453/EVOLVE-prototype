@@ -12,6 +12,7 @@ export default function EditProfileScreen() {
     const styles = createEditProfileStyles(colors);
     const router = useRouter();
 
+    // Form state for editable profile fields and messages.
     const [firstName, setFirstName] = useState('');
     const [lastName, setLastName] = useState('');
     const [username, setUsername] = useState('');
@@ -22,6 +23,7 @@ export default function EditProfileScreen() {
     const [success, setSuccess] = useState('');
 
     useEffect(() => {
+        // Loads current profile values into the form.
         const fetchProfile = async () => {
             const { data: { user } } = await supabase.auth.getUser();
             if (!user) return;
@@ -44,6 +46,7 @@ export default function EditProfileScreen() {
         fetchProfile();
     }, []);
 
+    // Opens gallery and starts avatar upload flow.
     const pickImage = async () => {
         const result = await ImagePicker.launchImageLibraryAsync({
             mediaTypes: ['images'],
@@ -58,6 +61,7 @@ export default function EditProfileScreen() {
         await uploadAvatar(image.uri);
     };
 
+    // Uploads avatar to storage and stores its public URL.
     const uploadAvatar = async (uri: string) => {
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) return;
@@ -108,6 +112,7 @@ export default function EditProfileScreen() {
         }
     };
 
+    // Saves text-based profile fields.
     const handleSave = async () => {
         if (!firstName.trim() || !lastName.trim()) {
             setError('Please fill in your name');
@@ -149,10 +154,12 @@ export default function EditProfileScreen() {
     };
 
     return (
+        // Keyboard-safe wrapper for profile form.
         <KeyboardAvoidingView
             style={styles.container}
             behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         >
+            {/* Header with back navigation. */}
             <View style={styles.headerRow}>
                 <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
                     <Ionicons name="arrow-back" size={24} color={colors.text} />

@@ -39,6 +39,7 @@ export default function AddHabitScreen() {
     const styles = createAddHabitStyles(colors);
     const router = useRouter();
 
+    // Form state for creating a new habit.
     const [name, setName] = useState('');
     const [description, setDescription] = useState('');
     const [startDate, setStartDate] = useState(formatToday());
@@ -50,7 +51,7 @@ export default function AddHabitScreen() {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
 
-    // Track unsaved changes for tab switch alert
+    // Tracks unsaved changes for leave confirmation.
     useEffect(() => {
         const hasData = name.trim().length > 0 || selectedDays.length > 0 || description.trim().length > 0;
         setUnsavedChanges(hasData);
@@ -63,6 +64,7 @@ export default function AddHabitScreen() {
         );
     };
 
+    // Validates form and inserts a new habit row.
     const handleCreate = async () => {
         if (!name.trim()) {
             setError('Please enter a habit name');
@@ -105,10 +107,12 @@ export default function AddHabitScreen() {
 
     return (
         <View style={styles.container}>
+            {/* Keyboard-safe wrapper for long form inputs. */}
             <KeyboardAvoidingView
                 style={{ flex: 1 }}
                 behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
             >
+                {/* Header with guarded back navigation. */}
                 <View style={styles.headerRow}>
                     <TouchableOpacity style={styles.backButton} onPress={() => {
                         const hasData = name.trim().length > 0 || selectedDays.length > 0 || description.trim().length > 0;

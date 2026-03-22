@@ -14,6 +14,7 @@ export default function SettingsScreen() {
     const styles = createSettingsStyles(colors);
     const router = useRouter();
 
+    // Profile, stats, badges, and loading state.
     const [profile, setProfile] = useState<{
         first_name: string;
         last_name: string;
@@ -32,6 +33,7 @@ export default function SettingsScreen() {
 
     useFocusEffect(
         useCallback(() => {
+            // Loads profile data, counters, XP, streak, and badge progress.
             const fetchProfile = async () => {
                 const { data: { user } } = await supabase.auth.getUser();
                 if (user) {
@@ -101,6 +103,7 @@ export default function SettingsScreen() {
 
     return (
         <View style={styles.container}>
+            {/* Top header with shortcut to settings page. */}
             <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', marginBottom: 24, position: 'relative' }}>
                 <Text style={styles.header}>Profile</Text>
                 <TouchableOpacity

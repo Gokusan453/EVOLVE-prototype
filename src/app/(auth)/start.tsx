@@ -7,9 +7,11 @@ export default function StartScreen() {
 
     return (
         <View style={styles.container}>
+            {/* Simple app intro block. */}
             <Text style={styles.logo}>Evolve</Text>
             <Text style={styles.subtitle}>Track your habits, challenge yourself</Text>
 
+            {/* Primary CTA to registration flow. */}
             <TouchableOpacity
                 style={styles.registerButton}
                 onPress={() => router.push('/(auth)/register')}
@@ -17,6 +19,7 @@ export default function StartScreen() {
                 <Text style={styles.registerButtonText}>Create an account</Text>
             </TouchableOpacity>
 
+            {/* Secondary CTA to login flow. */}
             <TouchableOpacity
                 style={styles.loginButton}
                 onPress={() => router.push('/(auth)/login')}

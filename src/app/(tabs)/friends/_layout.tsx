@@ -5,6 +5,7 @@ export default function FriendsLayout() {
     const { colors } = useTheme();
 
     return (
+        // Shared stack wrapper for friends routes.
         <Stack
             screenOptions={{
                 headerShown: false,

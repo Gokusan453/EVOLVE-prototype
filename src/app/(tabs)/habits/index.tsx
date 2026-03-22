@@ -26,6 +26,7 @@ export default function HabitsListScreen() {
     const styles = createHabitsStyles(colors);
     const router = useRouter();
 
+    // Screen state for habits, filter, and first-load behavior.
     const [habits, setHabits] = useState<Habit[]>([]);
     const [filter, setFilter] = useState<'today' | 'all'>('today');
     const [isInitialLoading, setIsInitialLoading] = useState(true);
@@ -35,6 +36,7 @@ export default function HabitsListScreen() {
         0: 'sun', 1: 'mon', 2: 'tue', 3: 'wed', 4: 'thu', 5: 'fri', 6: 'sat',
     };
 
+    // Loads user habits and computes today's completion state.
     const fetchHabits = async (opts?: { initial?: boolean }) => {
         const isInitial = opts?.initial ?? false;
         if (isInitial) setIsInitialLoading(true);
@@ -88,12 +90,14 @@ export default function HabitsListScreen() {
 
     useFocusEffect(
         useCallback(() => {
+            // Refreshes list data when returning to this screen.
             const isInitial = !hasLoadedOnceRef.current;
             fetchHabits({ initial: isInitial });
             if (isInitial) hasLoadedOnceRef.current = true;
         }, [])
     );
 
+    // Inserts a habit log for today after schedule checks.
     const handleMarkDone = async (habit: Habit) => {
         if (!isHabitScheduledToday(habit)) {
             Alert.alert('Not scheduled today', 'This habit is not planned for today.');
@@ -121,6 +125,7 @@ export default function HabitsListScreen() {
         return <ListPageSkeleton title="Habits" rows={4} />;
     }
 
+    // Row renderer for each habit card.
     const renderHabit = ({ item }: { item: Habit }) => (
         <TouchableOpacity
             style={styles.habitCard}
