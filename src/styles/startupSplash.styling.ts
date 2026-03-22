@@ -3,6 +3,12 @@ import { StyleSheet } from 'react-native';
 export const startupSplashStyles = StyleSheet.create({
     background: {
         flex: 1,
+        backgroundColor: '#000000',
+    },
+    backgroundImage: {
+        ...StyleSheet.absoluteFillObject,
+        width: '100%',
+        height: '100%',
     },
     progressTrack: {
         position: 'absolute',
