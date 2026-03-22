@@ -1,4 +1,5 @@
 import { ListPageSkeleton } from '@/components/Skeletons';
+import { useSettings } from '@/contexts/SettingsContext';
 import { useTheme } from '@/contexts/ThemeContext';
 import { supabase } from '@/lib/supabase';
 import { createHabitsStyles } from '@/styles/habits.styling';
@@ -20,6 +21,7 @@ type Habit = {
 
 export default function HabitsListScreen() {
     const { colors } = useTheme();
+    const { triggerFeedback } = useSettings();
     const styles = createHabitsStyles(colors);
     const router = useRouter();
 
@@ -105,6 +107,7 @@ export default function HabitsListScreen() {
             user_id: user.id,
         });
 
+        triggerFeedback();
         fetchHabits();
     };
 

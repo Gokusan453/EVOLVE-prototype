@@ -1,4 +1,5 @@
 import { ListPageSkeleton } from '@/components/Skeletons';
+import { useSettings } from '@/contexts/SettingsContext';
 import { useTheme } from '@/contexts/ThemeContext';
 import { supabase } from '@/lib/supabase';
 import { createChallengesStyles } from '@/styles/challenges.styling';
@@ -25,6 +26,7 @@ type Challenge = {
 
 export default function ChallengesListScreen() {
     const { colors } = useTheme();
+    const { triggerFeedback } = useSettings();
     const styles = createChallengesStyles(colors);
     const router = useRouter();
 
@@ -152,6 +154,7 @@ export default function ChallengesListScreen() {
             return;
         }
 
+        triggerFeedback();
         fetchChallenges();
     };
 
@@ -172,6 +175,7 @@ export default function ChallengesListScreen() {
             user_id: userId,
         });
 
+        triggerFeedback();
         fetchChallenges();
     };
 

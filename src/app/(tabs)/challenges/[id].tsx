@@ -373,8 +373,8 @@ export default function ChallengeDetailScreen() {
                                                     return;
                                                 }
 
-                                                router.back();
                                                 triggerFeedback();
+                                                router.back();
                                             },
                                         },
                                     ]
