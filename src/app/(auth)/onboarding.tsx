@@ -66,11 +66,6 @@ export default function OnboardingScreen() {
                             <Text style={styles.reminderSubtitle}>Stay updated without spam. We only send useful reminders.</Text>
 
                             <View style={styles.infoRow}>
-                                <Ionicons name="people-outline" size={14} color={colors.primary} />
-                                <Text style={styles.infoText}>Friend request alerts</Text>
-                            </View>
-
-                            <View style={styles.infoRow}>
                                 <Ionicons name="time-outline" size={14} color={colors.primary} />
                                 <Text style={styles.infoText}>Daily reminder at 10:00 for habits and challenges</Text>
                             </View>
