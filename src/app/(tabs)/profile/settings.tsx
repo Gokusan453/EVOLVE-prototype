@@ -83,7 +83,7 @@ export default function PreferencesScreen() {
             <View style={styles.scrollContent}>
                 <View style={styles.settingsCard}>
                     <View style={[styles.settingsRow, styles.settingsBorder]}>
-                        <Text style={styles.settingsLabel}>Theme</Text>
+                        <Text style={styles.settingsLabel}>Darkmode</Text>
                         <Switch
                             value={mode === 'dark'}
                             onValueChange={toggleTheme}
