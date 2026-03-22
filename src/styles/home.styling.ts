@@ -219,7 +219,8 @@ export const createHomeStyles = (colors: any) =>
             shadowOffset: { width: 0, height: 3 },
             shadowOpacity: 0.9,
             shadowRadius: 11,
-            elevation: 5,
+            elevation: 10,
+            zIndex: 1000,
         },
         fabPillText: {
             color: '#166534',
