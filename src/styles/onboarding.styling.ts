@@ -99,6 +99,24 @@ export const createOnboardingStyles = (colors: AppColors) => StyleSheet.create({
         fontSize: 13,
         lineHeight: 18,
     },
+    notificationItem: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 6,
+        marginTop: 6,
+    },
+    notificationItemText: {
+        color: colors.textSecondary,
+        fontSize: 12,
+        lineHeight: 16,
+        flex: 1,
+    },
+    notificationPermissionHint: {
+        color: colors.textMuted,
+        fontSize: 11,
+        lineHeight: 15,
+        marginTop: 8,
+    },
     pill: {
         minWidth: 58,
         height: 30,

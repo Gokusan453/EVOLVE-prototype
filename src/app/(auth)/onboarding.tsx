@@ -60,21 +60,37 @@ export default function OnboardingScreen() {
 
                 <View style={styles.sectionBlock}>
                     <Text style={styles.sectionTitle}>Quick preferences</Text>
-                    <TouchableOpacity
-                        style={styles.reminderCard}
-                        onPress={() => setNotifications(!notifications)}
-                        activeOpacity={0.85}
-                    >
+                    <View style={styles.reminderCard}>
                         <View style={styles.reminderTextWrap}>
-                            <Text style={styles.reminderTitle}>Daily reminder</Text>
-                            <Text style={styles.reminderSubtitle}>At 10:00: do not forget to check your habits and challenges.</Text>
-                        </View>
-                        <View style={[styles.pill, notifications && styles.pillActive]}>
-                            <Text style={[styles.pillText, notifications && styles.pillTextActive]}>
-                                {notifications ? 'On' : 'Off'}
+                            <Text style={styles.reminderTitle}>Notifications</Text>
+                            <Text style={styles.reminderSubtitle}>Stay updated without spam. We only send useful reminders.</Text>
+
+                            <View style={styles.infoRow}>
+                                <Ionicons name="people-outline" size={14} color={colors.primary} />
+                                <Text style={styles.infoText}>Friend request alerts</Text>
+                            </View>
+
+                            <View style={styles.infoRow}>
+                                <Ionicons name="time-outline" size={14} color={colors.primary} />
+                                <Text style={styles.infoText}>Daily reminder at 10:00 for habits and challenges</Text>
+                            </View>
+
+                            <Text style={styles.reminderSubtitle}>
+                                When you turn this on, we ask notification permission once.
                             </Text>
                         </View>
-                    </TouchableOpacity>
+
+                        <TouchableOpacity
+                            onPress={() => setNotifications(!notifications)}
+                            activeOpacity={0.85}
+                        >
+                            <View style={[styles.pill, notifications && styles.pillActive]}>
+                                <Text style={[styles.pillText, notifications && styles.pillTextActive]}>
+                                    {notifications ? 'On' : 'Off'}
+                                </Text>
+                            </View>
+                        </TouchableOpacity>
+                    </View>
 
                     <TouchableOpacity
                         style={[styles.reminderCard, styles.preferenceSpacing]}
