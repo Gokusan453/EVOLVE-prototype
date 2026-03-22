@@ -3,6 +3,7 @@ import { hasUnsavedChanges, setUnsavedChanges } from '@/lib/unsavedChanges';
 import { Ionicons } from '@expo/vector-icons';
 import { Tabs, useRouter, useSegments } from 'expo-router';
 import { Alert } from 'react-native';
+import AnimatedPressable from '@/components/AnimatedPressable';
 
 export default function TabLayout() {
   const { colors } = useTheme();
@@ -53,6 +54,9 @@ export default function TabLayout() {
           borderTopWidth: 1,
         },
         headerShown: false,
+        tabBarButton: (props) => (
+          <AnimatedPressable {...props} style={props.style} pressedScale={0.88} />
+        ),
       }}>
       <Tabs.Screen
         name="challenges"
