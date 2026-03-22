@@ -156,7 +156,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
         const reminderId = await notificationsModule.scheduleNotificationAsync({
             content: {
                 title: 'Daily reminder',
-                body: 'Vergeet niet je habits & challenges van vandaag te checken.',
+                body: "Don't forget to check your habits & challenges for today.",
             },
             trigger: reminderTrigger,
         });
