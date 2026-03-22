@@ -135,17 +135,13 @@ export default function ChatScreen() {
 
     return (
         <SafeAreaView style={styles.container} edges={['top']}>
-            {Platform.OS === 'ios' ? (
-                <KeyboardAvoidingView
-                    style={{ flex: 1 }}
-                    behavior="padding"
-                    keyboardVerticalOffset={6}
-                >
-                    {content}
-                </KeyboardAvoidingView>
-            ) : (
-                <View style={{ flex: 1 }}>{content}</View>
-            )}
+            <KeyboardAvoidingView
+                style={{ flex: 1 }}
+                behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+                keyboardVerticalOffset={Platform.OS === 'ios' ? 6 : 0}
+            >
+                {content}
+            </KeyboardAvoidingView>
         </SafeAreaView>
     );
 }
